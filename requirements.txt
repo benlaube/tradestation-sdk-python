@@ -1,0 +1,14 @@
+# TradeStation SDK - Core Dependencies
+# Minimal dependencies required for SDK functionality
+
+# HTTP client (async support)
+httpx>=0.27.2
+
+# JWT token parsing
+PyJWT>=2.8.0
+
+# Data validation and models
+pydantic>=2.12.5
+
+# Environment variable management
+python-dotenv>=1.0.0

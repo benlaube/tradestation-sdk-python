@@ -1,0 +1,114 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tradestation-python-sdk"
+version = "1.0.0"
+description = "Unofficial Python SDK for TradeStation API v3 with full REST API and HTTP Streaming support"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [
+    {name = "Ben Laube", email = "ben@example.com"}
+]
+keywords = [
+    "tradestation",
+    "trading",
+    "api",
+    "sdk",
+    "futures",
+    "stocks",
+    "options",
+    "forex",
+    "algorithmic-trading",
+    "market-data",
+    "order-execution"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Financial and Insurance Industry",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Office/Business :: Financial :: Investment",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "httpx>=0.27.2",
+    "PyJWT>=2.8.0",
+    "pydantic>=2.12.5",
+    "python-dotenv>=1.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.11.0",
+    "black>=23.0.0",
+    "ruff>=0.1.0",
+]
+examples = [
+    "jupyter>=1.0.0",
+    "notebook>=7.0.0",
+    "matplotlib>=3.7.0",
+    "pandas>=2.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/benlaube/tradestation-python-sdk"
+Documentation = "https://github.com/benlaube/tradestation-python-sdk/tree/main/docs"
+Repository = "https://github.com/benlaube/tradestation-python-sdk"
+Issues = "https://github.com/benlaube/tradestation-python-sdk/issues"
+Changelog = "https://github.com/benlaube/tradestation-python-sdk/blob/main/CHANGELOG.md"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["tradestation*"]
+namespaces = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+asyncio_mode = "auto"
+markers = [
+    "unit: Unit tests with mocked dependencies",
+    "integration: Integration tests with real SDK components",
+    "slow: Slow-running tests (streaming, etc.)",
+    "accounts: Account operations tests",
+    "orders: Order operations tests",
+    "market_data: Market data operations tests",
+    "streaming: Streaming operations tests",
+    "sdk: SDK-level integration tests",
+]
+
+[tool.black]
+line-length = 120
+target-version = ["py310", "py311", "py312"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+select = ["E", "F", "W", "I", "N", "UP"]
+ignore = ["E501"]  # Line too long (handled by black)
+
+[tool.coverage.run]
+source = ["."]
+omit = ["tests/*", "examples/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+]
