@@ -24,7 +24,7 @@ This document outlines current limitations, constraints, and known issues in the
 
 ### 1. Token Storage (No Encryption at Rest)
 
-**Issue:** OAuth tokens are stored as plain JSON in `logs/tokens_paper.json` and `logs/tokens_live.json`.
+**Issue:** OAuth tokens are stored as plain JSON in `config/tokens_paper.json` and `config/tokens_live.json`.
 
 **Impact:**
 - Anyone with file system access can read tokens
@@ -34,10 +34,10 @@ This document outlines current limitations, constraints, and known issues in the
 **Mitigation (Current):**
 ```bash
 # Set restrictive file permissions (macOS/Linux)
-chmod 600 logs/tokens_*.json
+chmod 600 config/tokens_*.json
 
-# Ensure logs/ directory is in .gitignore
-echo "logs/" >> .gitignore
+# Ensure config/ directory is in .gitignore if you relocate tokens
+echo "config/" >> .gitignore
 ```
 
 **Planned Fix:** v1.1 will add system keychain integration:
@@ -511,5 +511,5 @@ If you encounter limitations not listed here:
 
 ---
 
-**Last Updated:** 2025-12-07  
+**Last Updated:** 2025-12-28  
 **SDK Version:** 1.0.0

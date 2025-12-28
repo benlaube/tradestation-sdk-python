@@ -11,12 +11,11 @@ Dependencies: typing, Optional
 from collections.abc import AsyncGenerator
 from typing import Any
 
-from .logger import setup_logger
-
 from .accounts import AccountOperations
 from .client import HTTPClient
 from .config import sdk_config
 from .exceptions import TradeStationAPIError
+from .logger import setup_logger
 from .models import PositionsResponse
 
 logger = setup_logger(__name__, sdk_config.log_level)

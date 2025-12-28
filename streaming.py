@@ -17,8 +17,6 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import TypeVar
 
-from .logger import setup_logger
-
 from .client import HTTPClient
 from .config import sdk_config
 from .exceptions import (
@@ -27,6 +25,7 @@ from .exceptions import (
     RateLimitError,
     RecoverableError,
 )
+from .logger import setup_logger
 from .models import BalanceStream
 from .models.streaming import (
     OrderStream,

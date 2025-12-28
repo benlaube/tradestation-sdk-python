@@ -14,8 +14,8 @@ import time
 from typing import Any
 
 import requests
+
 from .config import sdk_config
-from .logger import log_with_context, setup_logger
 from .exceptions import (
     AuthenticationError,
     ErrorDetails,
@@ -26,6 +26,7 @@ from .exceptions import (
     RecoverableError,
     TradeStationAPIError,
 )
+from .logger import log_with_context, setup_logger
 from .session import TokenManager
 
 logger = setup_logger(__name__, sdk_config.log_level)

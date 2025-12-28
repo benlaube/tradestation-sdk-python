@@ -13,14 +13,14 @@ from pathlib import Path
 # Try to load .env file if python-dotenv is available
 try:
     from dotenv import load_dotenv
-    
+
     # Search for .env in SDK directory and parent directories
     current_dir = Path(__file__).parent
     env_paths = [
         current_dir / ".env",  # SDK directory
         current_dir.parent.parent.parent / ".env",  # Project root (if SDK is in src/lib/tradestation)
     ]
-    
+
     for env_path in env_paths:
         if env_path.exists():
             load_dotenv(dotenv_path=env_path)
@@ -33,7 +33,7 @@ except ImportError:
 class SDKConfig:
     """
     SDK configuration loaded from environment variables.
-    
+
     If the SDK is used as a submodule, it will read from the parent project's .env.
     If the SDK is standalone, it will read from its own .env or system environment.
     """
@@ -58,7 +58,7 @@ class SDKConfig:
         """
         Validate that required credentials are set.
         Call this when initializing the SDK to ensure proper configuration.
-        
+
         Raises:
             ValueError: If required credentials are missing
         """
@@ -76,10 +76,10 @@ class SDKConfig:
     def get_api_base_url(self, mode: str | None = None) -> str:
         """
         Returns the appropriate TradeStation API base URL based on trading mode.
-        
+
         Args:
             mode: Override trading mode (PAPER or LIVE). If None, uses self.trading_mode
-            
+
         Returns:
             API base URL string
         """

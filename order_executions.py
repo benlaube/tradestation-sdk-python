@@ -10,12 +10,11 @@ Dependencies: typing, collections.abc.AsyncGenerator
 
 from typing import Any
 
-from .logger import setup_logger
-
 from .accounts import AccountOperations
 from .client import HTTPClient
 from .config import sdk_config
 from .exceptions import TradeStationAPIError
+from .logger import setup_logger
 from .models import TradeStationExecutionResponse
 
 logger = setup_logger(__name__, sdk_config.log_level)
@@ -867,7 +866,9 @@ class OrderExecutionOperations:
             if stop_price is not None:
                 updates["StopPrice"] = str(stop_price)
 
-            logger.info(f"📤 Modifying order: {order_id} with updates: {updates} ({mode or sdk_config.trading_mode} mode)")
+            logger.info(
+                f"📤 Modifying order: {order_id} with updates: {updates} ({mode or sdk_config.trading_mode} mode)"
+            )
 
             response = self.client.make_request("PUT", endpoint, json_data=updates, mode=mode)
 

@@ -12,11 +12,11 @@ Dependencies: typing
 from typing import Any
 
 import requests
-from .logger import setup_logger
 
 from .client import HTTPClient
 from .config import sdk_config
 from .exceptions import TradeStationAPIError
+from .logger import setup_logger
 from .models import (
     AccountBalancesResponse,
     AccountsListResponse,

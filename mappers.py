@@ -9,9 +9,8 @@ Dependencies: None
 
 from typing import Any
 
-from .logger import setup_logger
-
 from .config import sdk_config
+from .logger import setup_logger
 
 logger = setup_logger(__name__, sdk_config.log_level)
 
