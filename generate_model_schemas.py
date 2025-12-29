@@ -85,6 +85,13 @@ def generate_schema_file():
         "title": "TradeStation SDK Models Schema",
         "description": "Complete JSON schema for all TradeStation SDK request, response, and streaming models",
         "version": "1.0.0",
+        "_regeneration_instructions": {
+            "note": "This file is auto-generated. Do not edit manually.",
+            "how_to_regenerate": "Run the following command from the SDK root directory: python generate_model_schemas.py",
+            "when_to_regenerate": "Regenerate this file whenever Pydantic models in the models/ directory are added, modified, or removed",
+            "script_location": "generate_model_schemas.py",
+            "output_location": "docs/reference/sdk-models-schema.json"
+        },
         "models": {
             "orders": {
                 "TradeStationOrderRequest": TradeStationOrderRequest.model_json_schema(),
