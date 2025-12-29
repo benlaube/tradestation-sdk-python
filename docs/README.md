@@ -46,7 +46,7 @@ Welcome to the TradeStation SDK documentation. This directory contains comprehen
 **Complete API reference and endpoint documentation.**
 
 - **[API Reference](api/reference.md)** - Complete API reference with all methods
-- **[Endpoint Mapping](api/endpoints.md)** - SDK methods → API endpoints mapping
+- **[SDK Endpoint Mapping](api/sdk_endpoints.md)** - SDK methods → TradeStation API endpoints
 - **[API Coverage](api/coverage.md)** - Endpoint coverage analysis
 - **[Operation Coverage](api/operations.md)** - Operation coverage analysis
 - **[API Structure](api/structure.md)** - Visual diagrams of API structure
@@ -182,7 +182,7 @@ All documentation follows these standards:
 - **Cross-References:** Related documents are linked
 - **Examples:** Code examples are provided where applicable
 
-See [Documentation Structure Proposal](DOCS_STRUCTURE_PROPOSAL.md) for complete organization details.
+See the [Documentation Structure](#documentation-structure) section below for complete organization details.
 
 ---
 
