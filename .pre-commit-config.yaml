@@ -23,3 +23,12 @@ repos:
     hooks:
       - id: detect-secrets
         args: [--baseline, .secrets.baseline]
+
+  - repo: local
+    hooks:
+      - id: validate-markdown-metadata
+        name: Validate Markdown Metadata
+        entry: python scripts/validate-markdown-metadata.py
+        language: system
+        types: [markdown]
+        pass_filenames: true

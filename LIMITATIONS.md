@@ -485,9 +485,44 @@ def rate_limited_place_order(*args, **kwargs):
 
 ---
 
+## Code Structure & Import Paths
+
+### 11. Direct Module Imports (v1.0.1+)
+
+**Status:** ✅ **Backward compatible through main SDK class**
+
+**Change:** Internal code structure reorganized (v1.0.1):
+- Operation modules moved to `operations/` subpackage
+- Utility modules moved to `utils/` subpackage
+
+**Impact:**
+- **No impact for standard usage** - All functionality accessible via `TradeStationSDK` class
+- **Direct imports affected** - If code directly imports from old paths (e.g., `from tradestation_sdk.accounts import AccountOperations`), update to new paths
+
+**Standard Usage (No Changes Needed):**
+```python
+# ✅ This still works (recommended)
+from tradestation_sdk import TradeStationSDK
+sdk = TradeStationSDK()
+sdk.get_account_info(mode="PAPER")
+```
+
+**Direct Imports (Update Required):**
+```python
+# ❌ Old path (v1.0.0 and earlier)
+from tradestation_sdk.accounts import AccountOperations
+
+# ✅ New path (v1.0.1+)
+from tradestation_sdk.operations.accounts import AccountOperations
+```
+
+**Recommendation:** Use the main `TradeStationSDK` class for all operations. Direct module imports are internal implementation details and may change in future versions.
+
+---
+
 ## Dependency Constraints
 
-### 11. Python Version Requirement
+### 12. Python Version Requirement
 
 **Requirement:** Python 3.10+
 
@@ -508,7 +543,7 @@ RUN pip install tradestation-sdk
 
 ---
 
-### 12. Operating System Compatibility
+### 13. Operating System Compatibility
 
 **Supported:** Windows, macOS, Linux
 
@@ -524,14 +559,14 @@ RUN pip install tradestation-sdk
 # 2. Copy tokens to server
 # 3. Use tokens on server
 import shutil
-shutil.copy('logs/tokens_paper.json', '/server/path/')
+shutil.copy('config/tokens_paper.json', '/server/path/')
 ```
 
 ---
 
 ## Error Handling Gaps
 
-### 13. Error Message Inconsistency
+### 14. Error Message Inconsistency
 
 **Issue:** TradeStation API returns errors in multiple formats.
 
@@ -597,5 +632,5 @@ If you encounter limitations not listed here:
 
 ---
 
-**Last Updated:** 2025-12-28
+**Last Updated:** 2025-12-29
 **SDK Version:** 1.0.1

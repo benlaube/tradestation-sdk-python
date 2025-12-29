@@ -346,5 +346,5 @@ jobs:
 
 ---
 
-**Last Updated:** 2025-12-07
-**Current Version:** 1.0.0
+**Last Updated:** 2025-12-29
+**Current Version:** 1.0.1

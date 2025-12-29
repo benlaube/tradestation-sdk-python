@@ -1776,5 +1776,5 @@ See [CHANGELOG.md](CHANGELOG.md) for version history and release notes.
 
 ---
 
-**Last Updated:** 2025-12-07
-**SDK Version:** 1.0.0
+**Last Updated:** 2025-12-29
+**SDK Version:** 1.0.1

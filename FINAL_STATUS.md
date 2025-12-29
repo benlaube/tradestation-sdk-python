@@ -594,7 +594,7 @@ You now have a **world-class, production-ready SDK** that's:
 
 ---
 
-**Last Updated:** 2025-12-09
-**SDK Version:** 1.0.0
+**Last Updated:** 2025-12-29
+**SDK Version:** 1.0.1
 **Package:** tradestation-python-sdk
 **Status:** ✅ Ready for PyPI Publication

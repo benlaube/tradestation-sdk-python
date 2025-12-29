@@ -481,10 +481,10 @@ except TradeStationAPIError as e:
 
 ```bash
 # Backup tokens
-cp logs/tokens_live.json backups/tokens_live_$(date +%Y%m%d).json
+cp config/tokens_live.json backups/tokens_live_$(date +%Y%m%d).json
 
 # Or sync to S3
-aws s3 cp logs/tokens_live.json s3://my-bucket/backups/
+aws s3 cp config/tokens_live.json s3://my-bucket/backups/
 ```
 
 ### State Backup

@@ -6,14 +6,18 @@ This script exports all Pydantic model schemas to a single JSON file
 that can be used for documentation, validation, and integration purposes.
 
 Usage:
-    python generate_model_schemas.py
+    python scripts/generate_model_schemas.py
 
 Output:
     docs/reference/sdk-models-schema.json
 """
 
 import json
+import sys
 from pathlib import Path
+
+# Add parent directory to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from models import (
     # Order Models
@@ -87,9 +91,9 @@ def generate_schema_file():
         "version": "1.0.0",
         "_regeneration_instructions": {
             "note": "This file is auto-generated. Do not edit manually.",
-            "how_to_regenerate": "Run the following command from the SDK root directory: python generate_model_schemas.py",
+            "how_to_regenerate": "Run the following command from the SDK root directory: python scripts/generate_model_schemas.py",
             "when_to_regenerate": "Regenerate this file whenever Pydantic models in the models/ directory are added, modified, or removed",
-            "script_location": "generate_model_schemas.py",
+            "script_location": "scripts/generate_model_schemas.py",
             "output_location": "docs/reference/sdk-models-schema.json"
         },
         "models": {
@@ -164,7 +168,7 @@ def generate_schema_file():
     }
     
     # Write to file
-    output_path = Path(__file__).parent / "docs" / "reference" / "sdk-models-schema.json"
+    output_path = Path(__file__).parent.parent / "docs" / "reference" / "sdk-models-schema.json"
     output_path.parent.mkdir(parents=True, exist_ok=True)
     
     with open(output_path, "w", encoding="utf-8") as f:

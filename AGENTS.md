@@ -49,16 +49,16 @@ When something conflicts, treat these as the canonical sources (top = most autho
 This SDK is intentionally split by concern:
 - **SDK façade / exports**: [__init__.py](__init__.py) (`TradeStationSDK`, public API surface)
 - **OAuth + token storage**: [session.py](session.py) (`TokenManager`, callback server)
-- **HTTP concerns (retry/logging/errors)**: [client.py](client.py) (`HTTPClient`)
+- **HTTP concerns (retry/logging/errors)**: [utils/client.py](utils/client.py) (`HTTPClient`)
 - **Domain operations**:
-  - [accounts.py](accounts.py)
-  - [market_data.py](market_data.py)
-  - [orders.py](orders.py) (order queries)
-  - [order_executions.py](order_executions.py) (order placement/modify/cancel/confirm)
-  - [positions.py](positions.py)
-- **Streaming**: [streaming.py](streaming.py) (HTTP streaming manager + resiliency)
+  - [operations/accounts.py](operations/accounts.py)
+  - [operations/market_data.py](operations/market_data.py)
+  - [operations/orders.py](operations/orders.py) (order queries)
+  - [operations/order_executions.py](operations/order_executions.py) (order placement/modify/cancel/confirm)
+  - [operations/positions.py](operations/positions.py)
+- **Streaming**: [operations/streaming.py](operations/streaming.py) (HTTP streaming manager + resiliency)
 - **Models**: [models/](models/) (Pydantic request/response models)
-- **Normalization**: [mappers.py](mappers.py) (normalize API shapes)
+- **Normalization**: [utils/mappers.py](utils/mappers.py) (normalize API shapes)
 - **Errors**: [exceptions.py](exceptions.py) (typed errors + structured details)
 - **Docs**: [docs/](docs/) (+ root docs like [LIMITATIONS.md](LIMITATIONS.md), [SECURITY.md](SECURITY.md))
 
@@ -74,7 +74,7 @@ If you need “what endpoints exist / what’s implemented”, use:
 - **PAPER**: `https://sim-api.tradestation.com/v3`
 - **LIVE**: `https://api.tradestation.com/v3`
 
-Reference: [client.py](client.py) (`get_base_url`) and [__init__.py](__init__.py) defaults.
+Reference: [utils/client.py](utils/client.py) (`get_base_url`) and [__init__.py](__init__.py) defaults.
 
 ### 4.2 Token storage location (security-sensitive)
 Tokens are persisted **outside this SDK folder** by default:
@@ -141,7 +141,7 @@ OAuth / token storage:
 - `TRADESTATION_TOKEN_DIR`
 - `TRADESTATION_TOKEN_STORAGE=auto|file|keychain`
 
-Reference: [config.py](config.py) + [session.py](session.py) + [client.py](client.py).
+Reference: [config.py](config.py) + [session.py](session.py) + [utils/client.py](utils/client.py).
 
 ---
 
@@ -204,7 +204,7 @@ See: [CONTRIBUTING.md](CONTRIBUTING.md) for examples and docstring conventions.
 ## 9. Quick debugging checklist (SDK)
 - **Auth failing**: check redirect URI registration and whether the SDK auto-selected a port (see logs).
 - **Token issues**: confirm token files under `config/` and permissions; check `TRADESTATION_TOKEN_*` env vars.
-- **429 rate limits**: confirm retry behavior and backoff ([client.py](client.py)), reduce call rate, batch requests.
+- **429 rate limits**: confirm retry behavior and backoff ([utils/client.py](utils/client.py)), reduce call rate, batch requests.
 - **Streaming drops**: confirm reconnect settings and fallback behavior in [streaming.py](streaming.py).
 
 Primary references:
@@ -230,4 +230,4 @@ Primary references:
 
 ---
 
-*Last Updated: 12-29-2025 12:59:35 EST*
+*Last Updated: 12-29-2025 16:19:02 EST*
