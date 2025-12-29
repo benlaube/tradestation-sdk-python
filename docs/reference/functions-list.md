@@ -17,8 +17,8 @@ This is a **quick reference index** of all functions available in the SDK, organ
 
 - **Status:** Active
 - **Created:** 12-05-2025
-- **Last Updated:** 12-29-2025 13:19:35 EST
-- **Version:** 1.2.0
+- **Last Updated:** 12-29-2025 13:41:00 EST
+- **Version:** 1.2.1
 - **Description:** Quick reference list of all functions available in the TradeStation SDK across all modules and endpoints, organized by category for quick lookup
 - **Type:** Function Index - Quick reference for developers looking up SDK functions
 - **Applicability:** When quickly looking up available SDK functions, understanding function organization, or finding functions by category
@@ -296,6 +296,12 @@ result = sdk.place_bracket_order(
 |----------|----------|-------------|---------|--------------------------|
 | `normalize_order(order)` | `mappers.normalize_order()` | Normalize TradeStation order object to consistent dictionary format | dict[str, Any] \| None | Internal utility function |
 | `normalize_position(position)` | `mappers.normalize_position()` | Normalize TradeStation position object to consistent dictionary format | dict[str, Any] \| None | Internal utility function |
+| `normalize_quote(quote)` | `mappers.normalize_quote()` | Normalize TradeStation quote snapshot to consistent dictionary format | dict[str, Any] \| None | Internal utility function |
+| `normalize_execution(execution)` | `mappers.normalize_execution()` | Normalize execution/fill object to consistent dictionary format | dict[str, Any] \| None | Internal utility function |
+| `normalize_account(account)` | `mappers.normalize_account()` | Normalize account summary to consistent dictionary format | dict[str, Any] \| None | Internal utility function |
+| `normalize_balances(balances)` | `mappers.normalize_balances()` | Normalize balance detail to consistent dictionary format | dict[str, Any] \| None | Internal utility function |
+| `normalize_account_balances(response)` | `mappers.normalize_account_balances()` | Normalize account balances response to consistent dictionary format | dict[str, Any] \| None | Internal utility function |
+| `normalize_bod_balance(bod_balance)` | `mappers.normalize_bod_balance()` | Normalize beginning-of-day balance entry to consistent dictionary format | dict[str, Any] \| None | Internal utility function |
 | `get_base_url(mode)` | `client.get_base_url()` | Get base URL for specified mode (PAPER/LIVE) | str | Internal utility function |
 | `parse_api_error_response(response)` | `client.parse_api_error_response()` | Parse TradeStation API error response into structured ErrorDetails | ErrorDetails | Internal utility function |
 
@@ -332,8 +338,8 @@ All 9 required trading operations are now fully covered:
 | **Order Queries** | 5 | get_order_history, get_current_orders, get_orders_by_ids, get_historical_orders_by_ids, stream_orders |
 | **Order Status Filters** | 5 | get_orders_by_status, get_open_orders, get_filled_orders, get_canceled_orders, get_rejected_orders |
 | **Streaming** | 5 | stream_quotes, stream_orders, stream_positions, stream_balances, stream_orders_by_ids |
-| **Utilities** | 4 | normalize_order, normalize_position, get_base_url, parse_api_error_response |
-| **Total** | **72** | Unique functions across all modules |
+| **Utilities** | 10 | normalize_order, normalize_position, normalize_quote, normalize_execution, normalize_account, normalize_balances, normalize_account_balances, normalize_bod_balance, get_base_url, parse_api_error_response |
+| **Total** | **78** | Unique functions across all modules |
 
 ### Access Patterns
 

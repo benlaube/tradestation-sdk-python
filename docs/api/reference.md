@@ -21,8 +21,8 @@ This is the **complete API reference** for all SDK classes, methods, models, and
 
 - **Status:** Active
 - **Created:** 12-05-2025
-- **Last Updated:** 12-29-2025 12:52:55 EST
-- **Version:** 1.0.1
+- **Last Updated:** 12-29-2025 13:41:00 EST
+- **Version:** 1.0.2
 - **Description:** Complete API reference documentation for all SDK classes, methods, models, and exceptions with detailed parameter descriptions and usage patterns
 - **Type:** API Reference - Technical reference for developers using the SDK
 - **Applicability:** When implementing SDK features, understanding method signatures, or looking up specific class/method documentation
@@ -1407,53 +1407,101 @@ except InvalidTokenError as e:
 
 ---
 
-## Mappers
+## Mappers (Optional Utilities)
+
+**⚠️ Important:** Mappers are **optional utilities** for specific use cases. The SDK's primary API returns Pydantic models with PascalCase field names (matching the TradeStation API format).
+
+**When to use mappers:**
+- You need snake_case format for database storage
+- You're integrating with systems requiring snake_case
+- You have existing code expecting snake_case
+
+**When to use Pydantic models (default):**
+- Building new applications (recommended)
+- You want type safety and validation
+- You want to match the TradeStation API format exactly
+- You don't need snake_case
+
+**📖 For complete guidance, see [Data Transformation Guide](../guides/data-transformation.md)**
+
+---
 
 ### `normalize_order(order: Any) -> dict[str, Any] | None`
 
-Normalize TradeStation order object to consistent dictionary format.
+Normalize TradeStation order object to snake_case dictionary format.
+
+**Note:** This is an optional utility. The SDK returns Pydantic models by default. Use this only if you need snake_case format.
 
 **Parameters:**
-- `order: Any` - Order object (dict or object) from TradeStation API
+- `order: Any` - Order object (dict, Pydantic model, or object) from TradeStation API
 
 **Returns:**
-- `dict[str, Any] | None` - Normalized order dictionary or None if invalid
+- `dict[str, Any] | None` - Normalized order dictionary with snake_case keys, or None if invalid
 
 **Example:**
 ```python
-from src.lib.tradestation import normalize_order
+from src.lib.tradestation import TradeStationSDK, normalize_order
 
-normalized = normalize_order(order_data)
-if normalized:
-    print(f"Order ID: {normalized['order_id']}")
-    print(f"Symbol: {normalized['symbol']}")
-    print(f"Status: {normalized['status']}")
+sdk = TradeStationSDK()
+sdk.ensure_authenticated(mode="PAPER")
+
+# Get orders (returns Pydantic models with PascalCase)
+orders = sdk.get_current_orders(mode="PAPER")
+
+# Transform to snake_case for database storage
+for order_model in orders.Orders:
+    normalized = normalize_order(order_model)
+    if normalized:
+        # normalized has snake_case keys: {"order_id": "...", "symbol": "..."}
+        db.insert_order(normalized)
 ```
 
 ---
 
 ### `normalize_position(position: Any) -> dict[str, Any] | None`
 
-Normalize TradeStation position object to consistent dictionary format.
+Normalize TradeStation position object to snake_case dictionary format.
+
+**Note:** This is an optional utility. The SDK returns Pydantic models by default. Use this only if you need snake_case format.
 
 **Parameters:**
-- `position: Any` - Position object (dict or object) from TradeStation API
+- `position: Any` - Position object (dict, Pydantic model, or object) from TradeStation API
 
 **Returns:**
-- `dict[str, Any] | None` - Normalized position dictionary or None if invalid
+- `dict[str, Any] | None` - Normalized position dictionary with snake_case keys, or None if invalid
 
 **Example:**
 ```python
-from src.lib.tradestation import normalize_position
+from src.lib.tradestation import TradeStationSDK, normalize_position
 
-normalized = normalize_position(position_data)
-if normalized:
-    print(f"Symbol: {normalized['symbol']}")
-    print(f"Quantity: {normalized['quantity']}")
-    print(f"Unrealized P&L: {normalized['unrealized_pnl']}")
+sdk = TradeStationSDK()
+sdk.ensure_authenticated(mode="PAPER")
+
+# Get positions (returns Pydantic models with PascalCase)
+positions = sdk.get_all_positions(mode="PAPER")
+
+# Transform to snake_case for database storage
+for position_model in positions:
+    normalized = normalize_position(position_model)
+    if normalized:
+        # normalized has snake_case keys: {"symbol": "...", "quantity": "..."}
+        db.upsert_position(normalized)
 ```
+
+### Other Available Mappers
+
+The SDK also provides these optional mapper utilities:
+
+- `normalize_quote(quote)` - Normalize quote data to snake_case
+- `normalize_execution(execution)` - Normalize execution/fill data to snake_case
+- `normalize_account(account)` - Normalize account summary to snake_case
+- `normalize_balances(balances)` - Normalize balance detail to snake_case
+- `normalize_account_balances(response)` - Normalize account balances response to snake_case
+- `normalize_bod_balance(bod_balance)` - Normalize BOD balance data to snake_case
+
+**See [Data Transformation Guide](../guides/data-transformation.md) for complete usage guidance.**
 
 ---
 
-**Last Updated:** 2025-12-05
+**Last Updated:** 12-29-2025 13:41:00 EST
 

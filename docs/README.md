@@ -66,6 +66,7 @@ Welcome to the TradeStation SDK documentation. This directory contains comprehen
 - **[Usage Examples](guides/usage-examples.md)** - SDK usage examples with code
 - **[Code Examples](guides/code-examples.md)** - OpenAPI code examples
 - **[Order Functions](guides/order-functions.md)** - Order function reference
+- **[Data Transformation](guides/data-transformation.md)** - When to use Pydantic models vs mappers
 - **[Submodule Integration](guides/submodule-integration.md)** - Git submodule workflow
 
 ### 🏛️ Architecture

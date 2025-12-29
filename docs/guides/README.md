@@ -22,6 +22,7 @@ This section contains how-to guides, code examples, and integration instructions
 - **[Usage Examples](usage-examples.md)** - SDK usage examples with code samples
 - **[Code Examples](code-examples.md)** - OpenAPI code examples and patterns
 - **[Order Functions](order-functions.md)** - Order function reference and examples
+- **[Data Transformation](data-transformation.md)** - When to use Pydantic models vs mappers
 - **[Submodule Integration](submodule-integration.md)** - How to use SDK as git submodule
 
 ### Quick Navigation
@@ -37,6 +38,9 @@ This section contains how-to guides, code examples, and integration instructions
 
 **Looking for code patterns?**
 - Check [Code Examples](code-examples.md) - OpenAPI-based examples
+
+**Working with data formats?**
+- See [Data Transformation](data-transformation.md) - Pydantic models vs mappers guide
 
 ---
 
