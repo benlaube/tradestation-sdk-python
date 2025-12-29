@@ -238,7 +238,10 @@ TRADING_MODE=PAPER
 1. Go to [TradeStation Developer Portal](https://developer.tradestation.com)
 2. Create an application
 3. Copy your Client ID and Client Secret
-4. Set Redirect URI to `http://localhost:8888/callback`
+4. **Set Redirect URI(s):**
+   - **Recommended:** Register all ports 8888-8898: `http://localhost:8888/callback`, `http://localhost:8889/callback`, etc.
+   - **Or:** Register only one port (e.g., `http://localhost:8888/callback`) and set `TRADESTATION_OAUTH_PORT=8888`
+   - **Why:** SDK may auto-select a different port if the default is busy
 
 ### Step 2: First Script (Hello TradeStation!)
 
@@ -323,7 +326,12 @@ asyncio.run(stream_quotes())
 
 **Problem:** OAuth callback server can't bind to port 8888.
 
-**Solution:**
+**Solution (v1.0.1+):**
+
+**Automatic (Recommended):** SDK will auto-select an available port (8888-8898)
+- Ensure the selected port is registered in TradeStation Developer Portal
+- SDK will warn you which port was selected
+- See [LIMITATIONS.md](LIMITATIONS.md#2-oauth-port-conflicts--fixed-in-v101) for details
 
 **Option 1:** Kill the process using port 8888
 ```bash
@@ -335,10 +343,23 @@ netstat -ano | findstr :8888
 taskkill /PID <PID> /F
 ```
 
-**Option 2:** Change redirect URI in `.env`
+**Option 2:** Use a different port
 ```env
-TRADESTATION_REDIRECT_URI=http://localhost:9999/callback
+TRADESTATION_OAUTH_PORT=8889
+# Or in redirect URI:
+TRADESTATION_REDIRECT_URI=http://localhost:8889/callback
 ```
+**Important:** Register the port you choose in TradeStation Developer Portal.
+
+#### ❌ "redirect_uri_mismatch" or "Invalid redirect URI"
+
+**Problem:** The redirect URI used by SDK doesn't match what's registered in TradeStation Developer Portal.
+
+**Solution:**
+1. Check SDK logs to see which port/redirect URI was used
+2. Go to [TradeStation Developer Portal](https://developer.tradestation.com)
+3. Add the exact redirect URI shown in logs (e.g., `http://localhost:8889/callback`)
+4. **Recommended:** Register all ports 8888-8898 to allow auto-selection
 
 #### ❌ "Authentication failed: Invalid credentials"
 
@@ -1677,7 +1698,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for complete guidelines including:
 For complete TradeStation API v3 documentation, see:
 - [TradeStation Developer Portal](https://developer.tradestation.com)
 - [API v3 Reference](https://developer.tradestation.com/webapi)
-- OpenAPI Spec: [`tradestation-api-v3-openapi.json`](./tradestation-api-v3-openapi.json)
+- OpenAPI Spec: [`tradestation-api-v3-openapi.json`](./docs/reference/tradestation-api-v3-openapi.json)
 
 ---
 

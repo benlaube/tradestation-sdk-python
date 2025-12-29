@@ -9,6 +9,7 @@ This document provides **comprehensive API coverage analysis** showing which Tra
 **Related Documents:**
 - 📚 **[API_REFERENCE.md](API_REFERENCE.md)** - Complete API reference
 - 📊 **[API_ENDPOINT_MAPPING.md](API_ENDPOINT_MAPPING.md)** - SDK function to endpoint mapping
+- 🧭 **[SDK_ENDPOINT_MAPPING.md](sdk_endpoints.md)** - SDK methods to TradeStation API endpoints
 - 🎯 **[FEATURES.md](../FEATURES.md)** - Feature overview
 - 🗺️ **[ROADMAP.md](ROADMAP.md)** - Future development plans
 - 📖 **[README.md](../README.md)** - SDK documentation
@@ -17,13 +18,13 @@ This document provides **comprehensive API coverage analysis** showing which Tra
 
 - **Status:** Active
 - **Created:** 12-05-2025
-- **Last Updated:** 12-05-2025 14:21:15 EST
-- **Version:** 2.0
+- **Last Updated:** 12-29-2025 12:52:55 EST
+- **Version:** 2.2
 - **Description:** Comprehensive analysis of SDK API endpoint coverage, model implementation status, and endpoint inventory mapping SDK functions to TradeStation API endpoints
 - **Type:** Coverage Analysis - Technical reference for developers and AI agents
 - **Applicability:** When reviewing SDK completeness, planning new endpoint implementations, or understanding API coverage status
 - **Dependencies:**
-  - [`tradestation-api-v3-openapi.json`](../tradestation-api-v3-openapi.json) - Source OpenAPI specification
+  - [`tradestation-api-v3-openapi.json`](../reference/tradestation-api-v3-openapi.json) - Source OpenAPI specification
   - [`order_executions.py`](../order_executions.py) - Order execution operations
   - [`orders.py`](../orders.py) - Order query operations
   - [`accounts.py`](../accounts.py) - Account operations
@@ -66,12 +67,12 @@ This document provides **comprehensive API coverage analysis** showing which Tra
 | Accounts | `brokerage/accounts/{accountId}` | GET | `accounts.py#get_account_balances` | Used | `AccountBalancesResponse` |
 | Accounts | `brokerage/accounts/{accounts}/balances` | GET | `accounts.py#get_detailed_balances` | Available (not used) | - |
 | Accounts | `brokerage/accounts/{accounts}/bodbalances` | GET | `accounts.py#get_account_balances_bod` | Used | `BODBalancesResponse` |
-| Market Data | `marketdata/barcharts/{symbol}` | GET | `market_data.py#get_bars` | Used | Raw dict |
+| Market Data | `marketdata/barcharts/{symbol}` | GET | `market_data.py#get_bars` | Used | `BarsResponse` (wraps `BarResponse`) |
 | Market Data | `marketdata/quotes/{symbols}` | GET | `market_data.py#get_quote_snapshots` | Used | `QuotesResponse` |
-| Market Data | `marketdata/symbols/{symbols}` | GET | `market_data.py#get_symbol_details` | Used | Raw dict |
-| Market Data | `marketdata/symbols/search` | GET | `market_data.py#search_symbols` | Used | Raw dict |
+| Market Data | `marketdata/symbols/{symbols}` | GET | `market_data.py#get_symbol_details` | Used | `SymbolDetailsResponse` |
+| Market Data | `marketdata/symbols/search` | GET | `market_data.py#search_symbols` | Used | `SymbolSearchResponse` |
 | Market Data | `marketdata/symbollists/cryptopairs/symbolnames` | GET | `market_data.py#get_crypto_symbol_names` | Used | Raw dict |
-| Market Data | Options (chains/strikes/expirations/risk-reward/spreads) | GET | `market_data.py` option methods | Available (not actively used) | Raw dict |
+| Market Data | Options (chains/strikes/expirations/risk-reward/spreads) | GET | `market_data.py` option methods | Available (not actively used) | Option* responses (typed) |
 | Orders | `orderexecution/orders` | POST | `order_executions.py#place_order` | Used | `TradeStationOrderRequest` → `TradeStationOrderResponse` |
 | Orders | `orderexecution/orders/{orderId}` | PUT | `order_executions.py#modify_order` | Used | `TradeStationOrderResponse` |
 | Orders | `orderexecution/orders/{orderId}` | DELETE | `order_executions.py#cancel_order` | Used | Raw dict |
@@ -92,21 +93,21 @@ This document provides **comprehensive API coverage analysis** showing which Tra
 | Domain | Endpoint | Method | SDK File / Function | Usage | Model Used |
 |--------|----------|--------|---------------------|-------|------------|
 | Streaming | `marketdata/stream/quotes/{symbols}` | GET | `streaming.py#stream_quotes` | Used | `QuoteStream` |
-| Streaming | `marketdata/stream/barcharts/{symbol}` | GET | `market_data.py#stream_bars` | Available (not used) | Raw dict |
+| Streaming | `marketdata/stream/barcharts/{symbol}` | GET | `market_data.py#stream_bars` | Available (not used) | `BarStream` |
 | Streaming | `brokerage/stream/accounts/{accountId}/orders` | GET | `streaming.py#stream_orders` | Used | `OrderStream` |
 | Streaming | `brokerage/stream/accounts/{accounts}/orders/{ordersIds}` | GET | `streaming.py#stream_orders_by_ids` | Available (not widely used) | `OrderStream` |
 | Streaming | `brokerage/stream/accounts/{accountId}/positions` | GET | `streaming.py#stream_positions` | Used | `PositionStream` |
 | Streaming | `brokerage/stream/accounts/{accountId}/balances` | GET | `streaming.py#stream_balances` | Used | `BalanceStream` |
-| Streaming | `marketdata/stream/options/chains/{underlying}` | GET | `market_data.py#stream_option_chains` | Available (not used) | Raw dict |
-| Streaming | `marketdata/stream/options/quotes` | GET | `market_data.py#stream_option_quotes` | Available (not used) | Raw dict |
-| Streaming | `marketdata/stream/marketdepth/quotes/{symbol}` | GET | `market_data.py#stream_market_depth_quotes` | Available (not used) | Raw dict |
-| Streaming | `marketdata/stream/marketdepth/aggregates/{symbol}` | GET | `market_data.py#stream_market_depth_aggregates` | Available (not used) | Raw dict |
+| Streaming | `marketdata/stream/options/chains/{underlying}` | GET | `market_data.py#stream_option_chains` | Available (not used) | `OptionChainStream` |
+| Streaming | `marketdata/stream/options/quotes` | GET | `market_data.py#stream_option_quotes` | Available (not used) | `OptionQuoteStream` |
+| Streaming | `marketdata/stream/marketdepth/quotes/{symbol}` | GET | `market_data.py#stream_market_depth_quotes` | Available (not used) | `MarketDepthQuoteStream` |
+| Streaming | `marketdata/stream/marketdepth/aggregates/{symbol}` | GET | `market_data.py#stream_market_depth_aggregates` | Available (not used) | `MarketDepthAggregateStream` |
 
 ---
 
 ## OpenAPI Comparison (SDK vs OpenAPI Specification)
 
-**Comparison:** SDK Implementation vs OpenAPI Specification ([`tradestation-api-v3-openapi.json`](../tradestation-api-v3-openapi.json))
+**Comparison:** SDK Implementation vs OpenAPI Specification ([`tradestation-api-v3-openapi.json`](../reference/tradestation-api-v3-openapi.json))
 
 ### v3 Endpoints Coverage
 

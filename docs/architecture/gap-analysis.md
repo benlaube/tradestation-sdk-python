@@ -23,7 +23,7 @@ This document provides **comprehensive gap analysis** identifying missing endpoi
 - **Type:** Analysis Report - Technical reference for developers and AI agents planning SDK enhancements
 - **Applicability:** When planning SDK enhancements, identifying missing features, or reviewing code quality improvements
 - **Dependencies:**
-  - [`tradestation-api-v3-openapi.json`](../tradestation-api-v3-openapi.json) - Source OpenAPI specification for gap comparison
+  - [`tradestation-api-v3-openapi.json`](../reference/tradestation-api-v3-openapi.json) - Source OpenAPI specification for gap comparison
   - [`API_COVERAGE.md`](./API_COVERAGE.md) - Current API coverage status
   - [`SUMMARY.md`](./SUMMARY.md) - SDK enhancement summary
 - **How to Use:** Review this document to identify gaps between API capabilities and SDK implementation, prioritize improvements, and plan enhancement work
@@ -48,7 +48,7 @@ This document provides **comprehensive gap analysis** identifying missing endpoi
 ## Overview
 
 This document identifies gaps between:
-1. **TradeStation API v3 Capabilities** (from [`tradestation-api-v3-openapi.json`](../tradestation-api-v3-openapi.json))
+1. **TradeStation API v3 Capabilities** (from [`tradestation-api-v3-openapi.json`](../reference/tradestation-api-v3-openapi.json))
 2. **Current SDK Implementation** (from `src/lib/tradestation/`)
 3. **Code Quality Standards** (commenting, error handling, etc.)
 
@@ -61,7 +61,7 @@ This document identifies gaps between:
 
 ## OpenAPI Specification Analysis
 
-**Source:** [`tradestation-api-v3-openapi.json`](../tradestation-api-v3-openapi.json)
+**Source:** [`tradestation-api-v3-openapi.json`](../reference/tradestation-api-v3-openapi.json)
 
 ### Complete Endpoint Inventory
 

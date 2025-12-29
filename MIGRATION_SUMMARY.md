@@ -83,7 +83,7 @@ docs/
 ├── api/                        # API documentation
 │   ├── README.md
 │   ├── reference.md
-│   ├── endpoints.md
+│   ├── sdk_endpoints.md
 │   ├── coverage.md
 │   ├── operations.md
 │   └── structure.md
@@ -107,7 +107,7 @@ docs/
 ├── reference/                  # Reference materials
 │   ├── README.md
 │   ├── functions-list.md
-│   ├── new-functions.md
+│   ├── functions-list.md (includes new-functions section)
 │   ├── trailing-stops.md
 │   └── audit-references.md
 │

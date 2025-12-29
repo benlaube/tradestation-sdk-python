@@ -9,11 +9,11 @@
 - **Description:** Visual diagrams showing TradeStation API v3 endpoint structure organized by tag groups (Brokerage, MarketData, Order Execution) with detailed relationships
 - **Applicability:** When understanding API structure, planning SDK enhancements, or reviewing endpoint coverage
 - **Dependencies:**
-  - [`tradestation-api-v3-openapi.json`](../../tradestation-api-v3-openapi.json) - Source OpenAPI specification
+  - [`tradestation-api-v3-openapi.json`](../../reference/tradestation-api-v3-openapi.json) - Source OpenAPI specification
 - **Related Documents:**
   - [API Reference](reference.md) - Complete API reference
   - [API Coverage](coverage.md) - Endpoint coverage analysis
-  - [API Endpoints](endpoints.md) - Endpoint mapping
+  - [SDK Endpoint Mapping](sdk_endpoints.md) - Endpoint mapping
 
 ---
 
@@ -125,6 +125,6 @@ graph LR
 ---
 
 **Related Files:**
-- [`tradestation-api-v3-openapi.json`](../../tradestation-api-v3-openapi.json) - Complete OpenAPI specification
+- [`tradestation-api-v3-openapi.json`](../../reference/tradestation-api-v3-openapi.json) - Complete OpenAPI specification
 - [API Reference](reference.md) - Complete API reference
 - [API Coverage](coverage.md) - Endpoint coverage analysis

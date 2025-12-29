@@ -55,6 +55,7 @@ This changelog tracks SDK-specific changes including:
 
 **Fixed**
 - OAuth authentication no longer fails when default port (8888) is in use
+- **Critical:** OAuth redirect_uri now automatically updates to match auto-selected port (prevents redirect_uri_mismatch errors)
 - Token storage security improved with automatic permission restrictions
 - Better error handling for token storage operations
 
@@ -744,8 +745,8 @@ None - All existing code continues to work via delegation methods in the main SD
 **Added:** Comprehensive OpenAPI specification analysis, Mermaid diagrams, code examples extraction, and file reference fixes.
 
 ### File Changes
-- Renamed `openapi (2) (2).json` → [`tradestation-api-v3-openapi.json`](./tradestation-api-v3-openapi.json) for clarity
-- Verified `tradestation-api-v3-openapi.json` and root `APIv3Endpoints.json` are **identical** (same file)
+- Renamed `openapi (2) (2).json` → [`tradestation-api-v3-openapi.json`](./docs/reference/tradestation-api-v3-openapi.json) for clarity
+- Verified `docs/reference/tradestation-api-v3-openapi.json` and root `APIv3Endpoints.json` are **identical** (same file)
 
 ### Documentation Created
 - [`docs/OPENAPI_CODE_EXAMPLES.md`](./docs/OPENAPI_CODE_EXAMPLES.md) - Extracted **190 code examples** from OpenAPI spec (Shell, Node.js, Python, C#, JSON)

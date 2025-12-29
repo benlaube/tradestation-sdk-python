@@ -10,7 +10,7 @@
 - **Type:** Analysis Summary - Technical reference for developers and AI agents
 - **Applicability:** When understanding OpenAPI analysis results, reviewing SDK coverage, or planning API enhancements
 - **Dependencies:**
-  - [`tradestation-api-v3-openapi.json`](../tradestation-api-v3-openapi.json) - Source OpenAPI specification
+  - [`tradestation-api-v3-openapi.json`](../reference/tradestation-api-v3-openapi.json) - Source OpenAPI specification
   - [`API_STRUCTURE.md`](./API_STRUCTURE.md) - API structure diagram
   - [`API_STRUCTURE_DETAILED.md`](./API_STRUCTURE_DETAILED.md) - Detailed API structure diagram
   - [`OPENAPI_CODE_EXAMPLES.md`](./OPENAPI_CODE_EXAMPLES.md) - Code examples extracted from OpenAPI spec
@@ -24,12 +24,12 @@
 
 ### Are the OpenAPI files the same?
 
-**Yes!** `src/lib/tradestation/tradestation-api-v3-openapi.json` and `APIv3Endpoints.json` (project root) are **identical** files.
+**Yes!** `src/lib/tradestation/docs/reference/tradestation-api-v3-openapi.json` and `APIv3Endpoints.json` (project root) are **identical** files.
 
 ### Where are API request/response structures logged?
 
 **Single Source of Truth:**
-1. **OpenAPI Specification:** [`tradestation-api-v3-openapi.json`](../tradestation-api-v3-openapi.json)
+1. **OpenAPI Specification:** [`tradestation-api-v3-openapi.json`](../reference/tradestation-api-v3-openapi.json)
    - Authoritative API contract definition
    - Contains all endpoint schemas, request/response structures, authentication requirements
    
@@ -44,7 +44,7 @@
 
 ### 1. Renamed OpenAPI File
 - **Old:** `openapi (2) (2).json`
-- **New:** [`tradestation-api-v3-openapi.json`](../tradestation-api-v3-openapi.json)
+- **New:** [`tradestation-api-v3-openapi.json`](../reference/tradestation-api-v3-openapi.json)
 - **Reason:** More descriptive and specific filename
 
 ### 2. Mermaid Diagrams
@@ -93,7 +93,7 @@ The SDK implements 2 additional endpoints not in the OpenAPI spec:
 
 All file references in SDK documentation have been updated to:
 - Use proper markdown links (not just file paths)
-- Reference the correct filename: `tradestation-api-v3-openapi.json`
+- Reference the correct filename: `docs/reference/tradestation-api-v3-openapi.json`
 - Link to related documentation files
 
 **Files Updated:**
@@ -106,7 +106,7 @@ All file references in SDK documentation have been updated to:
 
 ## Related Files
 
-- **OpenAPI Spec:** [`tradestation-api-v3-openapi.json`](../tradestation-api-v3-openapi.json)
+- **OpenAPI Spec:** [`tradestation-api-v3-openapi.json`](../reference/tradestation-api-v3-openapi.json)
 - **Mermaid Diagrams:** [`API_STRUCTURE.md`](./API_STRUCTURE.md), [`API_STRUCTURE_DETAILED.md`](./API_STRUCTURE_DETAILED.md)
 - **Code Examples:** [`OPENAPI_CODE_EXAMPLES.md`](./OPENAPI_CODE_EXAMPLES.md)
 - **Gap Analysis:** [`GAP_ANALYSIS.md`](./GAP_ANALYSIS.md) (updated with OpenAPI analysis)
