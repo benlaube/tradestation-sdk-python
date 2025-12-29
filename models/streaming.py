@@ -374,3 +374,84 @@ class BalanceStream(BaseModel):
             }
         }
     )
+
+
+class BarStream(BaseModel):
+    """
+    Bar data from TradeStation HTTP Streaming API (marketdata/stream/barcharts/{symbol}).
+
+    Each item represents an OHLCV bar plus tick/volume statistics and status flags.
+    The payload mirrors the TradeStation Bar schema.
+    """
+
+    TimeStamp: str = Field(..., description="ISO timestamp of the bar close time")
+    Open: str = Field(..., description="Opening price for the bar")
+    High: str = Field(..., description="Highest price during the bar")
+    Low: str = Field(..., description="Lowest price during the bar")
+    Close: str = Field(..., description="Closing price for the bar")
+    TotalVolume: str = Field(..., description="Total volume for the bar")
+    Epoch: int = Field(..., description="Unix epoch timestamp in milliseconds")
+    BarStatus: str | None = Field(None, description='Bar status flag (e.g., "Closed", "Open")')
+    IsRealtime: bool | None = Field(None, description="True if the bar is being built in real time")
+    IsEndOfHistory: bool | None = Field(None, description="True when all historical bars have been delivered")
+    OpenInterest: str | None = Field(None, description="Open interest (futures/options)")
+    DownTicks: int | None = Field(None, description="Number of downticks in the bar")
+    UpTicks: int | None = Field(None, description="Number of upticks in the bar")
+    DownVolume: int | None = Field(None, description="Volume on downticks")
+    UpVolume: int | None = Field(None, description="Volume on upticks")
+    TotalTicks: int | None = Field(None, description="Total tick count in the bar")
+    UnchangedTicks: int | None = Field(None, description="Number of unchanged ticks")
+    UnchangedVolume: int | None = Field(None, description="Volume on unchanged ticks")
+
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "TimeStamp": "2025-01-15T10:01:00Z",
+                "Open": "21450.00",
+                "High": "21452.00",
+                "Low": "21448.50",
+                "Close": "21450.25",
+                "TotalVolume": "12345",
+                "Epoch": 1705314060000,
+                "BarStatus": "Closed",
+                "IsRealtime": False,
+                "IsEndOfHistory": False,
+                "OpenInterest": "0",
+                "DownTicks": 231,
+                "UpTicks": 229,
+                "DownVolume": 1957,
+                "UpVolume": 2273,
+                "TotalTicks": 460,
+                "UnchangedTicks": 0,
+                "UnchangedVolume": 0,
+            }
+        }
+    )
+
+
+class OptionChainStream(BaseModel):
+    """Streaming option chain update (structure varies by request)."""
+
+    class Config:
+        extra = "allow"
+
+
+class OptionQuoteStream(BaseModel):
+    """Streaming option quote update."""
+
+    class Config:
+        extra = "allow"
+
+
+class MarketDepthQuoteStream(BaseModel):
+    """Streaming Level 2 market depth quote update."""
+
+    class Config:
+        extra = "allow"
+
+
+class MarketDepthAggregateStream(BaseModel):
+    """Streaming aggregated market depth update."""
+
+    class Config:
+        extra = "allow"

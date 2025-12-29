@@ -80,34 +80,67 @@ sdk.authenticate(mode="PAPER")  # Tokens stored in keychain
 
 **Current Implementation (v1.0.1):**
 - **Automatic Port Selection:** SDK automatically finds an available port in range 8888-8898
+- **Redirect URI Synchronization:** SDK automatically updates redirect_uri to match selected port
 - **Environment Override:** Can specify exact port via `TRADESTATION_OAUTH_PORT`
 - **Redirect URI Support:** Port is extracted from `TRADESTATION_REDIRECT_URI` if specified
 - **Improved Error Messages:** Clear guidance when all ports are unavailable
+- **Warnings:** SDK warns if auto-selected port may not be registered in Developer Portal
+
+**⚠️ IMPORTANT: Port Registration Requirements**
+
+**TradeStation API v3 requires that redirect URIs be EXACTLY registered in the Developer Portal.**
+
+If the SDK auto-selects a port (e.g., 8889 when 8888 is busy), you must ensure that port is registered:
+
+1. **Register ALL ports in range (recommended):**
+   - Go to [TradeStation Developer Portal](https://developer.tradestation.com)
+   - Add redirect URIs for all ports: `http://localhost:8888/callback`, `http://localhost:8889/callback`, etc. (through 8898)
+   - This allows the SDK to auto-select any available port
+
+2. **Or use a fixed port:**
+   - Set `TRADESTATION_OAUTH_PORT=8888` (or your preferred port)
+   - Register only that specific port in Developer Portal
+   - SDK will use that port or fail with a clear error if unavailable
 
 **Configuration:**
 ```bash
 # Auto-select port from range 8888-8898 (default behavior)
+# IMPORTANT: Register all ports 8888-8898 in Developer Portal
 # No configuration needed
 
-# Specify exact port (optional)
-export TRADESTATION_OAUTH_PORT=8889
+# Specify exact port (recommended if you only register one port)
+export TRADESTATION_OAUTH_PORT=8888
 
 # Or specify in redirect URI
-export TRADESTATION_REDIRECT_URI=http://localhost:9999/callback
+export TRADESTATION_REDIRECT_URI=http://localhost:8888/callback
 ```
 
 **Behavior:**
 1. If `TRADESTATION_OAUTH_PORT` is set, use that port
 2. If port is in redirect URI, extract and use that port
 3. If port is in use, automatically try next port in range 8888-8898
-4. If all ports unavailable, provide clear error message
+4. **SDK updates redirect_uri to match selected port** (ensures TradeStation redirects correctly)
+5. SDK warns if port was auto-selected (reminds you to register it)
+6. If all ports unavailable, provide clear error message
 
 **Example:**
 ```python
 # SDK automatically handles port conflicts
 sdk = TradeStationSDK()
-sdk.authenticate(mode="PAPER")  # Auto-selects available port if 8888 is busy
+sdk.authenticate(mode="PAPER")  
+# If port 8888 is busy, SDK will:
+# 1. Auto-select port 8889
+# 2. Update redirect_uri to http://localhost:8889/callback
+# 3. Warn you to register this port in Developer Portal
+# 4. Send OAuth request with updated redirect_uri
 ```
+
+**Troubleshooting:**
+
+**Error: "redirect_uri_mismatch"**
+- **Cause:** Selected port is not registered in TradeStation Developer Portal
+- **Solution:** Register the port being used (check SDK logs for the actual port)
+- **Prevention:** Register all ports 8888-8898 in Developer Portal
 
 **Manual Override (if needed):**
 ```bash

@@ -55,6 +55,7 @@ from .models.positions import PositionResponse, PositionsResponse
 from .models.quotes import QuoteSnapshot, QuotesResponse
 from .models.streaming import (
     BalanceStream,
+    BarStream,
     Heartbeat,
     MarketFlags,
     OrderStream,
@@ -1178,6 +1179,7 @@ __all__ = [
     "OrderStream",
     "PositionStream",
     "BalanceStream",
+    "BarStream",
     "StreamStatus",
     "Heartbeat",
     "StreamErrorResponse",

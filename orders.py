@@ -17,6 +17,7 @@ from .client import HTTPClient
 from .config import sdk_config
 from .exceptions import TradeStationAPIError
 from .logger import setup_logger
+from .models import OrdersWrapper
 
 logger = setup_logger(__name__, sdk_config.log_level)
 
@@ -66,7 +67,7 @@ class OrderOperations:
         since: str | None = None,
         page_size: int | None = None,
         next_token: str | None = None,
-    ) -> list[dict[str, Any]]:
+    ) -> OrdersWrapper | list[dict[str, Any]]:
         """
         Get historical orders from TradeStation API.
 
@@ -168,7 +169,10 @@ class OrderOperations:
                 else:
                     logger.debug(f"Response: {str(response)[:500]}")
 
-            return orders
+            try:
+                return OrdersWrapper(Orders=orders, NextPageToken=response.get("NextPageToken"), Errors=response.get("Errors", []))
+            except Exception:
+                return orders
 
         except TradeStationAPIError as e:
             e.details.operation = "get_order_history"
@@ -186,7 +190,7 @@ class OrderOperations:
         next_token: str | None = None,
         mode: str | None = None,
         page_size: int | None = None,
-    ) -> dict[str, Any]:
+    ) -> OrdersWrapper | dict[str, Any]:
         """
         Get current/open orders for account(s).
 
@@ -248,11 +252,13 @@ class OrderOperations:
 
             logger.info(f"Retrieved {len(orders)} current order(s) for account(s) {account_ids} (mode: {mode})")
 
-            result = {"Orders": orders, "Errors": errors}
-            if next_token_response:
-                result["NextToken"] = next_token_response
-
-            return result
+            try:
+                return OrdersWrapper(Orders=orders, NextPageToken=next_token_response, Errors=errors)
+            except Exception:
+                result = {"Orders": orders, "Errors": errors}
+                if next_token_response:
+                    result["NextToken"] = next_token_response
+                return result
 
         except TradeStationAPIError as e:
             e.details.operation = "get_current_orders"
@@ -266,7 +272,7 @@ class OrderOperations:
 
     def get_orders_by_ids(
         self, order_ids: str, account_ids: str | None = None, mode: str | None = None
-    ) -> dict[str, Any]:
+    ) -> OrdersWrapper | dict[str, Any]:
         """
         Get specific current orders by order ID(s).
 
@@ -315,7 +321,10 @@ class OrderOperations:
 
             logger.info(f"Retrieved {len(orders)} order(s) by IDs for account(s) {account_ids} (mode: {mode})")
 
-            return {"Orders": orders, "Errors": errors}
+            try:
+                return OrdersWrapper(Orders=orders, Errors=errors)
+            except Exception:
+                return {"Orders": orders, "Errors": errors}
 
         except TradeStationAPIError as e:
             e.details.operation = "get_orders_by_ids"
@@ -335,7 +344,7 @@ class OrderOperations:
         end_date: str | None = None,
         mode: str | None = None,
         since: str | None = None,
-    ) -> dict[str, Any]:
+    ) -> OrdersWrapper | dict[str, Any]:
         """
         Get specific historical orders by order ID(s).
 
@@ -408,7 +417,10 @@ class OrderOperations:
                 f"Retrieved {len(orders)} historical order(s) by IDs for account(s) {account_ids} (mode: {mode})"
             )
 
-            return {"Orders": orders, "Errors": errors}
+            try:
+                return OrdersWrapper(Orders=orders, Errors=errors)
+            except Exception:
+                return {"Orders": orders, "Errors": errors}
 
         except TradeStationAPIError as e:
             e.details.operation = "get_historical_orders_by_ids"

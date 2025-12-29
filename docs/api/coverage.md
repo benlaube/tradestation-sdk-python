@@ -18,8 +18,8 @@ This document provides **comprehensive API coverage analysis** showing which Tra
 
 - **Status:** Active
 - **Created:** 12-05-2025
-- **Last Updated:** 12-29-2025 12:52:55 EST
-- **Version:** 2.2
+- **Last Updated:** 12-29-2025 13:16:21 EST
+- **Version:** 2.3
 - **Description:** Comprehensive analysis of SDK API endpoint coverage, model implementation status, and endpoint inventory mapping SDK functions to TradeStation API endpoints
 - **Type:** Coverage Analysis - Technical reference for developers and AI agents
 - **Applicability:** When reviewing SDK completeness, planning new endpoint implementations, or understanding API coverage status
@@ -82,9 +82,9 @@ This document provides **comprehensive API coverage analysis** showing which Tra
 | Orders | `orderexecution/ordergroupconfirm` | POST | `order_executions.py#confirm_group_order` | Available (not used) | - |
 | Orders | `orderexecution/activationtriggers` | GET | `order_executions.py#get_activation_triggers` | Available (not used) | - |
 | Orders | `orderexecution/routes` | GET | `order_executions.py#get_routes` | Available (not used) | - |
-| Orders | `brokerage/accounts/{accounts}/orders` | GET | `orders.py#get_current_orders` | Used | Raw dict (uses `TradeStationOrderResponse` internally) |
+| Orders | `brokerage/accounts/{accounts}/orders` | GET | `orders.py#get_current_orders` | Used | `OrdersWrapper` |
 | Orders | `brokerage/accounts/{accounts}/historicalorders` | GET | `orders.py#get_order_history` | Used | Raw dict (uses `TradeStationOrderResponse` internally) |
-| Orders | `brokerage/accounts/{accounts}/orders/{orderIds}` | GET | `orders.py#get_orders_by_ids` | Available (not used) | - |
+| Orders | `brokerage/accounts/{accounts}/orders/{orderIds}` | GET | `orders.py#get_orders_by_ids` | Available (not used) | `OrdersWrapper` |
 | Orders | `brokerage/accounts/{accounts}/historicalorders/{orderIds}` | GET | `orders.py#get_historical_orders_by_ids` | Available (not used) | - |
 | Positions | `brokerage/accounts/{accountId}/positions` | GET | `positions.py#get_positions` | Used | `PositionsResponse` |
 
@@ -120,8 +120,8 @@ This document provides **comprehensive API coverage analysis** showing which Tra
 | GET | `/v3/brokerage/accounts` | `accounts.py#get_account_info` | `AccountsListResponse` |
 | GET | `/v3/brokerage/accounts/{accountId}` | `accounts.py#get_account_balances` | `AccountBalancesResponse` |
 | GET | `/v3/brokerage/accounts/{accounts}/bodbalances` | `accounts.py#get_account_balances_bod` | `BODBalancesResponse` |
-| GET | `/v3/brokerage/accounts/{accounts}/historicalorders` | `orders.py#get_historical_orders` | Raw dict (uses `TradeStationOrderResponse` internally) |
-| GET | `/v3/brokerage/accounts/{accounts}/orders` | `orders.py#get_current_orders` | Raw dict (uses `TradeStationOrderResponse` internally) |
+| GET | `/v3/brokerage/accounts/{accounts}/historicalorders` | `orders.py#get_historical_orders` | `OrdersWrapper` |
+| GET | `/v3/brokerage/accounts/{accounts}/orders` | `orders.py#get_current_orders` | `OrdersWrapper` |
 | GET | `/v3/brokerage/accounts/{accountId}/positions` | `positions.py#get_positions` | `PositionsResponse` |
 | GET | `/v3/marketdata/barcharts/{symbol}` | `market_data.py#get_bars` | Raw dict |
 | GET | `/v3/marketdata/quotes/{symbols}` | `market_data.py#get_quote_snapshots` | `QuotesResponse` |
@@ -129,7 +129,7 @@ This document provides **comprehensive API coverage analysis** showing which Tra
 | GET | `/v3/marketdata/symbollists/cryptopairs/symbolnames` | `market_data.py#get_crypto_symbol_names` | Raw dict |
 | POST | `/v3/orderexecution/orders` | `orders.py#place_order` | `TradeStationOrderRequest` → `TradeStationOrderResponse` |
 | PUT | `/v3/orderexecution/orders/{orderID}` | `orders.py#modify_order` | `TradeStationOrderResponse` |
-| DELETE | `/v3/orderexecution/orders/{orderID}` | `orders.py#cancel_order` | Raw dict |
+| DELETE | `/v3/orderexecution/orders/{orderID}` | `orders.py#cancel_order` | `CancelOrderResponse` |
 | GET | `/v3/orderexecution/orders/{orderID}/executions` | `orders.py#get_order_executions` | `TradeStationExecutionResponse` |
 | POST | `/v3/orderexecution/ordergroups` | `orders.py#place_group_order` | `TradeStationOrderGroupRequest` → `TradeStationOrderGroupResponse` |
 | GET | `/v3/brokerage/stream/accounts/{accounts}/orders` | `streaming.py#stream_orders` | `OrderStream` |

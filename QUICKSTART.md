@@ -29,6 +29,10 @@ pip install tradestation-python-sdk
 1. Go to https://developer.tradestation.com
 2. Create an application
 3. Copy your **Client ID** and **Client Secret**
+4. **Set Redirect URI(s):**
+   - **Recommended:** Register all ports 8888-8898: `http://localhost:8888/callback`, `http://localhost:8889/callback`, etc.
+   - **Or:** Register only `http://localhost:8888/callback` and set `TRADESTATION_OAUTH_PORT=8888` in `.env`
+   - **Why:** SDK may auto-select a different port if 8888 is busy
 
 ## Step 3: Configure (30 seconds)
 
@@ -86,10 +90,17 @@ python test.py
 ## Common Issues
 
 ### "Port 8888 in use"
+**v1.0.1+:** SDK will auto-select an available port. Ensure the selected port is registered in Developer Portal.
+
+**Or manually:**
 ```bash
 # Kill process on port 8888
 lsof -ti:8888 | xargs kill -9
 ```
+
+### "redirect_uri_mismatch"
+**Cause:** Selected port not registered in TradeStation Developer Portal  
+**Solution:** Register the port shown in SDK logs (or register all ports 8888-8898)
 
 ### "Module not found"
 ```bash

@@ -12,6 +12,7 @@ This is the **complete API reference** for all SDK classes, methods, models, and
 - 📋 **[CHEATSHEET.md](../CHEATSHEET.md)** - Quick code snippets (faster lookup)
 - 💡 **[SDK_USAGE_EXAMPLES.md](SDK_USAGE_EXAMPLES.md)** - Real-world usage examples
 - 📚 **[API_ENDPOINT_MAPPING.md](API_ENDPOINT_MAPPING.md)** - SDK functions mapped to TradeStation API v3 endpoints (shows which API endpoints are called)
+- 🧭 **[SDK_ENDPOINT_MAPPING.md](sdk_endpoints.md)** - SDK methods to TradeStation API endpoints
 - 📝 **[ORDER_FUNCTIONS_REFERENCE.md](ORDER_FUNCTIONS_REFERENCE.md)** - Detailed order function documentation
 - 🏗️ **[MODELS.md](MODELS.md)** - Pydantic model documentation
 - 📖 **[README.md](../README.md)** - SDK overview and getting started
@@ -20,8 +21,8 @@ This is the **complete API reference** for all SDK classes, methods, models, and
 
 - **Status:** Active
 - **Created:** 12-05-2025
-- **Last Updated:** 12-05-2025 14:21:15 EST
-- **Version:** 1.0.0
+- **Last Updated:** 12-29-2025 12:52:55 EST
+- **Version:** 1.0.1
 - **Description:** Complete API reference documentation for all SDK classes, methods, models, and exceptions with detailed parameter descriptions and usage patterns
 - **Type:** API Reference - Technical reference for developers using the SDK
 - **Applicability:** When implementing SDK features, understanding method signatures, or looking up specific class/method documentation
@@ -1215,6 +1216,45 @@ async for data in sdk.streaming.stream_positions("SIM123456"):
         print(f"Position {position.PositionID} closed")
     else:
         print(f"{position.Symbol}: P&L={position.UnrealizedProfitLoss}")
+```
+
+---
+
+#### `BarStream`
+
+Streaming bar payload for `marketdata/stream/barcharts/{symbol}` (used by `stream_bars()`).
+
+**Key Fields (mirrors TradeStation Bar schema):**
+- `TimeStamp: str` - ISO timestamp of bar close time
+- `Open, High, Low, Close: str` - OHLC prices
+- `TotalVolume: str` - Total volume
+- `Epoch: int` - Unix epoch (milliseconds)
+- `BarStatus: str | None` - Bar status (`Closed`, `Open`, etc.)
+- `IsRealtime: bool | None` - True if bar is currently building
+- `IsEndOfHistory: bool | None` - True when historical bars are finished
+- Tick stats: `DownTicks`, `UpTicks`, `DownVolume`, `UpVolume`, `TotalTicks`, `UnchangedTicks`, `UnchangedVolume`
+
+**Example (raw API payload):**
+```json
+{
+  "TimeStamp": "2025-01-15T10:01:00Z",
+  "Open": "21450.00",
+  "High": "21452.00",
+  "Low": "21448.50",
+  "Close": "21450.25",
+  "TotalVolume": "12345",
+  "Epoch": 1705314060000,
+  "BarStatus": "Closed",
+  "IsRealtime": false,
+  "IsEndOfHistory": false
+}
+```
+
+**Example (SDK model):**
+```python
+async for data in sdk.market_data.stream_bars("MNQZ25", "1", "Minute"):
+    bar = data  # BarStream
+    print(f"{bar.TimeStamp} O={bar.Open} H={bar.High} L={bar.Low} C={bar.Close}")
 ```
 
 ---

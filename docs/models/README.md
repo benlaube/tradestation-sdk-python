@@ -2,8 +2,8 @@
 
 ## Metadata
 
-- **Version:** 1.1
-- **Last Updated:** 12-28-2025 EST
+- **Version:** 1.2
+- **Last Updated:** 12-29-2025 12:52:55 EST
 - **Type:** Model Reference
 - **Status:** Active
 - **Description:** Complete documentation for all Pydantic models used in the SDK
@@ -31,6 +31,13 @@ All models are documented in the [Models Overview](README.md) which includes:
 Models are organized by domain:
 - **Order Models** - Order requests, responses, and nested components
 - **Streaming Models** - HTTP Streaming API response models
+  - `QuoteStream`, `OrderStream`, `PositionStream`, `BalanceStream`, `BarStream`
+- **Market Data Models (REST)** - Historical/lookup responses
+  - `BarResponse`, `BarsResponse` (GET /v3/marketdata/barcharts/{symbol}`)
+- **Symbol Models** - Symbol metadata/search
+  - `SymbolDetail`, `SymbolDetailsResponse`, `SymbolSearchResponse`
+- **Option Models** - Option metadata/analytics
+  - `OptionExpirationsResponse`, `OptionStrikesResponse`, `OptionRiskRewardResponse`, `OptionSpreadType`, `OptionSpreadTypesResponse`
 - **Account Models** - Account and balance models
 - **Position Models** - Position models
 - **Quote Models** - Quote snapshot models

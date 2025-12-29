@@ -15,7 +15,22 @@ from .client import HTTPClient
 from .config import sdk_config
 from .exceptions import TradeStationAPIError
 from .logger import setup_logger
-from .models import QuotesResponse
+from .models import (
+    BarResponse,
+    BarsResponse,
+    OptionExpirationsResponse,
+    OptionChainStream,
+    OptionQuoteStream,
+    MarketDepthQuoteStream,
+    MarketDepthAggregateStream,
+    OptionRiskRewardResponse,
+    OptionSpreadTypesResponse,
+    OptionStrikesResponse,
+    QuotesResponse,
+    SymbolDetailsResponse,
+    SymbolSearchResponse,
+)
+from .models.streaming import BarStream
 
 logger = setup_logger(__name__, sdk_config.log_level)
 
@@ -53,7 +68,7 @@ class MarketDataOperations:
         session_template: str | None = None,
         mode: str | None = None,
         start_date_deprecated: str | None = None,
-    ) -> list[dict[str, Any]]:
+    ) -> list[dict[str, Any]] | BarsResponse:
         """
         Fetch historical bar data for a symbol.
 
@@ -123,11 +138,15 @@ class MarketDataOperations:
             unit,
             session_template or "default",
         )
-        return bars
+        try:
+            return BarsResponse(Bars=[BarResponse(**b) for b in bars])
+        except Exception:
+            # Fallback to raw list of dicts to preserve backward compatibility
+            return bars
 
     def search_symbols(
         self, pattern: str = "", category: str | None = "Future", asset_type: str | None = None, mode: str | None = None
-    ) -> list[dict[str, Any]]:
+    ) -> SymbolSearchResponse | list[dict[str, Any]]:
         """
         Search for symbols matching criteria.
 
@@ -180,7 +199,10 @@ class MarketDataOperations:
                         return []
 
             logger.debug(f"Found {len(symbols)} symbols matching criteria")
-            return symbols
+            try:
+                return SymbolSearchResponse(Symbols=[SymbolSearchResponse.__fields__["Symbols"].annotation.__args__[0](**s) for s in symbols], Errors=response.get("Errors", []))  # type: ignore[index]
+            except Exception:
+                return symbols
         except TradeStationAPIError as e:
             e.details.operation = "search_symbols"
             if not e.details.message.startswith("Failed to search symbols"):
@@ -303,7 +325,7 @@ class MarketDataOperations:
         session_template: str | None = None,
         mode: str | None = None,
         bars_back: int | None = None,
-    ) -> AsyncGenerator[dict[str, Any], None]:
+    ) -> AsyncGenerator[BarStream, None]:
         """
         Stream bars via TradeStation HTTP Streaming API.
 
@@ -316,8 +338,8 @@ class MarketDataOperations:
             bars_back: Optional bars back to include in the stream handshake
 
         Yields:
-            Bar dictionaries as they arrive
-        Dependencies: HTTPClient.stream_data
+            BarStream models as they arrive
+        Dependencies: HTTPClient.stream_data, BarStream
         """
         if mode is None:
             mode = sdk_config.trading_mode
@@ -353,13 +375,18 @@ class MarketDataOperations:
         )
 
         async for data in self._stream_helper(endpoint, params=params, mode=mode):
-            yield data
+            # Filter out control messages (already handled in _stream_helper) and parse payload
+            try:
+                yield BarStream(**data)
+            except Exception as e:
+                logger.warning(f"Failed to parse bar data: {e}, raw data: {data}")
+                raise
 
     # Note: stream_option_chains is defined later with correct signature (underlying parameter)
 
     async def _stream_helper(
         self, endpoint: str, params: dict | None = None, mode: str | None = None
-    ) -> AsyncGenerator[dict[str, Any], None]:
+    ) -> AsyncGenerator[OptionChainStream, None]:
         """
         Helper to bridge synchronous HTTP streaming to async generator.
         """
@@ -459,7 +486,7 @@ class MarketDataOperations:
             logger.error(f"Failed to get quote snapshots: {e}", exc_info=True)
             return {"Quotes": [], "Errors": []}
 
-    def get_symbol_details(self, symbols: str, mode: str | None = None) -> dict[str, Any]:
+    def get_symbol_details(self, symbols: str, mode: str | None = None) -> SymbolDetailsResponse | dict[str, Any]:
         """
         Get symbol details and formatting information.
 
@@ -497,7 +524,10 @@ class MarketDataOperations:
 
             logger.info(f"Retrieved symbol details for {len(symbol_details)} symbol(s) (mode: {mode})")
 
-            return {"Symbols": symbol_details, "Errors": errors}
+            try:
+                return SymbolDetailsResponse(Symbols=[SymbolDetailsResponse.__fields__["Symbols"].annotation.__args__[0](**s) for s in symbol_details], Errors=errors)  # type: ignore[index]
+            except Exception:
+                return {"Symbols": symbol_details, "Errors": errors}
 
         except TradeStationAPIError as e:
             e.details.operation = "get_symbol_details"
@@ -547,7 +577,7 @@ class MarketDataOperations:
 
     def get_option_expirations(
         self, underlying: str, mode: str | None = None, strike_price: float | None = None
-    ) -> list[str]:
+    ) -> OptionExpirationsResponse | list[str]:
         """
         Get option expiration dates for an underlying symbol.
 
@@ -591,13 +621,18 @@ class MarketDataOperations:
                 params or {},
             )
 
-            return expirations
+            try:
+                return OptionExpirationsResponse(Expirations=expirations, Errors=response.get("Errors", []))
+            except Exception:
+                return expirations
 
         except Exception as e:
             logger.error(f"Failed to get option expirations: {e}", exc_info=True)
             return []
 
-    def get_option_risk_reward(self, request: dict[str, Any], mode: str | None = None) -> dict[str, Any]:
+    def get_option_risk_reward(
+        self, request: dict[str, Any], mode: str | None = None
+    ) -> OptionRiskRewardResponse | dict[str, Any]:
         """
         Calculate option risk/reward analysis.
 
@@ -623,13 +658,16 @@ class MarketDataOperations:
 
             logger.info(f"Option risk/reward calculation successful (mode: {mode})")
 
-            return response
+            try:
+                return OptionRiskRewardResponse(**response)
+            except Exception:
+                return response
 
         except Exception as e:
             logger.error(f"Failed to calculate option risk/reward: {e}", exc_info=True)
             raise
 
-    def get_option_spread_types(self, mode: str | None = None) -> list[dict[str, Any]]:
+    def get_option_spread_types(self, mode: str | None = None) -> OptionSpreadTypesResponse | list[dict[str, Any]]:
         """
         Get available option spread types.
 
@@ -657,7 +695,12 @@ class MarketDataOperations:
 
             logger.info(f"Retrieved {len(spread_types)} spread type(s) (mode: {mode})")
 
-            return spread_types
+            try:
+                return OptionSpreadTypesResponse(
+                    SpreadTypes=[OptionSpreadType(**st) for st in spread_types], Errors=response.get("Errors", [])
+                )
+            except Exception:
+                return spread_types
 
         except Exception as e:
             logger.error(f"Failed to get option spread types: {e}", exc_info=True)
@@ -674,7 +717,7 @@ class MarketDataOperations:
         strike_interval: int | None = None,
         expiration: str | None = None,
         expiration2: str | None = None,
-    ) -> list[float]:
+    ) -> OptionStrikesResponse | list[float]:
         """
         Get available strike prices for an underlying and expiration.
 
@@ -740,7 +783,10 @@ class MarketDataOperations:
                 params or {},
             )
 
-            return strikes
+            try:
+                return OptionStrikesResponse(Strikes=strikes, Errors=response.get("Errors", []))
+            except Exception:
+                return strikes
 
         except Exception as e:
             logger.error(f"Failed to get option strikes: {e}", exc_info=True)
@@ -760,7 +806,7 @@ class MarketDataOperations:
         enable_greeks: bool | None = None,
         strike_range: str | None = None,
         option_type: str | None = None,
-    ) -> AsyncGenerator[dict[str, Any], None]:
+    ) -> AsyncGenerator[OptionQuoteStream, None]:
         """
         Stream option chain data for an underlying symbol.
 
@@ -820,7 +866,11 @@ class MarketDataOperations:
             )
 
             async for data in self._stream_helper(endpoint, params=params or None, mode=mode):
-                yield data
+                try:
+                    yield OptionChainStream(**data)
+                except Exception as e:
+                    logger.warning(f"Failed to parse option chain stream data: {e}, raw data: {data}")
+                    raise
 
         except Exception as e:
             logger.error(f"Option chain stream error: {e}", exc_info=True)
@@ -881,7 +931,11 @@ class MarketDataOperations:
             )
 
             async for data in self._stream_helper(endpoint, params=params, mode=mode):
-                yield data
+                try:
+                    yield OptionQuoteStream(**data)
+                except Exception as e:
+                    logger.warning(f"Failed to parse option quote stream data: {e}, raw data: {data}")
+                    raise
 
         except Exception as e:
             logger.error(f"Option quotes stream error: {e}", exc_info=True)
@@ -889,7 +943,7 @@ class MarketDataOperations:
 
     async def stream_market_depth_quotes(
         self, symbol: str, mode: str | None = None, max_levels: int | None = None
-    ) -> AsyncGenerator[dict[str, Any], None]:
+    ) -> AsyncGenerator[MarketDepthQuoteStream, None]:
         """
         Stream Level 2 market depth quotes for a symbol.
 
@@ -922,7 +976,11 @@ class MarketDataOperations:
             )
 
             async for data in self._stream_helper(endpoint, params=params or None, mode=mode):
-                yield data
+                try:
+                    yield MarketDepthQuoteStream(**data)
+                except Exception as e:
+                    logger.warning(f"Failed to parse market depth quote stream data: {e}, raw data: {data}")
+                    raise
 
         except Exception as e:
             logger.error(f"Market depth quotes stream error: {e}", exc_info=True)
@@ -930,7 +988,7 @@ class MarketDataOperations:
 
     async def stream_market_depth_aggregates(
         self, symbol: str, mode: str | None = None, max_levels: int | None = None
-    ) -> AsyncGenerator[dict[str, Any], None]:
+    ) -> AsyncGenerator[MarketDepthAggregateStream, None]:
         """
         Stream aggregated market depth data for a symbol.
 
@@ -963,7 +1021,11 @@ class MarketDataOperations:
             )
 
             async for data in self._stream_helper(endpoint, params=params or None, mode=mode):
-                yield data
+                try:
+                    yield MarketDepthAggregateStream(**data)
+                except Exception as e:
+                    logger.warning(f"Failed to parse market depth aggregate stream data: {e}, raw data: {data}")
+                    raise
 
         except Exception as e:
             logger.error(f"Market depth aggregates stream error: {e}", exc_info=True)

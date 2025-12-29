@@ -15,7 +15,12 @@ from .client import HTTPClient
 from .config import sdk_config
 from .exceptions import TradeStationAPIError
 from .logger import setup_logger
-from .models import TradeStationExecutionResponse
+from .models import (
+    TradeStationExecutionResponse,
+    CancelOrderResponse,
+    ConfirmOrderResponse,
+    ConfirmGroupOrderResponse,
+)
 
 logger = setup_logger(__name__, sdk_config.log_level)
 
@@ -422,17 +427,27 @@ class OrderExecutionOperations:
 
             # TradeStation API may return different response formats
             if isinstance(response, dict):
-                message = response.get("Message", "Order cancelled")
-                success = response.get("Success", True)
+                try:
+                    parsed = CancelOrderResponse(**response)
+                    success = bool(parsed.Success if parsed.Success is not None else True)
+                    message = parsed.Message or "Order cancelled"
+                    if success:
+                        logger.info(f"✅ Order {order_id} cancelled successfully")
+                        return parsed
+                    logger.warning(f"⚠️  Order cancellation may have failed: {message}")
+                    return parsed
+                except Exception:
+                    message = response.get("Message", "Order cancelled")
+                    success = response.get("Success", True)
             else:
                 message = "Order cancelled"
                 success = True
 
             if success:
                 logger.info(f"✅ Order {order_id} cancelled successfully")
-                return True, message
+                return CancelOrderResponse(Success=True, Message=str(message))
             logger.warning(f"⚠️  Order cancellation may have failed: {message}")
-            return False, message
+            return CancelOrderResponse(Success=bool(success), Message=str(message))
 
         except TradeStationAPIError as e:
             e.details.operation = "cancel_order"
@@ -1061,7 +1076,7 @@ class OrderExecutionOperations:
         stop_price: float | None = None,
         time_in_force: str = "DAY",
         mode: str | None = None,
-    ) -> dict[str, Any]:
+    ) -> ConfirmOrderResponse | dict[str, Any]:
         """
         Confirm an order (pre-flight check) to get estimated cost and commission.
 
@@ -1152,7 +1167,11 @@ class OrderExecutionOperations:
 
         try:
             logger.debug(f"Confirming order: {order}")
-            return self.client.make_request("POST", endpoint, json_data=order, mode=mode)
+            response = self.client.make_request("POST", endpoint, json_data=order, mode=mode)
+            try:
+                return ConfirmOrderResponse(**response)
+            except Exception:
+                return response
         except TradeStationAPIError as e:
             e.details.operation = "confirm_order"
             if not e.details.message.startswith("Order confirmation failed"):
@@ -1165,7 +1184,7 @@ class OrderExecutionOperations:
 
     def confirm_group_order(
         self, group_type: str, orders: list[dict[str, Any]], mode: str | None = None
-    ) -> dict[str, Any]:
+    ) -> ConfirmGroupOrderResponse | dict[str, Any]:
         """
         Confirm a group order (OCO/Bracket) before placement.
 
@@ -1198,7 +1217,10 @@ class OrderExecutionOperations:
 
             logger.info(f"Group order confirmation successful: type={group_type}, mode={mode}")
 
-            return response
+            try:
+                return ConfirmGroupOrderResponse(**response)
+            except Exception:
+                return response
 
         except TradeStationAPIError as e:
             e.details.operation = "confirm_group_order"

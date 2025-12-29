@@ -103,7 +103,7 @@ docs/
 ├── api/                        # API documentation
 │   ├── README.md               # API documentation index
 │   ├── reference.md            # Complete API reference
-│   ├── endpoints.md            # Endpoint mapping
+│   ├── sdk_endpoints.md        # SDK endpoint mapping
 │   ├── coverage.md            # API coverage analysis
 │   ├── operations.md          # Operation coverage
 │   └── structure.md           # API structure diagrams

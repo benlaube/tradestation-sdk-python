@@ -140,6 +140,27 @@ All methods in this class use the `/brokerage/accounts/.../orders` API endpoints
 
 ---
 
+## Order Execution Operations (OrderExecutionOperations)
+
+| SDK Function | API Endpoint | Method | Request Model | Response Model | Example |
+|--------------|--------------|--------|---------------|----------------|---------|
+| `cancel_order()` | `/v3/orderexecution/orders/{orderID}` | DELETE | - | `CancelOrderResponse` | `sdk.cancel_order("924243071")` |
+| `confirm_order()` | `/v3/orderexecution/orderconfirm` | POST | `TradeStationOrderRequest` (dict) | `ConfirmOrderResponse` | `sdk.confirm_order("MNQZ25", "BUY", 1, "Limit", limit_price=25000.0)` |
+| `confirm_group_order()` | `/v3/orderexecution/ordergroupconfirm` | POST | `TradeStationOrderGroupRequest` (dict) | `ConfirmGroupOrderResponse` | `sdk.confirm_group_order("OCO", orders)` |
+
+---
+
+## Order Query Operations (OrderOperations)
+
+| SDK Function | API Endpoint | Method | Request Model | Response Model | Example |
+|--------------|--------------|--------|---------------|----------------|---------|
+| `get_order_history()` | `/v3/brokerage/accounts/{accountId}/historicalorders` | GET | - | `OrdersWrapper` | `sdk.orders.get_order_history(mode="PAPER")` |
+| `get_current_orders()` | `/v3/brokerage/accounts/{accounts}/orders` | GET | - | `OrdersWrapper` | `sdk.orders.get_current_orders(account_ids="SIM123456")` |
+| `get_orders_by_ids()` | `/v3/brokerage/accounts/{accounts}/orders/{orderIds}` | GET | - | `OrdersWrapper` | `sdk.orders.get_orders_by_ids("123,456")` |
+| `get_historical_orders_by_ids()` | `/v3/brokerage/accounts/{accounts}/historicalorders/{orderIds}` | GET | - | `OrdersWrapper` | `sdk.orders.get_historical_orders_by_ids("123,456")` |
+
+---
+
 ## Position Operations (PositionOperations)
 
 | SDK Function | API Endpoint | Method | Request Model | Response Model | Example |

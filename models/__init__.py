@@ -27,6 +27,21 @@ from .accounts_list import AccountsListResponse
 from .order_executions import (
     TradeStationExecutionResponse,
 )
+from .bars import BarResponse, BarsResponse
+from .symbols import SymbolDetail, SymbolDetailsResponse, SymbolSearchResponse
+from .options import (
+    OptionExpirationsResponse,
+    OptionStrikesResponse,
+    OptionRiskRewardResponse,
+    OptionSpreadType,
+    OptionSpreadTypesResponse,
+)
+from .order_wrappers import (
+    OrdersWrapper,
+    CancelOrderResponse,
+    ConfirmOrderResponse,
+    ConfirmGroupOrderResponse,
+)
 from .orders import (
     TradeStationConditionalOrder,
     TradeStationMarketActivationRule,
@@ -42,7 +57,12 @@ from .positions import PositionResponse, PositionsResponse
 from .quotes import QuoteSnapshot, QuotesResponse
 from .streaming import (
     BalanceStream,
+    BarStream,
     Heartbeat,
+    OptionChainStream,
+    OptionQuoteStream,
+    MarketDepthQuoteStream,
+    MarketDepthAggregateStream,
     MarketFlags,
     OrderStream,
     PositionStream,
@@ -65,11 +85,34 @@ __all__ = [
     "TradeStationTrailingStop",
     # Order Execution Models
     "TradeStationExecutionResponse",
+    # Bar Models
+    "BarResponse",
+    "BarsResponse",
+    # Symbol Models
+    "SymbolDetail",
+    "SymbolDetailsResponse",
+    "SymbolSearchResponse",
+    # Option Models
+    "OptionExpirationsResponse",
+    "OptionStrikesResponse",
+    "OptionRiskRewardResponse",
+    "OptionSpreadType",
+    "OptionSpreadTypesResponse",
+    # Order Wrappers / Confirm
+    "OrdersWrapper",
+    "CancelOrderResponse",
+    "ConfirmOrderResponse",
+    "ConfirmGroupOrderResponse",
     # Streaming Models (HTTP Streaming API)
     "QuoteStream",
     "OrderStream",
     "PositionStream",
     "BalanceStream",
+    "BarStream",
+    "OptionChainStream",
+    "OptionQuoteStream",
+    "MarketDepthQuoteStream",
+    "MarketDepthAggregateStream",
     "StreamStatus",
     "Heartbeat",
     "StreamErrorResponse",

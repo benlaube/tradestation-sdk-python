@@ -2,7 +2,7 @@
 
 **Date:** 2025-12-28  
 **Severity:** 🔴 **CRITICAL**  
-**Status:** ⚠️ **NEEDS FIX**
+**Status:** ✅ **FIXED in v1.0.1**
 
 ---
 
@@ -194,8 +194,18 @@ After fix:
 
 ## Status
 
-- [ ] Fix redirect_uri update when auto-selecting port
-- [ ] Add warning when port doesn't match registered URI
-- [ ] Update documentation
-- [ ] Add tests
-- [ ] Verify with TradeStation API v3
+- [x] Fix redirect_uri update when auto-selecting port ✅
+- [x] Add warning when port doesn't match registered URI ✅
+- [x] Update documentation ✅
+- [ ] Add tests (recommended for future)
+- [ ] Verify with TradeStation API v3 (recommended for future)
+
+## Fix Applied (2025-12-28)
+
+The fix has been implemented in `session.py`:
+- Redirect URI is now automatically updated to match the selected port
+- Warnings are logged when ports are auto-selected
+- Token exchange uses the same updated redirect_uri
+- Documentation updated to clarify port registration requirements
+
+**See:** `session.py` lines 413-495 for the implementation.

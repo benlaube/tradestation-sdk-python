@@ -410,28 +410,12 @@ class TokenManager:
         if parsed_redirect.hostname not in {"localhost", "127.0.0.1"}:
             raise AuthenticationError("Redirect URI must use localhost/127.0.0.1 for OAuth callback security")
 
-        # Step 1: Build authorization URL with proper URL encoding
-        state_token = py_secrets.token_urlsafe(24)
-        OAuthCallbackHandler.expected_state = state_token
-
-        auth_params = {
-            "response_type": "code",
-            "client_id": self.client_id,
-            "redirect_uri": self.redirect_uri,
-            "audience": "https://api.tradestation.com",
-            "scope": " ".join(OAUTH_SCOPES),
-            "state": state_token,
-        }
-
-        # Use urlencode for proper URL encoding
-        auth_request_url = f"{self.auth_url}?{urlencode(auth_params)}"
-
-        logger.debug(f"Auth URL: {auth_request_url}")
-
-        # Step 2: Start local server to capture callback
+        # Step 1: Determine port for OAuth callback server
         # Extract port from redirect URI or use default
         redirect_port = 8888  # Default
         port_from_uri = None
+        original_redirect_uri = self.redirect_uri
+        
         if ":" in self.redirect_uri:
             with contextlib.suppress(builtins.BaseException):
                 port_from_uri = int(self.redirect_uri.split(":")[2].split("/")[0])
@@ -454,8 +438,10 @@ class TokenManager:
         # Reset class variable before starting
         OAuthCallbackHandler.auth_code = None
 
-        # Try to start server, with auto-port selection if needed
+        # Step 2: Start local server to capture callback (with auto-port selection if needed)
         httpd = None
+        port_was_auto_selected = False
+        
         if redirect_port is not None:
             # Use specified port
             server_address = ("127.0.0.1", redirect_port)
@@ -468,11 +454,13 @@ class TokenManager:
                     redirect_port = None  # Fall through to auto-selection
                 else:
                     raise
-        else:
+        
+        if redirect_port is None:
             # Auto-select port from range
             redirect_port = _find_available_port(8888, 8898)
             server_address = ("127.0.0.1", redirect_port)
             httpd = HTTPServer(server_address, OAuthCallbackHandler)
+            port_was_auto_selected = True
             logger.info(f"✅ Started OAuth callback server on http://localhost:{redirect_port} (auto-selected)")
 
         # If we still don't have a server, something went wrong
@@ -482,7 +470,49 @@ class TokenManager:
                 "Please ensure ports 8888-8898 are available or set TRADESTATION_OAUTH_PORT."
             )
 
+        # Step 3: Update redirect_uri if port was auto-selected or changed
+        # This ensures the redirect_uri sent to TradeStation matches the port we're listening on
+        if port_was_auto_selected or (port_from_uri is not None and redirect_port != port_from_uri):
+            parsed = urlparse(self.redirect_uri)
+            # Update redirect_uri to match the actual port being used
+            self.redirect_uri = f"{parsed.scheme}://{parsed.hostname}:{redirect_port}{parsed.path}"
+            
+            if port_was_auto_selected:
+                logger.warning(
+                    f"⚠️  OAuth port auto-selected to {redirect_port} (original: {port_from_uri or 8888}). "
+                    f"Ensure 'http://localhost:{redirect_port}/callback' is registered in TradeStation Developer Portal. "
+                    f"See https://developer.tradestation.com for redirect URI configuration."
+                )
+            elif redirect_port != port_from_uri:
+                logger.warning(
+                    f"⚠️  OAuth port changed from {port_from_uri} to {redirect_port} due to port conflict. "
+                    f"Ensure 'http://localhost:{redirect_port}/callback' is registered in TradeStation Developer Portal."
+                )
+
+        # Step 4: Build authorization URL with updated redirect_uri
+        state_token = py_secrets.token_urlsafe(24)
+        OAuthCallbackHandler.expected_state = state_token
+
+        auth_params = {
+            "response_type": "code",
+            "client_id": self.client_id,
+            "redirect_uri": self.redirect_uri,  # Use updated redirect_uri that matches selected port
+            "audience": "https://api.tradestation.com",
+            "scope": " ".join(OAUTH_SCOPES),
+            "state": state_token,
+        }
+
+        # Use urlencode for proper URL encoding
+        auth_request_url = f"{self.auth_url}?{urlencode(auth_params)}"
+
+        logger.debug(f"Auth URL: {auth_request_url}")
+
         logger.info("🌐 Opening browser for TradeStation login...")
+        if port_was_auto_selected:
+            logger.info(
+                f"📝 Note: Using redirect URI '{self.redirect_uri}'. "
+                f"If authentication fails, ensure this URI is registered in TradeStation Developer Portal."
+            )
 
         # Start server in background thread
         server_thread = threading.Thread(target=httpd.handle_request, daemon=True)
@@ -504,13 +534,14 @@ class TokenManager:
         auth_code = OAuthCallbackHandler.auth_code
         logger.info("✅ Authorization code received from browser")
 
-        # Step 3: Exchange authorization code for tokens
+        # Step 5: Exchange authorization code for tokens
+        # Use the same redirect_uri that was sent in the OAuth request (may have been updated)
         token_payload = {
             "grant_type": "authorization_code",
             "client_id": self.client_id,
             "client_secret": self.client_secret,
             "code": auth_code,
-            "redirect_uri": self.redirect_uri,
+            "redirect_uri": self.redirect_uri,  # Must match what was sent in OAuth request
         }
 
         try:

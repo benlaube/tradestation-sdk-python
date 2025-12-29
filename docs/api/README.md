@@ -20,7 +20,7 @@ This section contains complete API documentation for the TradeStation SDK.
 ### Available Documentation
 
 - **[API Reference](reference.md)** - Complete API reference with all methods, parameters, and return values
-- **[Endpoint Mapping](endpoints.md)** - Mapping of SDK methods to TradeStation API endpoints
+- **[SDK Endpoint Mapping](sdk_endpoints.md)** - Mapping of SDK methods to TradeStation API endpoints
 - **[API Coverage](coverage.md)** - Analysis of API endpoint coverage in the SDK
 - **[Operation Coverage](operations.md)** - Coverage analysis of API operations
 - **[API Structure](structure.md)** - Visual diagrams of API endpoint structure
@@ -31,7 +31,7 @@ This section contains complete API documentation for the TradeStation SDK.
 - Use [API Reference](reference.md) - Search for method names
 
 **Understanding endpoint mapping?**
-- See [Endpoint Mapping](endpoints.md) - SDK methods → API endpoints
+- See [SDK Endpoint Mapping](sdk_endpoints.md) - SDK methods → API endpoints
 
 **Checking coverage?**
 - Review [API Coverage](coverage.md) - What's implemented vs available
