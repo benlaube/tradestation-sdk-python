@@ -21,53 +21,27 @@ Visual overview of SDK architecture, design decisions, and data flow.
 
 ## High-Level Architecture
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                     TradeStationSDK                         │
-│                    (Main SDK Class)                         │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              │ delegates to
-                              ▼
-        ┌─────────────────────────────────────────────┐
-        │                                             │
-        ▼                                             ▼
-┌──────────────┐                              ┌──────────────┐
-│ TokenManager │◄─────┐                       │  HTTPClient  │
-│  (session.py)│      │                       │ (client.py)  │
-└──────────────┘      │                       └──────────────┘
-        │             │                               │
-        │             │                               │
-        │             │         ┌─────────────────────┤
-        │             │         │                     │
-        ▼             │         ▼                     ▼
-┌──────────────┐      │  ┌──────────────┐    ┌──────────────┐
-│   OAuth2     │      │  │   Accounts   │    │ Market Data  │
-│   Server     │      │  │(accounts.py) │    │(market_data  │
-│  (callback)  │      │  └──────────────┘    │    .py)      │
-└──────────────┘      │         │             └──────────────┘
-                      │         │                     │
-                      │         ▼                     ▼
-                      │  ┌──────────────┐    ┌──────────────┐
-                      │  │   Orders     │    │  Positions   │
-                      │  │(orders.py,   │    │(positions    │
-                      │  │order_exec.py)│    │    .py)      │
-                      │  └──────────────┘    └──────────────┘
-                      │         │                     │
-                      │         │                     │
-                      │         └─────────┬───────────┘
-                      │                   │
-                      │                   ▼
-                      │          ┌──────────────┐
-                      └─────────►│  Streaming   │
-                                 │(streaming.py)│
-                                 └──────────────┘
-                                        │
-                                        ▼
-                              ┌──────────────┐
-                              │   Models     │
-                              │ (Pydantic)   │
-                              └──────────────┘
+```mermaid
+graph TB
+    SDK[TradeStationSDK<br/>Main SDK Class]
+    
+    SDK -->|delegates to| TokenManager[TokenManager<br/>session.py]
+    SDK -->|delegates to| HTTPClient[HTTPClient<br/>client.py]
+    
+    TokenManager -->|uses| OAuth2[OAuth2 Server<br/>callback]
+    TokenManager -->|provides tokens| HTTPClient
+    
+    HTTPClient -->|used by| Accounts[AccountOperations<br/>accounts.py]
+    HTTPClient -->|used by| MarketData[MarketDataOperations<br/>market_data.py]
+    HTTPClient -->|used by| Orders[OrderExecutionOperations<br/>orders.py, order_executions.py]
+    HTTPClient -->|used by| Positions[PositionOperations<br/>positions.py]
+    HTTPClient -->|used by| Streaming[StreamingManager<br/>streaming.py]
+    
+    Accounts -->|uses| Models[Models<br/>Pydantic]
+    MarketData -->|uses| Models
+    Orders -->|uses| Models
+    Positions -->|uses| Models
+    Streaming -->|uses| Models
 ```
 
 ---
@@ -125,26 +99,20 @@ sdk.streaming.stream_quotes(symbols, mode)
 - HTTP callback server
 
 **Token Lifecycle:**
-```
-User → authenticate() → Browser Opens → User Logs In
-                                              │
-                                              ▼
-                                    Callback with Code
-                                              │
-                                              ▼
-                        Exchange Code for Access + Refresh Tokens
-                                              │
-                                              ▼
-                              Save to logs/tokens_{mode}.json
-                                              │
-                                              ▼
-                              Use Access Token (20min lifespan)
-                                              │
-                                              ▼
-                              Token Expires → Auto Refresh
-                                              │
-                                              ▼
-                          Use Refresh Token → Get New Access Token
+
+```mermaid
+flowchart LR
+    User[User] --> Auth[authenticate]
+    Auth --> Browser[Browser Opens]
+    Browser --> Login[User Logs In]
+    Login --> Callback[Callback with Code]
+    Callback --> Exchange[Exchange Code for<br/>Access + Refresh Tokens]
+    Exchange --> Save[Save to<br/>logs/tokens_{mode}.json]
+    Save --> Use[Use Access Token<br/>20min lifespan]
+    Use --> Expires[Token Expires]
+    Expires --> Refresh[Auto Refresh]
+    Refresh --> NewToken[Get New Access Token<br/>via Refresh Token]
+    NewToken --> Use
 ```
 
 **Files:**
@@ -167,26 +135,17 @@ User → authenticate() → Browser Opens → User Logs In
 - Sanitize sensitive data in logs
 
 **Request Flow:**
-```
-API Call → ensure_authenticated() → Add Auth Headers
-                                          │
-                                          ▼
-                                   HTTP Request
-                                          │
-                                          ▼
-                            ┌─────────────┴─────────────┐
-                            │                           │
-                            ▼                           ▼
-                      Success (200)                Error (4xx/5xx)
-                            │                           │
-                            ▼                           ▼
-                    Return Response              Parse Error
-                                                       │
-                                                       ▼
-                                          Categorize (Recoverable vs Non-Recoverable)
-                                                       │
-                                                       ▼
-                                              Raise Exception
+
+```mermaid
+flowchart TD
+    Start[API Call] --> Auth[ensure_authenticated]
+    Auth --> Headers[Add Auth Headers]
+    Headers --> Request[HTTP Request]
+    Request --> Decision{Response Status}
+    Decision -->|200 Success| Success[Return Response]
+    Decision -->|4xx/5xx Error| Parse[Parse Error]
+    Parse --> Categorize[Categorize:<br/>Recoverable vs Non-Recoverable]
+    Categorize --> Exception[Raise Exception]
 ```
 
 **Error Categorization:**
@@ -240,35 +199,24 @@ Each module handles a specific domain:
 **Role:** Manage HTTP Streaming connections for real-time data
 
 **Architecture:**
-```
-stream_quotes() → _with_retry() → _ensure_session()
-                                        │
-                                        ▼
-                              Refresh Token if Needed
-                                        │
-                                        ▼
-                          HTTP Streaming Request (NDJSON)
-                                        │
-                ┌───────────────────────┼───────────────────────┐
-                │                       │                       │
-                ▼                       ▼                       ▼
-          Success                 Error                 Timeout
-                │                       │                       │
-                ▼                       ▼                       ▼
-         Yield Data            Categorize Error      Exponential Backoff
-                                        │                       │
-                        ┌───────────────┴───────┐               │
-                        │                       │               │
-                        ▼                       ▼               ▼
-                Recoverable?            Non-Recoverable   Retry (max 10x)
-                        │                       │
-                        ▼                       ▼
-                  Retry with            Raise Exception
-                  Backoff
-                        │
-                        ▼
-              REST Fallback
-             (if enabled)
+
+```mermaid
+flowchart TD
+    Start[stream_quotes] --> Retry[_with_retry]
+    Retry --> Session[_ensure_session]
+    Session --> Refresh[Refresh Token if Needed]
+    Refresh --> Stream[HTTP Streaming Request<br/>NDJSON]
+    Stream --> Result{Result}
+    Result -->|Success| Yield[Yield Data]
+    Result -->|Error| Categorize[Categorize Error]
+    Result -->|Timeout| Backoff[Exponential Backoff]
+    Categorize --> Recoverable{Recoverable?}
+    Recoverable -->|Yes| RetryBackoff[Retry with Backoff]
+    Recoverable -->|No| Raise[Raise Exception]
+    RetryBackoff --> MaxRetries{Max Retries?}
+    MaxRetries -->|No| Stream
+    MaxRetries -->|Yes| Fallback[REST Fallback<br/>if enabled]
+    Backoff --> MaxRetries
 ```
 
 **Features:**
@@ -317,88 +265,55 @@ stream_quotes() → _with_retry() → _ensure_session()
 
 ### Example 1: Placing an Order
 
-```
-User Code
-    │
-    ▼
-sdk.place_order("AAPL", "BUY", 10)
-    │
-    ▼
-OrderExecutionOperations.place_order()
-    │
-    ├─► Get Account ID (if not provided)
-    │   └─► AccountOperations.get_account_info()
-    │
-    ├─► Build Order Request
-    │   └─► TradeStationOrderRequest model
-    │
-    ▼
-HTTPClient.make_request("POST", "orderexecution/orders")
-    │
-    ├─► Ensure Authenticated
-    │   └─► TokenManager.ensure_authenticated()
-    │       ├─► Check token expiration
-    │       └─► Refresh if needed
-    │
-    ├─► Add Authorization Header
-    │
-    ├─► Make HTTP Request
-    │   └─► requests.post(url, headers, json)
-    │
-    ▼
-Response Handler
-    │
-    ├─► Success (200) → Parse Response → Return (order_id, status)
-    │
-    └─► Error (4xx/5xx) → Parse Error → Categorize → Raise Exception
+```mermaid
+flowchart TD
+    User[User Code] --> PlaceOrder[sdk.place_order<br/>AAPL, BUY, 10]
+    PlaceOrder --> OEO[OrderExecutionOperations<br/>place_order]
+    OEO --> AccountCheck{Account ID<br/>provided?}
+    AccountCheck -->|No| GetAccount[AccountOperations<br/>get_account_info]
+    GetAccount --> BuildOrder
+    AccountCheck -->|Yes| BuildOrder[Build Order Request<br/>TradeStationOrderRequest model]
+    BuildOrder --> HTTP[HTTPClient.make_request<br/>POST orderexecution/orders]
+    HTTP --> EnsureAuth[Ensure Authenticated]
+    EnsureAuth --> TokenCheck{Token<br/>expired?}
+    TokenCheck -->|Yes| Refresh[Refresh Token]
+    TokenCheck -->|No| AddHeader
+    Refresh --> AddHeader[Add Authorization Header]
+    AddHeader --> MakeRequest[Make HTTP Request<br/>requests.post]
+    MakeRequest --> Response{Response Status}
+    Response -->|200 Success| ParseSuccess[Parse Response]
+    ParseSuccess --> Return[Return order_id, status]
+    Response -->|4xx/5xx Error| ParseError[Parse Error]
+    ParseError --> Categorize[Categorize Error]
+    Categorize --> Raise[Raise Exception]
 ```
 
 ---
 
 ### Example 2: Streaming Quotes
 
-```
-User Code (async)
-    │
-    ▼
-async for quote in sdk.streaming.stream_quotes(["AAPL"])
-    │
-    ▼
-StreamingManager._with_retry()
-    │
-    ├─► _ensure_session() → Refresh token if needed
-    │
-    ▼
-HTTPClient.stream_data("marketdata/stream/quotes/AAPL")
-    │
-    ├─► Ensure Authenticated
-    ├─► HTTP Streaming Request (stream=True, timeout=None)
-    │
-    ▼
-Parse NDJSON Stream
-    │
-    ├─► Read chunks (8192 bytes)
-    ├─► Split on newlines
-    ├─► Parse JSON objects
-    │
-    ▼
-Filter & Validate
-    │
-    ├─► Skip StreamStatus (EndSnapshot, GoAway)
-    ├─► Skip Heartbeat messages
-    │
-    ▼
-Yield QuoteStream Model
-    │
-    ▼
-User Code (receives quote)
-    │
-    ▼
-Handle Errors
-    │
-    ├─► Recoverable → Exponential Backoff → Retry
-    ├─► Non-Recoverable → Raise Exception
-    └─► Max Retries → REST Fallback (if enabled)
+```mermaid
+flowchart TD
+    User[User Code async] --> Stream[async for quote in<br/>sdk.streaming.stream_quotes]
+    Stream --> Retry[StreamingManager<br/>_with_retry]
+    Retry --> Session[_ensure_session<br/>Refresh token if needed]
+    Session --> StreamData[HTTPClient.stream_data<br/>marketdata/stream/quotes/AAPL]
+    StreamData --> Auth[Ensure Authenticated]
+    Auth --> HTTPStream[HTTP Streaming Request<br/>stream=True, timeout=None]
+    HTTPStream --> Parse[Parse NDJSON Stream]
+    Parse --> Read[Read chunks<br/>8192 bytes]
+    Read --> Split[Split on newlines]
+    Split --> JSON[Parse JSON objects]
+    JSON --> Filter[Filter & Validate]
+    Filter --> SkipStatus[Skip StreamStatus<br/>EndSnapshot, GoAway]
+    SkipStatus --> SkipHeartbeat[Skip Heartbeat messages]
+    SkipHeartbeat --> Yield[Yield QuoteStream Model]
+    Yield --> Receive[User Code receives quote]
+    Receive --> Errors{Errors?}
+    Errors -->|Recoverable| Backoff[Exponential Backoff]
+    Backoff --> Retry
+    Errors -->|Non-Recoverable| Raise[Raise Exception]
+    Errors -->|Max Retries| Fallback[REST Fallback<br/>if enabled]
 ```
 
 ---
@@ -498,42 +413,43 @@ print(quote.Last)  # AttributeError caught by Pydantic
 
 ## Module Dependencies
 
-```
-TradeStationSDK
-├── TokenManager (session.py)
-│   └── (no dependencies)
-│
-├── HTTPClient (client.py)
-│   ├── TokenManager
-│   └── exceptions.py
-│
-├── AccountOperations (accounts.py)
-│   ├── HTTPClient
-│   └── models.accounts
-│
-├── MarketDataOperations (market_data.py)
-│   ├── HTTPClient
-│   └── models.quotes
-│
-├── OrderExecutionOperations (order_executions.py)
-│   ├── HTTPClient
-│   ├── AccountOperations
-│   └── models.orders
-│
-├── OrderOperations (orders.py)
-│   ├── HTTPClient
-│   ├── AccountOperations
-│   └── models.orders
-│
-├── PositionOperations (positions.py)
-│   ├── HTTPClient
-│   ├── AccountOperations
-│   └── models.positions
-│
-└── StreamingManager (streaming.py)
-    ├── TokenManager
-    ├── HTTPClient
-    └── models.streaming
+```mermaid
+graph TD
+    SDK[TradeStationSDK]
+    
+    SDK --> TokenManager[TokenManager<br/>session.py]
+    SDK --> HTTPClient[HTTPClient<br/>client.py]
+    SDK --> Accounts[AccountOperations<br/>accounts.py]
+    SDK --> MarketData[MarketDataOperations<br/>market_data.py]
+    SDK --> OrderExec[OrderExecutionOperations<br/>order_executions.py]
+    SDK --> Orders[OrderOperations<br/>orders.py]
+    SDK --> Positions[PositionOperations<br/>positions.py]
+    SDK --> Streaming[StreamingManager<br/>streaming.py]
+    
+    HTTPClient --> TokenManager
+    HTTPClient --> Exceptions[exceptions.py]
+    
+    Accounts --> HTTPClient
+    Accounts --> ModelsAccounts[models.accounts]
+    
+    MarketData --> HTTPClient
+    MarketData --> ModelsQuotes[models.quotes]
+    
+    OrderExec --> HTTPClient
+    OrderExec --> Accounts
+    OrderExec --> ModelsOrders[models.orders]
+    
+    Orders --> HTTPClient
+    Orders --> Accounts
+    Orders --> ModelsOrders
+    
+    Positions --> HTTPClient
+    Positions --> Accounts
+    Positions --> ModelsPositions[models.positions]
+    
+    Streaming --> TokenManager
+    Streaming --> HTTPClient
+    Streaming --> ModelsStreaming[models.streaming]
 ```
 
 ---
@@ -618,26 +534,26 @@ TradeStationSDK
 
 ### Exception Hierarchy
 
-```
-Exception (Python built-in)
-    │
-    └── TradeStationAPIError
-            │
-            ├── AuthenticationError
-            │   ├── TokenExpiredError
-            │   └── InvalidTokenError
-            │
-            ├── RateLimitError
-            │
-            ├── InvalidRequestError
-            │
-            ├── NetworkError
-            │
-            ├── RecoverableError (mixin)
-            │   └── Used for: Network errors, rate limits, server errors
-            │
-            └── NonRecoverableError (mixin)
-                └── Used for: Auth errors, invalid requests, not found
+```mermaid
+graph TD
+    Exception[Exception<br/>Python built-in]
+    Exception --> TSAPIError[TradeStationAPIError]
+    
+    TSAPIError --> AuthError[AuthenticationError]
+    TSAPIError --> RateLimit[RateLimitError]
+    TSAPIError --> InvalidRequest[InvalidRequestError]
+    TSAPIError --> NetworkError[NetworkError]
+    TSAPIError --> Recoverable[RecoverableError<br/>mixin]
+    TSAPIError --> NonRecoverable[NonRecoverableError<br/>mixin]
+    
+    AuthError --> TokenExpired[TokenExpiredError]
+    AuthError --> InvalidToken[InvalidTokenError]
+    
+    Recoverable -.->|Used for| RecoverableDesc[Network errors,<br/>rate limits,<br/>server errors]
+    NonRecoverable -.->|Used for| NonRecoverableDesc[Auth errors,<br/>invalid requests,<br/>not found]
+    
+    style RecoverableDesc fill:#e1f5e1
+    style NonRecoverableDesc fill:#ffe1e1
 ```
 
 ### ErrorDetails Structure
@@ -732,22 +648,17 @@ except TradeStationAPIError as e:
 
 ### Token Security
 
-```
-Credentials (.env) → OAuth Flow → Tokens (JSON)
-                                       │
-                                       ▼
-                              logs/tokens_*.json
-                              (chmod 600 - owner only)
-                                       │
-                                       ▼
-                            Used for API requests
-                                       │
-                                       ▼
-                          Auto-refresh when expired
-                                       │
-                                       ▼
-                        [v1.1] Keychain Storage
-                               (encrypted)
+```mermaid
+flowchart LR
+    Creds[Credentials<br/>.env] --> OAuth[OAuth Flow]
+    OAuth --> Tokens[Tokens JSON]
+    Tokens --> Save[logs/tokens_*.json<br/>chmod 600 - owner only]
+    Save --> Use[Used for API requests]
+    Use --> Expired{Expired?}
+    Expired -->|Yes| Refresh[Auto-refresh]
+    Refresh --> Use
+    Expired -->|No| Future[v1.1 Keychain Storage<br/>encrypted]
+    Future --> Use
 ```
 
 ### Data Sanitization
@@ -823,7 +734,8 @@ class CustomHTTPClient(HTTPClient):
 |----------|----------|---------|-------|
 | `TRADESTATION_CLIENT_ID` | Yes | None | OAuth client ID |
 | `TRADESTATION_CLIENT_SECRET` | Yes | None | OAuth client secret |
-| `TRADESTATION_REDIRECT_URI` | No | `http://localhost:8888/callback` | OAuth callback |
+| `TRADESTATION_REDIRECT_URI` | No | `http://localhost:8888/callback` | OAuth callback (register all ports 8888-8898 in Developer Portal for auto-selection) |
+| `TRADESTATION_OAUTH_PORT` | No | Auto-select 8888-8898 | Explicit OAuth port override |
 | `TRADING_MODE` | No | `PAPER` | PAPER or LIVE |
 | `TRADESTATION_ACCOUNT_ID` | No | Auto-detect | Account to use |
 | `LOG_LEVEL` | No | `INFO` | DEBUG, INFO, WARNING, ERROR |
@@ -848,20 +760,25 @@ async def main():
 
 ### Connection Pooling
 
-```
-HTTPClient
-    │
-    └── Connection Pool
-            ├── Connection 1 (reused)
-            ├── Connection 2 (reused)
-            └── Connection 3 (reused)
+```mermaid
+graph TD
+    HTTPClient[HTTPClient]
+    HTTPClient --> Pool[Connection Pool]
+    Pool --> Conn1[Connection 1<br/>reused]
+    Pool --> Conn2[Connection 2<br/>reused]
+    Pool --> Conn3[Connection 3<br/>reused]
 ```
 
 ### Caching Layer
 
-```
-Request → Cache Check → Hit? Return cached
-                      → Miss? API call → Cache → Return
+```mermaid
+flowchart TD
+    Request[Request] --> CacheCheck[Cache Check]
+    CacheCheck --> Hit{Hit?}
+    Hit -->|Yes| ReturnCached[Return cached]
+    Hit -->|No| APICall[API call]
+    APICall --> Cache[Cache]
+    Cache --> Return[Return]
 ```
 
 ---
