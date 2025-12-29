@@ -3,7 +3,7 @@
 ## Metadata
 
 - **Version:** 1.1
-- **Last Updated:** 12-28-2025 EST
+- **Last Updated:** 12-29-2025 13:31:00 EST
 - **Type:** Reference Material
 - **Status:** Active
 - **Description:** Quick reference materials, function lists, and technical references
@@ -20,8 +20,9 @@ This section contains quick reference materials and technical references.
 ### Available References
 
 - **[SDK Functions List](functions-list.md)** - Complete list of all SDK functions (includes [New Functions section](functions-list.md#new-functions))
+- **[SDK Models Schema](sdk-models-schema.json)** - JSON schema for all SDK request/response models (47 models across 10 categories)
 - **[Trailing Stop Variations](trailing-stops.md)** - Trailing stop order variations and examples
-- **[Audit File References](audit-references.md)** - References to audit and analysis files
+- **[TradeStation API OpenAPI Spec](tradestation-api-v3-openapi.json)** - Complete TradeStation API v3 OpenAPI specification
 
 ### Quick Navigation
 
@@ -34,8 +35,9 @@ This section contains quick reference materials and technical references.
 **Working with trailing stops?**
 - Review [Trailing Stop Variations](trailing-stops.md) - All trailing stop options
 
-**Finding audit files?**
-- Check [Audit File References](audit-references.md) - Links to audit documentation
+**Need model schemas for validation/integration?**
+- Use [SDK Models Schema](sdk-models-schema.json) - Complete JSON schema for all 47 SDK models
+- Regenerate with: `python generate_model_schemas.py` (when models change)
 
 ---
 
