@@ -29,6 +29,95 @@ This changelog tracks SDK-specific changes including:
 
 ---
 
+## 2025-12-29 - Code Structure Reorganization & Comprehensive Normalization Functions
+
+**Highlights**
+- ✅ Major code reorganization: Operations and utilities moved to dedicated subpackages
+- ✅ Added 6 new normalization functions for all major data models
+- ✅ Complete MarketDataOperations documentation added to API reference
+- ✅ All file moves preserved git history through proper renames
+
+**Added**
+- `normalize_quote()` - Normalize quote snapshot data to consistent snake_case dictionary format
+- `normalize_execution()` - Normalize execution/fill data to consistent snake_case dictionary format
+- `normalize_account()` - Normalize account summary to consistent snake_case dictionary format
+- `normalize_balances()` - Normalize balance detail to consistent snake_case dictionary format
+- `normalize_account_balances()` - Normalize account balances response wrapper to consistent format
+- `normalize_bod_balance()` - Normalize beginning-of-day balance entries to consistent format
+- Helper utility functions: `_get_value()`, `_to_float()`, `_to_int()` for robust data extraction
+- `operations/` subpackage with dedicated `__init__.py` for domain-specific operations
+- `utils/` subpackage with dedicated `__init__.py` for shared utilities
+
+**Changed**
+- **Code Structure Reorganization:**
+  - Moved all operation modules to `operations/` directory:
+    - `accounts.py` → `operations/accounts.py`
+    - `market_data.py` → `operations/market_data.py`
+    - `order_executions.py` → `operations/order_executions.py`
+    - `orders.py` → `operations/orders.py`
+    - `positions.py` → `operations/positions.py`
+    - `streaming.py` → `operations/streaming.py`
+  - Moved all utility modules to `utils/` directory:
+    - `client.py` → `utils/client.py`
+    - `logger.py` → `utils/logger.py`
+    - `mappers.py` → `utils/mappers.py`
+- **Import Path Updates:**
+  - Updated `__init__.py` to import from `operations/` and `utils/` subpackages
+  - Updated all operation modules to use relative imports (`..utils.client`, `..utils.logger`)
+  - Updated `session.py` to import from `utils.logger`
+  - All imports maintain backward compatibility through proper package structure
+- **Documentation:**
+  - Added complete `MarketDataOperations` method documentation to `docs/api/reference.md`:
+    - Options methods: `get_option_expirations()`, `get_option_strikes()`, `get_option_spread_types()`, `get_option_risk_reward()`
+    - Streaming methods: `stream_quotes()`, `stream_bars()`, `stream_option_chains()`, `stream_option_quotes()`, `stream_market_depth_quotes()`, `stream_market_depth_aggregates()`
+    - Additional methods: `get_futures_index_symbols()`, `get_symbol_details()`, `get_crypto_symbol_names()`
+  - Updated `docs/guides/data-transformation.md` with comprehensive normalizer coverage section
+  - Updated `docs/reference/functions-list.md` with all new normalizers (utilities count: 4 → 10)
+  - Updated all architecture documentation (`overview.md`, `gap-analysis.md`) with new file paths
+  - Updated `README.md`, `CONTRIBUTING.md`, `FINAL_STATUS.md` directory structure sections
+
+**Fixed**
+- `.DS_Store` files now properly ignored via `.gitignore` update
+
+**Documentation**
+- `docs/api/reference.md` - Version updated to 1.1.0, added complete MarketDataOperations documentation
+- `docs/guides/data-transformation.md` - Version updated to 1.0.1, added mapper coverage section
+- `docs/reference/functions-list.md` - Updated with all new normalizers and utility count
+- `docs/architecture/overview.md` - Updated all file path references to new structure
+- `docs/architecture/gap-analysis.md` - Updated SDK implementation paths
+- `docs/guides/order-functions.md` - Updated file path references
+- `README.md` - Updated directory structure section
+- `CONTRIBUTING.md` - Updated directory structure section
+- `FINAL_STATUS.md` - Updated source code directory listing
+
+**Files Modified**
+- ✅ `operations/__init__.py` (new) - Package initialization for operations subpackage
+- ✅ `operations/accounts.py` (moved from root) - Updated imports
+- ✅ `operations/market_data.py` (moved from root) - Updated imports
+- ✅ `operations/order_executions.py` (moved from root) - Updated imports
+- ✅ `operations/orders.py` (moved from root) - Updated imports
+- ✅ `operations/positions.py` (moved from root) - Updated imports
+- ✅ `operations/streaming.py` (moved from root) - Updated imports
+- ✅ `utils/__init__.py` (new) - Package initialization for utils subpackage
+- ✅ `utils/client.py` (moved from root) - Updated relative imports
+- ✅ `utils/logger.py` (moved from root) - No changes needed
+- ✅ `utils/mappers.py` (moved from root) - Added 6 new normalization functions + helpers
+- ✅ `__init__.py` - Updated imports to use operations/ and utils/ subpackages
+- ✅ `session.py` - Updated import to use `utils.logger`
+- ✅ `.gitignore` - Added `.DS_Store` and `*.DS_Store` patterns
+- ✅ `docs/api/reference.md` - Complete MarketDataOperations documentation, version 1.1.0
+- ✅ `docs/guides/data-transformation.md` - Normalizer coverage section, version 1.0.1
+- ✅ `docs/reference/functions-list.md` - Updated utilities count and normalizer entries
+- ✅ `docs/architecture/overview.md` - Updated file path references
+- ✅ `docs/architecture/gap-analysis.md` - Updated SDK implementation paths
+- ✅ `docs/guides/order-functions.md` - Updated file path references
+- ✅ `README.md` - Updated directory structure
+- ✅ `CONTRIBUTING.md` - Updated directory structure
+- ✅ `FINAL_STATUS.md` - Updated source code listing
+- ✅ `CHANGELOG.md` - Added this entry
+
+---
+
 ## [1.0.1] - 2025-12-28
 
 **Highlights**
