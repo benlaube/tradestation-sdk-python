@@ -22,109 +22,158 @@ This document outlines current limitations, constraints, and known issues in the
 
 ## Security Limitations
 
-### 1. Token Storage (No Encryption at Rest)
+### 1. Token Storage (✅ Improved in v1.0.1)
 
-**Issue:** OAuth tokens are stored as plain JSON in `config/tokens_paper.json` and `config/tokens_live.json`.
+**Status:** ✅ **Enhanced with optional keychain support and improved file security**
 
-**Impact:**
-- Anyone with file system access can read tokens
-- Tokens grant full API access until expiration
-- Risk on shared systems or compromised machines
+**Previous Issue:** OAuth tokens were stored as plain JSON in `config/tokens_paper.json` and `config/tokens_live.json`.
 
-**Mitigation (Current):**
+**Current Implementation (v1.0.1):**
+- **Keychain Storage (Optional):** System keychain integration available when `keyring` package is installed
+  - macOS: Keychain Services
+  - Linux: Secret Service API / gnome-keyring
+  - Windows: Windows Credential Manager
+- **File Storage (Fallback):** Secure file storage with automatic permission restrictions (chmod 600)
+- **Configurable:** Set `TRADESTATION_TOKEN_STORAGE=keychain` to prefer keychain, or `auto` for auto-detection
+
+**Configuration:**
 ```bash
-# Set restrictive file permissions (macOS/Linux)
-chmod 600 config/tokens_*.json
+# Use keychain storage (requires: pip install keyring)
+export TRADESTATION_TOKEN_STORAGE=keychain
 
-# Ensure config/ directory is in .gitignore if you relocate tokens
-echo "config/" >> .gitignore
+# Use file storage (default)
+export TRADESTATION_TOKEN_STORAGE=file
+
+# Auto-detect best option (default)
+export TRADESTATION_TOKEN_STORAGE=auto
+
+# Custom token directory (optional)
+export TRADESTATION_TOKEN_DIR=/path/to/secure/location
 ```
 
-**Planned Fix:** v1.1 will add system keychain integration:
-- macOS: Keychain Services
-- Linux: Secret Service API / gnome-keyring
-- Windows: Windows Credential Manager
+**File Permissions:**
+- Token files are automatically set to `chmod 600` (owner read/write only)
+- Token directory is set to `chmod 700` (owner access only)
+- Works on macOS, Linux, and Windows
 
-**Workaround:** Implement custom token storage:
+**Keychain Usage:**
 ```python
-class SecureTokenManager(TokenManager):
-    def save_tokens(self, mode, tokens):
-        # Your encryption logic here
-        encrypted = encrypt_tokens(tokens)
-        super().save_tokens(mode, encrypted)
+# Install keyring package
+# pip install keyring
+
+# SDK will automatically use keychain if available
+sdk = TradeStationSDK()
+sdk.authenticate(mode="PAPER")  # Tokens stored in keychain
 ```
+
+**Note:** Keychain storage requires the `keyring` package. If not installed, SDK falls back to secure file storage.
 
 ---
 
 ## Network & Connection Limitations
 
-### 2. OAuth Port Conflicts
+### 2. OAuth Port Conflicts (✅ Fixed in v1.0.1)
 
-**Issue:** OAuth callback server requires a specific port (default: 8888).
+**Status:** ✅ **Automatic port selection implemented**
 
-**Impact:**
-- Authentication fails if port is in use
-- Manual intervention required
-- Process restart doesn't fix it
+**Previous Issue:** OAuth callback server required a specific port (default: 8888), causing authentication failures if port was in use.
 
-**Common Causes:**
-- Multiple SDK instances running
-- Other applications using port 8888
-- Zombie processes from previous crashes
+**Current Implementation (v1.0.1):**
+- **Automatic Port Selection:** SDK automatically finds an available port in range 8888-8898
+- **Environment Override:** Can specify exact port via `TRADESTATION_OAUTH_PORT`
+- **Redirect URI Support:** Port is extracted from `TRADESTATION_REDIRECT_URI` if specified
+- **Improved Error Messages:** Clear guidance when all ports are unavailable
 
-**Solutions:**
-
-**Option 1:** Kill process using the port
+**Configuration:**
 ```bash
-# macOS/Linux
-lsof -ti:8888 | xargs kill -9
+# Auto-select port from range 8888-8898 (default behavior)
+# No configuration needed
 
-# Windows
-netstat -ano | findstr :8888
-taskkill /PID <PID> /F
+# Specify exact port (optional)
+export TRADESTATION_OAUTH_PORT=8889
+
+# Or specify in redirect URI
+export TRADESTATION_REDIRECT_URI=http://localhost:9999/callback
 ```
 
-**Option 2:** Use a different port
-```env
-# .env
-TRADESTATION_REDIRECT_URI=http://localhost:9999/callback
+**Behavior:**
+1. If `TRADESTATION_OAUTH_PORT` is set, use that port
+2. If port is in redirect URI, extract and use that port
+3. If port is in use, automatically try next port in range 8888-8898
+4. If all ports unavailable, provide clear error message
+
+**Example:**
+```python
+# SDK automatically handles port conflicts
+sdk = TradeStationSDK()
+sdk.authenticate(mode="PAPER")  # Auto-selects available port if 8888 is busy
 ```
 
-**Planned Fix:** v1.1 will add automatic port selection (8888-8898 range).
+**Manual Override (if needed):**
+```bash
+# Kill process using port (if auto-selection fails)
+lsof -ti:8888 | xargs kill -9  # macOS/Linux
+```
 
 ---
 
-### 3. Synchronous HTTP Client
+### 3. Synchronous HTTP Client (✅ Async Support Added in v1.0.1)
 
-**Issue:** SDK uses `requests` library (blocking I/O).
+**Status:** ✅ **Async HTTP client support added (optional)**
 
-**Impact:**
-- Not ideal for high-concurrency applications
-- Blocks thread during API calls
-- Cannot handle thousands of concurrent requests efficiently
+**Previous Issue:** SDK used `requests` library (blocking I/O), limiting high-concurrency applications.
 
-**When This Matters:**
+**Current Implementation (v1.0.1):**
+- **Async Support (Optional):** Enable async HTTP client with `httpx` for non-blocking I/O
+- **Backward Compatible:** Default behavior unchanged (synchronous `requests` library)
+- **Connection Pooling:** Async client includes connection pooling for better performance
+- **Same API:** Retry logic, error handling, and logging work identically in async mode
+
+**When to Use Async:**
 - Building high-frequency trading systems
 - Processing hundreds of symbols simultaneously
 - Running multiple trading strategies in parallel
+- High-concurrency applications requiring non-blocking I/O
 
-**Current Performance:**
-- ~120 requests/minute (rate limit)
-- Single-threaded: 2-5 seconds per batch
-- Multi-threaded: Better, but thread overhead
-
-**Workaround:** Use thread pools
+**Configuration:**
 ```python
-from concurrent.futures import ThreadPoolExecutor
+# Enable async mode
+sdk = TradeStationSDK(use_async=True)
 
-def get_quote(symbol):
-    return sdk.get_quote_snapshots(symbol, mode="PAPER")
-
-with ThreadPoolExecutor(max_workers=10) as executor:
-    quotes = list(executor.map(get_quote, symbols))
+# Or via environment variable
+export TRADESTATION_USE_ASYNC=true
+sdk = TradeStationSDK()
 ```
 
-**Planned Fix:** v2.0 will add native async support with `httpx` or `aiohttp`.
+**Async Usage:**
+```python
+import asyncio
+
+async def fetch_multiple_quotes():
+    sdk = TradeStationSDK(use_async=True)
+    await sdk.ensure_authenticated(mode="PAPER")
+
+    # Use async client directly
+    quotes = await sdk.client.make_request_async(
+        "GET",
+        "marketdata/quotes/MNQZ25,ESZ25",
+        mode="PAPER"
+    )
+
+    # Clean up when done
+    await sdk.aclose()
+    return quotes
+
+# Run async function
+quotes = asyncio.run(fetch_multiple_quotes())
+```
+
+**Performance Comparison:**
+- **Synchronous (default):** ~120 requests/minute (rate limit), 2-5 seconds per batch
+- **Async:** Better concurrency, non-blocking I/O, connection pooling
+- **Thread Pool (workaround):** Still supported, but async is more efficient
+
+**Note:** Async support is opt-in. Existing synchronous code continues to work unchanged.
 
 ---
 
@@ -183,7 +232,7 @@ All retry attempts are logged with context:
 
 **Issue:** TradeStation API only supports minute-based intervals.
 
-**Supported:** `1, 2, 3, 5, 10, 15, 30, 60` (minutes)  
+**Supported:** `1, 2, 3, 5, 10, 15, 30, 60` (minutes)
 **Not Supported:** Second-based intervals (`30S`, `60S`)
 
 **Impact:**
@@ -379,7 +428,7 @@ class RateLimiter:
         self.max_calls = max_calls
         self.period = period
         self.calls = deque()
-    
+
     def __call__(self, func):
         def wrapper(*args, **kwargs):
             now = time.time()
@@ -481,11 +530,15 @@ except TradeStationAPIError as e:
 
 ## Roadmap & Planned Fixes
 
+### v1.0.1 (December 2025) ✅ Released
+- ✅ Token storage: Optional keychain integration with secure file fallback
+- ✅ OAuth port: Automatic port selection (8888-8898 range)
+- ✅ HTTP client: Async support with httpx (optional, backward compatible)
+- ✅ Improved error messages and logging
+
 ### v1.1 (Q1 2026)
-- ✅ Token encryption (keychain integration)
-- ✅ Auto-port selection for OAuth
-- ✅ `trail_amount_dollars` parameter
-- ✅ Improved error messages
+- `trail_amount_dollars` parameter for convenience
+- Additional keychain storage improvements
 
 ### v1.2 (Q2 2026)
 - ✅ Built-in retry logic with backoff (✅ **Implemented in v1.0.0**)
@@ -511,5 +564,5 @@ If you encounter limitations not listed here:
 
 ---
 
-**Last Updated:** 2025-12-28  
-**SDK Version:** 1.0.0
+**Last Updated:** 2025-12-28
+**SDK Version:** 1.0.1

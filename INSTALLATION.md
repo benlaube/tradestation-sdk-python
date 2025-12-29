@@ -511,5 +511,5 @@ pip install --break-system-packages tradestation-sdk
 
 ---
 
-**Last Updated:** 2025-12-07  
+**Last Updated:** 2025-12-07
 **SDK Version:** 1.0.0

@@ -120,7 +120,7 @@ class TestMarketDataOperationsSearchSymbols:
         mocker.patch.object(mock_http_client, "make_request", return_value=api_responses.MOCK_SYMBOL_SEARCH)
 
         market_data = MarketDataOperations(mock_http_client)
-        result = market_data.search_symbols("ES", category="Future", mode="PAPER")
+        _ = market_data.search_symbols("ES", category="Future", mode="PAPER")
 
         call_args = mock_http_client.make_request.call_args
         assert call_args[1]["params"]["pattern"] == "ES"
@@ -207,7 +207,7 @@ class TestMarketDataOperationsGetQuoteSnapshots:
         mocker.patch.object(mock_http_client, "make_request", return_value=api_responses.MOCK_QUOTE_SNAPSHOT)
 
         market_data = MarketDataOperations(mock_http_client)
-        result = market_data.get_quote_snapshots("MNQZ25,ESZ25", mode="PAPER")
+        _ = market_data.get_quote_snapshots("MNQZ25,ESZ25", mode="PAPER")
 
         call_args = mock_http_client.make_request.call_args
         assert "MNQZ25,ESZ25" in call_args[0][1]

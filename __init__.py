@@ -73,7 +73,7 @@ from .streaming import StreamingManager, WebSocketManager
 
 logger = setup_logger(__name__, sdk_config.log_level)
 
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 
 
 class TradeStationSDK:
@@ -93,7 +93,7 @@ class TradeStationSDK:
     - Exposes streaming managers for HTTP streaming and optional SDK websockets
     """
 
-    def __init__(self, enable_full_logging: bool = False):
+    def __init__(self, enable_full_logging: bool = False, use_async: bool = False):
         """
         Bootstrap the SDK with shared dependencies and operation modules.
 
@@ -101,6 +101,9 @@ class TradeStationSDK:
             enable_full_logging: If True, include full HTTP request/response bodies in logs.
                 Use sparingly—may expose sensitive data. Can also be set via
                 `TRADESTATION_FULL_LOGGING` env var.
+            use_async: If True, enable async HTTP client (httpx) for non-blocking I/O.
+                Default False for backward compatibility. Can also be set via
+                `TRADESTATION_USE_ASYNC` env var.
 
         Side Effects:
             - Instantiates TokenManager and HTTPClient
@@ -124,8 +127,14 @@ class TradeStationSDK:
             client_id=self.client_id, client_secret=self.client_secret, redirect_uri=self.redirect_uri
         )
 
-        # Initialize HTTPClient with full logging option
-        self._client = HTTPClient(self._token_manager, enable_full_logging=enable_full_logging)
+        # Check environment variable for async mode
+        env_async = sdk_config.use_async
+        effective_async = use_async or env_async
+
+        # Initialize HTTPClient with full logging and async options
+        self._client = HTTPClient(
+            self._token_manager, enable_full_logging=enable_full_logging, use_async=effective_async
+        )
 
         # Initialize operation modules with default account_id and mode
         self._accounts = AccountOperations(self._client, self.account_id, self.default_mode)
@@ -1074,6 +1083,7 @@ class TradeStationSDK:
                 "rest_fallback": True,
                 "full_logging": self._client.enable_full_logging,
                 "error_categorization": True,
+                "async_support": self._client.use_async,
             },
             "sdk_status": "production_ready",
             "python_version_required": ">=3.10",
@@ -1115,10 +1125,15 @@ class TradeStationSDK:
         """Get order execution operations instance."""
         return self._order_executions
 
-    @property
-    def orders(self) -> OrderOperations:
-        """Get order query operations instance."""
-        return self._orders
+    async def aclose(self):
+        """
+        Close async HTTP client and release resources.
+
+        Call this when done with async operations to properly clean up connections.
+        Only needed if use_async=True was set during initialization.
+        """
+        if self._client.use_async:
+            await self._client.aclose()
 
 
 # Export main SDK class and all components

@@ -54,6 +54,11 @@ class SDKConfig:
         # Logging
         self.log_level = os.getenv("LOG_LEVEL", "INFO").upper()
 
+        # HTTP Client Configuration
+        # Set TRADESTATION_USE_ASYNC=true to enable async HTTP client (httpx)
+        # Default: False for backward compatibility
+        self.use_async = os.getenv("TRADESTATION_USE_ASYNC", "").lower() in ("true", "1", "yes")
+
     def validate_credentials(self):
         """
         Validate that required credentials are set.

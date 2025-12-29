@@ -131,7 +131,7 @@ class TestPositionOperationsFlattenPosition:
         position_ops = PositionOperations(mock_http_client, mock_accounts, default_mode="PAPER")
         position_ops._order_executions = mock_order_exec  # Inject mock
 
-        result = position_ops.flatten_position("MNQZ25", mock_order_exec, mode="PAPER")
+        _ = position_ops.flatten_position("MNQZ25", mock_order_exec, mode="PAPER")
 
         # Verify get_position was called
         assert mock_http_client.make_request.call_count >= 1
@@ -156,7 +156,7 @@ class TestPositionOperationsFlattenPosition:
         position_ops = PositionOperations(mock_http_client, mock_accounts, default_mode="PAPER")
         position_ops._order_executions = mock_order_exec
 
-        result = position_ops.flatten_position(None, mock_order_exec, mode="PAPER")
+        _ = position_ops.flatten_position(None, mock_order_exec, mode="PAPER")
 
         # Verify place_order was called for each position
         assert mock_order_exec.place_order.call_count == 2

@@ -6,11 +6,28 @@ This is the **complete navigation hub** for all SDK documentation. It organizes 
 
 **Use this if:** You're looking for specific documentation, want to understand the documentation structure, or need guidance on what to read next.
 
+**Note:** Documentation has been reorganized. See [README.md](README.md) for the new structure.
+
 **Related Documents:**
 - 📖 **[README.md](../README.md)** - Main SDK documentation (start here)
 - 🚀 **[QUICKSTART.md](../QUICKSTART.md)** - 2-minute getting started guide
-- 📚 **[GETTING_STARTED.md](GETTING_STARTED.md)** - 15-minute comprehensive tutorial
+- 📚 **[Getting Started Tutorial](getting-started/README.md)** - 15-minute comprehensive tutorial
 - 📋 **[CHEATSHEET.md](../CHEATSHEET.md)** - Quick reference guide
+
+---
+
+**⚠️ Documentation Structure Updated**
+
+The documentation has been reorganized into a hierarchical structure. See [README.md](README.md) for the new organization.
+
+**Quick Links:**
+- [Getting Started](getting-started/README.md) - Installation and tutorials
+- [API Reference](api/reference.md) - Complete API documentation
+- [Models Documentation](models/README.md) - Model documentation
+- [Guides & Examples](guides/README.md) - How-to guides
+- [Architecture](architecture/README.md) - System architecture
+- [Reference Materials](reference/README.md) - Quick references
+- [Analysis & Research](analysis/README.md) - Analysis documents
 
 ---
 
@@ -64,33 +81,50 @@ QUICKSTART.md → README.md → Jupyter Notebooks → API Reference
 
 | File | Description | Use For |
 |------|-------------|---------|
-| [API_REFERENCE.md](API_REFERENCE.md) | Complete API reference | Function signatures, parameters |
-| [SDK_USAGE_EXAMPLES.md](SDK_USAGE_EXAMPLES.md) | Code examples | Working code patterns |
-| [ORDER_FUNCTIONS_REFERENCE.md](ORDER_FUNCTIONS_REFERENCE.md) | Order functions | Order placement details |
-| [API_ENDPOINT_MAPPING.md](API_ENDPOINT_MAPPING.md) | SDK → API mapping | Understanding internals |
+| [api/reference.md](api/reference.md) | Complete API reference | Function signatures, parameters |
+| [api/endpoints.md](api/endpoints.md) | SDK → API mapping | Understanding internals |
+| [api/coverage.md](api/coverage.md) | Endpoint coverage | Feature completeness |
+| [api/operations.md](api/operations.md) | Operation analysis | What's implemented |
+| [api/structure.md](api/structure.md) | API organization | Understanding TradeStation API |
 
 ### Architecture & Design
 
 | File | Description | Use For |
 |------|-------------|---------|
-| [API_STRUCTURE.md](API_STRUCTURE.md) | API organization | Understanding TradeStation API |
-| [API_STRUCTURE_DETAILED.md](API_STRUCTURE_DETAILED.md) | Detailed API analysis | Deep dive into API design |
-| [README.md](README.md) | Service overview | Architecture decisions |
+| [architecture/overview.md](architecture/overview.md) | SDK architecture | Architecture decisions |
+| [architecture/feature-comparison.md](architecture/feature-comparison.md) | Feature comparison | Comparing with other SDKs |
+| [architecture/gap-analysis.md](architecture/gap-analysis.md) | Missing features | Future roadmap |
 
 ### Models & Data
 
 | File | Description | Use For |
 |------|-------------|---------|
-| [MODELS.md](MODELS.md) | Pydantic models | Type definitions, field descriptions |
-| [TRAILING_STOP_VARIATIONS.md](TRAILING_STOP_VARIATIONS.md) | Trailing stop details | Advanced order types |
+| [models/README.md](models/README.md) | Pydantic models | Type definitions, field descriptions |
+| [reference/trailing-stops.md](reference/trailing-stops.md) | Trailing stop details | Advanced order types |
 
-### Coverage & Analysis
+### Guides & Examples
 
 | File | Description | Use For |
 |------|-------------|---------|
-| [API_COVERAGE.md](API_COVERAGE.md) | Endpoint coverage | Feature completeness |
-| [OPERATION_COVERAGE.md](OPERATION_COVERAGE.md) | Operation analysis | What's implemented |
-| [GAP_ANALYSIS.md](GAP_ANALYSIS.md) | Missing features | Future roadmap |
+| [guides/usage-examples.md](guides/usage-examples.md) | Code examples | Working code patterns |
+| [guides/order-functions.md](guides/order-functions.md) | Order functions | Order placement details |
+| [guides/code-examples.md](guides/code-examples.md) | OpenAPI examples | Code patterns |
+| [guides/submodule-integration.md](guides/submodule-integration.md) | Git submodule | Embedding SDK |
+
+### Reference Materials
+
+| File | Description | Use For |
+|------|-------------|---------|
+| [reference/functions-list.md](reference/functions-list.md) | Function list | Complete function reference |
+| [reference/new-functions.md](reference/new-functions.md) | New functions | Recently added features |
+| [reference/audit-references.md](reference/audit-references.md) | Audit files | Audit documentation |
+
+### Analysis & Research
+
+| File | Description | Use For |
+|------|-------------|---------|
+| [analysis/openapi-analysis.md](analysis/openapi-analysis.md) | OpenAPI analysis | API specification analysis |
+| [analysis/roadmap.md](analysis/roadmap.md) | Development roadmap | Future plans |
 
 ---
 
@@ -160,7 +194,7 @@ pytest tests/test_accounts.py   # Specific module
 
 1. [QUICKSTART.md](../QUICKSTART.md) - Get started in 2 minutes
 2. [01_authentication.ipynb](../examples/01_authentication.ipynb) - Learn authentication
-3. [GETTING_STARTED.md](GETTING_STARTED.md) - Complete 15-minute tutorial
+3. [Getting Started Tutorial](getting-started/README.md) - Complete 15-minute tutorial
 4. [03_market_data.ipynb](../examples/03_market_data.ipynb) - Get market data
 5. [04_placing_orders.ipynb](../examples/04_placing_orders.ipynb) - Place your first order
 6. [CHEATSHEET.md](../CHEATSHEET.md) - Keep this handy!
@@ -169,15 +203,15 @@ pytest tests/test_accounts.py   # Specific module
 
 1. [MIGRATION.md](../MIGRATION.md) - Compare with other SDKs
 2. [README.md](../README.md) - Understand SDK features
-3. [SDK_USAGE_EXAMPLES.md](SDK_USAGE_EXAMPLES.md) - See code patterns
-4. [API_REFERENCE.md](API_REFERENCE.md) - Deep dive into API
+3. [Usage Examples](guides/usage-examples.md) - See code patterns
+4. [API Reference](api/reference.md) - Deep dive into API
 
 ### Path 3: Advanced (Building production systems)
 
 1. [LIMITATIONS.md](../LIMITATIONS.md) - Understand constraints
-2. [API_COVERAGE.md](API_COVERAGE.md) - Know what's available
-3. [ORDER_FUNCTIONS_REFERENCE.md](ORDER_FUNCTIONS_REFERENCE.md) - Master order execution
-4. [MODELS.md](MODELS.md) - Understand data structures
+2. [API Coverage](api/coverage.md) - Know what's available
+3. [Order Functions](guides/order-functions.md) - Master order execution
+4. [Models Documentation](models/README.md) - Understand data structures
 5. [CONTRIBUTING.md](../CONTRIBUTING.md) - Extend the SDK
 
 ---
@@ -192,14 +226,14 @@ pytest tests/test_accounts.py   # Specific module
 | Learn authentication | [01_authentication.ipynb](../examples/01_authentication.ipynb) |
 | Place my first order | [04_placing_orders.ipynb](../examples/04_placing_orders.ipynb) |
 | Fix port conflict | [FAQ & Troubleshooting](../README.md#faq--troubleshooting) |
-| See code examples | [SDK_USAGE_EXAMPLES.md](SDK_USAGE_EXAMPLES.md) |
-| Find a function | [API_REFERENCE.md](API_REFERENCE.md) |
+| See code examples | [Usage Examples](guides/usage-examples.md) |
+| Find a function | [API Reference](api/reference.md) |
 | Quick reference | [CHEATSHEET.md](../CHEATSHEET.md) |
 | Understand errors | [README.md](../README.md#error-handling) |
-| Stream real-time data | [SDK_USAGE_EXAMPLES.md](SDK_USAGE_EXAMPLES.md#streaming) |
+| Stream real-time data | [Usage Examples](guides/usage-examples.md) |
 | Migrate from other SDK | [MIGRATION.md](../MIGRATION.md) |
 | Know SDK limits | [LIMITATIONS.md](../LIMITATIONS.md) |
-| See future plans | [ROADMAP.md](ROADMAP.md) |
+| See future plans | [Roadmap](analysis/roadmap.md) |
 | Contribute code | [CONTRIBUTING.md](../CONTRIBUTING.md) |
 | Check version changes | [CHANGELOG.md](../CHANGELOG.md) |
 
@@ -219,13 +253,15 @@ tradestation-sdk/
 ├── LICENSE                      # MIT License
 │
 ├── docs/                        # Technical documentation
-│   ├── INDEX.md                 # This file
-│   ├── API_REFERENCE.md         # Complete API reference
-│   ├── SDK_USAGE_EXAMPLES.md    # Code examples
-│   ├── ORDER_FUNCTIONS_REFERENCE.md
-│   ├── MODELS.md
-│   ├── API_COVERAGE.md
-│   └── ...
+│   ├── README.md                # Documentation index (new structure)
+│   ├── INDEX.md                 # This file (legacy index)
+│   ├── getting-started/         # Getting started guides
+│   ├── api/                     # API documentation
+│   ├── models/                  # Model documentation
+│   ├── guides/                  # How-to guides
+│   ├── architecture/            # Architecture docs
+│   ├── reference/               # Reference materials
+│   └── analysis/                # Analysis & research
 │
 ├── examples/                    # Interactive examples
 │   ├── README.md

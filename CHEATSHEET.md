@@ -181,11 +181,11 @@ async def stream_example():
     # Stream quotes
     async for quote in sdk.streaming.stream_quotes(["AAPL"], mode="PAPER"):
         print(f"{quote.Symbol}: ${quote.Last}")
-    
+
     # Stream orders
     async for order in sdk.streaming.stream_orders(account_id, mode="PAPER"):
         print(f"Order {order.OrderID}: {order.Status}")
-    
+
     # Stream positions
     async for pos in sdk.streaming.stream_positions(account_id, mode="PAPER"):
         print(f"{pos.Symbol}: {pos.Quantity} @ ${pos.AveragePrice}")

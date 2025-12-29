@@ -9,10 +9,12 @@ client to keep business logic clean.
 Dependencies: requests, time, typing
 """
 
+import asyncio
 import json
 import time
 from typing import Any
 
+import httpx
 import requests
 
 from .config import sdk_config
@@ -51,7 +53,7 @@ def get_base_url(mode: str | None = None) -> str:
     return PAPER_BASE_URL if mode == "PAPER" else LIVE_BASE_URL
 
 
-def parse_api_error_response(response: requests.Response) -> ErrorDetails:
+def parse_api_error_response(response: requests.Response | Any) -> ErrorDetails:
     """
     Parse TradeStation API error response into structured ErrorDetails.
 
@@ -63,12 +65,13 @@ def parse_api_error_response(response: requests.Response) -> ErrorDetails:
     - Standard HTTP error responses
 
     Args:
-        response: requests.Response object with error status
+        response: requests.Response or httpx.Response-like object with error status
 
     Returns:
         ErrorDetails object with parsed error information
     """
-    details = ErrorDetails(response_status=response.status_code, code=f"HTTP_{response.status_code}")
+    status_code = getattr(response, "status_code", 500)
+    details = ErrorDetails(response_status=status_code, code=f"HTTP_{status_code}")
 
     # Try to parse JSON response body
     try:
@@ -125,25 +128,25 @@ def parse_api_error_response(response: requests.Response) -> ErrorDetails:
     except (json.JSONDecodeError, ValueError):
         # Not JSON, try to get text
         try:
-            error_text = response.text
+            error_text = getattr(response, "text", str(response))
             details.message = error_text[:500] if len(error_text) > 500 else error_text
             details.api_error_message = details.message
         except Exception:
-            details.message = f"HTTP {response.status_code} error (unable to parse response)"
+            details.message = f"HTTP {status_code} error (unable to parse response)"
 
     # Set code based on status code if not set
     if not details.api_error_code:
-        if response.status_code == 400:
+        if status_code == 400:
             details.code = "INVALID_REQUEST"
-        elif response.status_code == 401:
+        elif status_code == 401:
             details.code = "AUTHENTICATION_ERROR"
-        elif response.status_code == 403:
+        elif status_code == 403:
             details.code = "FORBIDDEN"
-        elif response.status_code == 404:
+        elif status_code == 404:
             details.code = "NOT_FOUND"
-        elif response.status_code == 429:
+        elif status_code == 429:
             details.code = "RATE_LIMIT_ERROR"
-        elif response.status_code >= 500:
+        elif status_code >= 500:
             details.code = "SERVER_ERROR"
         else:
             details.code = "API_ERROR"
@@ -156,7 +159,11 @@ class HTTPClient:
     HTTP client for TradeStation API requests.
 
     Handles authentication, request/response logging, and error handling.
+    Supports both synchronous (requests) and asynchronous (httpx) operations.
     Renamed from BaseAPIClient for SDK clarity.
+
+    By default, uses synchronous requests library for backward compatibility.
+    Set use_async=True to enable async operations with httpx.
     """
 
     def __init__(
@@ -167,6 +174,7 @@ class HTTPClient:
         retry_delay: float = 1.0,
         max_retry_delay: float = 60.0,
         enable_retry: bool = True,
+        use_async: bool = False,
     ):
         """
         Initialize API client.
@@ -179,8 +187,15 @@ class HTTPClient:
             retry_delay: Initial retry delay in seconds (default: 1.0)
             max_retry_delay: Maximum retry delay in seconds (default: 60.0)
             enable_retry: Enable automatic retry for recoverable errors (default: True)
+            use_async: If True, use httpx for async operations. Default False for backward compatibility.
         """
         self.token_manager = token_manager
+        self.use_async = use_async
+
+        # Initialize async client if async mode is enabled
+        self._async_client: httpx.AsyncClient | None = None
+        if self.use_async:
+            self._async_client = httpx.AsyncClient(timeout=30.0, limits=httpx.Limits(max_keepalive_connections=10))
 
         # Check environment variable as fallback
         import os
@@ -790,3 +805,321 @@ class HTTPClient:
         except Exception as e:
             logger.error(f"Unexpected error in HTTP stream {endpoint}: {e}")
             raise
+
+    async def make_request_async(
+        self,
+        method: str,
+        endpoint: str,
+        params: dict | None = None,
+        json_data: dict | None = None,
+        mode: str | None = None,
+    ) -> dict[str, Any]:
+        """
+        Make an authenticated API request asynchronously using httpx.
+
+        This method provides non-blocking I/O for high-concurrency applications.
+        Automatically retries recoverable errors with exponential backoff.
+
+        Args:
+            method: HTTP method (GET, POST, etc.)
+            endpoint: API endpoint (without base URL)
+            params: Query parameters
+            json_data: JSON body for POST requests
+            mode: "PAPER" or "LIVE". If None, uses sdk_config.trading_mode
+
+        Returns:
+            API response as dictionary
+
+        Raises:
+            RecoverableError: For errors that can be retried (raised after max retries exceeded)
+            NonRecoverableError: For errors that should not be retried (auth, invalid request)
+
+        Note:
+            This method requires use_async=True when initializing HTTPClient.
+            For synchronous operations, use make_request() instead.
+
+        Dependencies: httpx, asyncio
+        """
+        if not self.use_async or self._async_client is None:
+            raise RuntimeError(
+                "Async client not initialized. Set use_async=True when creating HTTPClient, "
+                "or use make_request() for synchronous operations."
+            )
+
+        if not self.enable_retry:
+            # Retry disabled, make single request
+            return await self._make_request_async_internal(method, endpoint, params, json_data, mode)
+
+        # Retry logic with exponential backoff
+        current_retry_delay = self.retry_delay
+        attempt = 0
+
+        while attempt <= self.max_retries:
+            try:
+                return await self._make_request_async_internal(method, endpoint, params, json_data, mode)
+            except NonRecoverableError:
+                # Non-recoverable errors should not be retried
+                raise
+            except RecoverableError as e:
+                attempt += 1
+
+                if attempt > self.max_retries:
+                    # Max retries exceeded, log and raise
+                    log_with_context(
+                        logger,
+                        "error",
+                        f"API Request Failed After {self.max_retries} Retries: {method} {endpoint} | "
+                        f"Error: {e.details.to_human_readable()}",
+                        source="bot",
+                        action="api_retry_exhausted",
+                        component="tradestation_api",
+                    )
+                    raise
+
+                # Log retry attempt with context
+                error_type = e.details.code or "UNKNOWN_ERROR"
+                status_code = e.details.response_status or "N/A"
+                retry_info = (
+                    f"Retry {attempt}/{self.max_retries} for {method} {endpoint} | "
+                    f"Error: {error_type} (Status: {status_code}) | "
+                    f"Waiting {current_retry_delay:.1f}s before retry"
+                )
+
+                log_with_context(
+                    logger,
+                    "warning",
+                    retry_info,
+                    source="bot",
+                    action="api_retry",
+                    component="tradestation_api",
+                )
+
+                # Handle rate limit errors with special backoff
+                if status_code == 429:
+                    # Check for Retry-After header in response body
+                    retry_after = None
+                    if e.details.response_body and isinstance(e.details.response_body, dict):
+                        retry_after = e.details.response_body.get("RetryAfter") or e.details.response_body.get(
+                            "retry_after"
+                        )
+
+                    if retry_after:
+                        # Use server-specified retry delay
+                        wait_time = float(retry_after)
+                        log_with_context(
+                            logger,
+                            "info",
+                            f"Rate limit hit. Using server-specified Retry-After: {wait_time}s",
+                            source="bot",
+                            action="api_rate_limit",
+                            component="tradestation_api",
+                        )
+                        await asyncio.sleep(wait_time)
+                        current_retry_delay = self.retry_delay  # Reset to initial delay after server delay
+                    else:
+                        # Use exponential backoff for rate limits
+                        await asyncio.sleep(current_retry_delay)
+                        current_retry_delay = min(current_retry_delay * 2, self.max_retry_delay)
+                else:
+                    # Use exponential backoff for other recoverable errors
+                    await asyncio.sleep(current_retry_delay)
+                    current_retry_delay = min(current_retry_delay * 2, self.max_retry_delay)
+
+                # Ensure authentication is still valid before retry
+                if mode is None:
+                    mode = sdk_config.trading_mode
+                self.token_manager.ensure_authenticated(mode)
+
+    async def _make_request_async_internal(
+        self,
+        method: str,
+        endpoint: str,
+        params: dict | None = None,
+        json_data: dict | None = None,
+        mode: str | None = None,
+    ) -> dict[str, Any]:
+        """
+        Internal async method that performs a single API request without retry logic.
+
+        Args:
+            method: HTTP method (GET, POST, etc.)
+            endpoint: API endpoint (without base URL)
+            params: Query parameters
+            json_data: JSON body for POST requests
+            mode: "PAPER" or "LIVE". If None, uses sdk_config.trading_mode
+
+        Returns:
+            API response as dictionary
+
+        Raises:
+            RecoverableError: For errors that can be retried
+            NonRecoverableError: For errors that should not be retried
+        """
+        if mode is None:
+            mode = sdk_config.trading_mode
+
+        self.token_manager.ensure_authenticated(mode)
+
+        base_url = get_base_url(mode)
+        tokens = self.token_manager.get_tokens(mode)
+        url = f"{base_url}/{endpoint}"
+        headers = {
+            "Authorization": f"Bearer {tokens['access_token']}",
+            "Content-Type": "application/json",
+        }
+
+        # Log request using helper method
+        self._log_request(method, endpoint, params, json_data)
+
+        # Track execution time
+        start_time = time.time()
+
+        if self._async_client is None:
+            raise RuntimeError("Async client not initialized")
+
+        try:
+            # Set timeout for API requests (30 seconds for order operations, 10 seconds for others)
+            timeout = 30.0 if endpoint.startswith("orderexecution") else 10.0
+
+            # Make async request
+            response = await self._async_client.request(
+                method, url, headers=headers, params=params, json=json_data, timeout=timeout
+            )
+            elapsed_time = time.time() - start_time
+
+            # Log response using helper method (convert httpx.Response to requests-like for logging)
+            class ResponseAdapter:
+                """Adapter to make httpx.Response compatible with logging method"""
+
+                def __init__(self, httpx_response: httpx.Response):
+                    self.status_code = httpx_response.status_code
+                    self.text = httpx_response.text
+                    self.content = httpx_response.content
+                    self._json_cache = None
+
+                def json(self):
+                    if self._json_cache is None:
+                        self._json_cache = json.loads(self.text)
+                    return self._json_cache
+
+            self._log_response(method, endpoint, ResponseAdapter(response), elapsed_time)
+
+            # Check for errors and parse them
+            if response.status_code >= 400:
+                # Parse error response into ErrorDetails
+                # Create a requests-like response for error parsing
+                class ErrorResponseAdapter:
+                    def __init__(self, httpx_response: httpx.Response):
+                        self.status_code = httpx_response.status_code
+                        self.text = httpx_response.text
+                        self._json_cache = None
+
+                    def json(self):
+                        if self._json_cache is None:
+                            try:
+                                self._json_cache = json.loads(self.text)
+                            except json.JSONDecodeError:
+                                self._json_cache = {}
+                        return self._json_cache
+
+                error_details = parse_api_error_response(ErrorResponseAdapter(response))
+
+                # Merge with request context
+                context_details = self._build_error_context(method, endpoint, params, json_data, None, mode)
+                error_details.request_method = context_details.request_method
+                error_details.request_endpoint = context_details.request_endpoint
+                error_details.request_params = context_details.request_params
+                error_details.request_body = context_details.request_body
+                error_details.mode = context_details.mode
+
+                # Determine exception type based on status code
+                if response.status_code == 401:
+                    raise NonRecoverableError(error_details)
+                elif response.status_code == 403:
+                    raise NonRecoverableError(error_details)
+                elif response.status_code == 400:
+                    raise NonRecoverableError(error_details)
+                elif response.status_code == 404:
+                    raise NonRecoverableError(error_details)
+                elif response.status_code == 429:
+                    raise RecoverableError(error_details)
+                elif response.status_code >= 500:
+                    raise RecoverableError(error_details)
+                else:
+                    raise NonRecoverableError(error_details)
+
+            # Log successful responses at info level for important operations
+            if method in ["POST", "PUT", "DELETE"] or "order" in endpoint.lower():
+                log_with_context(
+                    logger,
+                    "info",
+                    f"API Success: {method} {endpoint} | Status: {response.status_code} | Time: {elapsed_time:.3f}s",
+                    source="bot",
+                    action="api_response",
+                    component="tradestation_api",
+                )
+
+            return response.json()
+
+        except (
+            TradeStationAPIError,
+            AuthenticationError,
+            RateLimitError,
+            InvalidRequestError,
+            NetworkError,
+            RecoverableError,
+            NonRecoverableError,
+        ):
+            # Re-raise our custom exceptions as-is
+            raise
+        except httpx.HTTPError as e:
+            elapsed_time = time.time() - start_time
+
+            # Build error context for HTTP errors
+            error_details = self._build_error_context(method, endpoint, params, json_data, None, mode)
+            error_details.message = str(e)
+            error_details.code = "HTTP_ERROR"
+
+            log_with_context(
+                logger,
+                "error",
+                f"API Request Failed: {method} {endpoint} | "
+                f"Status: {getattr(e.response, 'status_code', 'Unknown') if hasattr(e, 'response') else 'Unknown'} | "
+                f"Time: {elapsed_time:.3f}s | "
+                f"Error: {error_details.to_human_readable()}",
+                source="bot",
+                action="api_error",
+                component="tradestation_api",
+            )
+
+            # Network errors are recoverable
+            raise RecoverableError(error_details) from e
+        except Exception as e:
+            elapsed_time = time.time() - start_time
+
+            # Build error context for unexpected errors
+            error_details = self._build_error_context(method, endpoint, params, json_data, None, mode)
+            error_details.message = f"Unexpected error: {str(e)}"
+            error_details.code = "UNEXPECTED_ERROR"
+
+            log_with_context(
+                logger,
+                "error",
+                f"API Request Exception: {method} {endpoint} | Time: {elapsed_time:.3f}s | Error: {str(e)}",
+                source="bot",
+                action="api_error",
+                component="tradestation_api",
+            )
+
+            # Unexpected errors default to recoverable
+            raise RecoverableError(error_details) from e
+
+    async def aclose(self):
+        """
+        Close async HTTP client and release resources.
+
+        Call this when done with async operations to properly clean up connections.
+        """
+        if self._async_client:
+            await self._async_client.aclose()
+            self._async_client = None

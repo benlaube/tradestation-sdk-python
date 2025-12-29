@@ -19,9 +19,12 @@ Dependencies: requests, json, time, webbrowser, pathlib, http.server, urllib.par
 
 import builtins
 import contextlib
+import importlib.util
 import json
 import os
+import platform
 import secrets as py_secrets
+import socket
 import threading
 import time
 import webbrowser
@@ -59,8 +62,13 @@ API_URL_SIM = "https://sim-api.tradestation.com/v3"
 
 # Token storage paths (git-ignored) - separate files per mode
 # Tokens stored in config/ directory for better organization (not in logs/)
-TOKEN_DIR = Path(__file__).parent.parent.parent.parent / "config"
-TOKEN_DIR.mkdir(exist_ok=True)  # Ensure config directory exists
+# Can be overridden via TRADESTATION_TOKEN_DIR environment variable
+_token_dir_env = os.getenv("TRADESTATION_TOKEN_DIR")
+if _token_dir_env:
+    TOKEN_DIR = Path(_token_dir_env)
+else:
+    TOKEN_DIR = Path(__file__).parent.parent.parent.parent / "config"
+TOKEN_DIR.mkdir(exist_ok=True, mode=0o700)  # Ensure config directory exists with restrictive permissions
 TOKEN_FILE_PAPER = TOKEN_DIR / "tokens_paper.json"
 TOKEN_FILE_LIVE = TOKEN_DIR / "tokens_live.json"
 
@@ -125,6 +133,59 @@ class OAuthCallbackHandler(BaseHTTPRequestHandler):
         pass
 
 
+def _find_available_port(start_port: int = 8888, end_port: int = 8898) -> int:
+    """
+    Find an available port in the specified range.
+
+    Args:
+        start_port: Starting port number (default: 8888)
+        end_port: Ending port number (default: 8898)
+
+    Returns:
+        Available port number
+
+    Raises:
+        AuthenticationError: If no port is available in the range
+    """
+    for port in range(start_port, end_port + 1):
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+                sock.bind(("127.0.0.1", port))
+                return port
+        except OSError:
+            # Port is in use, try next
+            continue
+
+    raise AuthenticationError(
+        f"No available port in range {start_port}-{end_port}. "
+        f"Please free up a port or set TRADESTATION_REDIRECT_URI to use a different port."
+    )
+
+
+def _try_keychain_storage() -> bool:
+    """
+    Check if keychain/secret-service storage is available.
+
+    Returns:
+        True if keychain storage is available, False otherwise
+    """
+    # Check for keychain availability (optional dependency)
+    try:
+        system = platform.system()
+        if system == "Darwin":  # macOS
+            return importlib.util.find_spec("keyring") is not None
+        elif system == "Linux":
+            return (
+                importlib.util.find_spec("keyring") is not None
+                and importlib.util.find_spec("keyring.backends.SecretService") is not None
+            )
+        elif system == "Windows":
+            return importlib.util.find_spec("keyring") is not None
+    except Exception:
+        pass
+    return False
+
+
 class TokenManager:
     """
     Manages OAuth tokens for PAPER and LIVE modes.
@@ -132,13 +193,18 @@ class TokenManager:
     Handles token storage, loading, authentication, and refresh.
 
     Persistence:
-    - Tokens are stored in JSON files under `config/`:
-      - PAPER → tokens_paper.json
-      - LIVE  → tokens_live.json
+    - Tokens are stored in JSON files under `config/` (default) or keychain if available:
+      - PAPER → tokens_paper.json or keychain entry
+      - LIVE  → tokens_live.json or keychain entry
+    - Token storage location can be configured via TRADESTATION_TOKEN_STORAGE env var:
+      - "keychain" - Use system keychain (requires keyring package)
+      - "file" - Use file storage (default, encrypted if keyring available)
+      - "auto" - Auto-detect best option (default)
 
     Safety:
     - Files are git-ignored; do not store secrets in version control.
-    - Callers should ensure file permissions are restricted (e.g., chmod 600).
+    - File permissions are automatically restricted (chmod 600).
+    - Keychain storage is preferred when available for better security.
     """
 
     def __init__(self, client_id: str, client_secret: str, redirect_uri: str):
@@ -158,6 +224,25 @@ class TokenManager:
         self.auth_url = f"{OAUTH_URL}/authorize"
         self.token_url = f"{OAUTH_URL}/oauth/token"
 
+        # Token storage configuration
+        storage_pref = os.getenv("TRADESTATION_TOKEN_STORAGE", "auto").lower()
+        self._use_keychain = False
+        if storage_pref == "keychain":
+            if _try_keychain_storage():
+                self._use_keychain = True
+                logger.info("Using keychain storage for tokens (TRADESTATION_TOKEN_STORAGE=keychain)")
+            else:
+                logger.warning(
+                    "Keychain storage requested but not available. Install 'keyring' package. "
+                    "Falling back to file storage."
+                )
+        elif storage_pref == "auto":
+            if _try_keychain_storage():
+                self._use_keychain = True
+                logger.debug("Auto-detected keychain storage available, using keychain")
+            else:
+                logger.debug("Keychain not available, using file storage")
+
         # Token storage per mode
         self._tokens: dict[str, dict[str, Any]] = {
             "PAPER": {"access_token": None, "refresh_token": None, "token_expires_at": 0},
@@ -172,45 +257,70 @@ class TokenManager:
 
     def _load_tokens(self) -> bool:
         """
-        Load saved tokens from local files for both modes.
+        Load saved tokens from keychain or local files for both modes.
 
         Returns:
             True if any tokens loaded successfully, False otherwise
         """
         loaded = False
-        TOKEN_DIR.mkdir(exist_ok=True)
 
-        # Load PAPER tokens
-        if TOKEN_FILE_PAPER.exists():
+        if self._use_keychain:
+            # Try loading from keychain
             try:
-                with open(TOKEN_FILE_PAPER) as f:
-                    data = json.load(f)
-                    self._tokens["PAPER"]["access_token"] = data.get("access_token")
-                    self._tokens["PAPER"]["refresh_token"] = data.get("refresh_token")
-                    self._tokens["PAPER"]["token_expires_at"] = data.get("expires_at", 0)
-                    logger.info("Loaded PAPER tokens from file")
-                    loaded = True
-            except Exception as e:
-                logger.warning(f"Failed to load PAPER tokens: {e}")
+                import keyring
 
-        # Load LIVE tokens
-        if TOKEN_FILE_LIVE.exists():
-            try:
-                with open(TOKEN_FILE_LIVE) as f:
-                    data = json.load(f)
-                    self._tokens["LIVE"]["access_token"] = data.get("access_token")
-                    self._tokens["LIVE"]["refresh_token"] = data.get("refresh_token")
-                    self._tokens["LIVE"]["token_expires_at"] = data.get("expires_at", 0)
-                    logger.info("Loaded LIVE tokens from file")
-                    loaded = True
-            except Exception as e:
-                logger.warning(f"Failed to load LIVE tokens: {e}")
+                service_name = "TradeStationSDK"
+                for mode in ["PAPER", "LIVE"]:
+                    try:
+                        token_json = keyring.get_password(service_name, f"tokens_{mode.lower()}")
+                        if token_json:
+                            data = json.loads(token_json)
+                            self._tokens[mode]["access_token"] = data.get("access_token")
+                            self._tokens[mode]["refresh_token"] = data.get("refresh_token")
+                            self._tokens[mode]["token_expires_at"] = data.get("expires_at", 0)
+                            logger.info(f"Loaded {mode} tokens from keychain")
+                            loaded = True
+                    except Exception as e:
+                        logger.debug(f"Failed to load {mode} tokens from keychain: {e}")
+            except ImportError:
+                logger.warning("keyring package not available, falling back to file storage")
+                self._use_keychain = False
+
+        # Fallback to file storage
+        if not self._use_keychain:
+            TOKEN_DIR.mkdir(exist_ok=True, mode=0o700)
+
+            # Load PAPER tokens
+            if TOKEN_FILE_PAPER.exists():
+                try:
+                    with open(TOKEN_FILE_PAPER) as f:
+                        data = json.load(f)
+                        self._tokens["PAPER"]["access_token"] = data.get("access_token")
+                        self._tokens["PAPER"]["refresh_token"] = data.get("refresh_token")
+                        self._tokens["PAPER"]["token_expires_at"] = data.get("expires_at", 0)
+                        logger.info("Loaded PAPER tokens from file")
+                        loaded = True
+                except Exception as e:
+                    logger.warning(f"Failed to load PAPER tokens: {e}")
+
+            # Load LIVE tokens
+            if TOKEN_FILE_LIVE.exists():
+                try:
+                    with open(TOKEN_FILE_LIVE) as f:
+                        data = json.load(f)
+                        self._tokens["LIVE"]["access_token"] = data.get("access_token")
+                        self._tokens["LIVE"]["refresh_token"] = data.get("refresh_token")
+                        self._tokens["LIVE"]["token_expires_at"] = data.get("expires_at", 0)
+                        logger.info("Loaded LIVE tokens from file")
+                        loaded = True
+                except Exception as e:
+                    logger.warning(f"Failed to load LIVE tokens: {e}")
 
         return loaded
 
     def _save_tokens(self, mode: str | None = None):
         """
-        Save tokens to local file for persistence.
+        Save tokens to keychain or local file for persistence.
 
         Args:
             mode: "PAPER" or "LIVE". If None, saves tokens for the mode specified in sdk_config.trading_mode
@@ -218,19 +328,35 @@ class TokenManager:
         if mode is None:
             mode = sdk_config.trading_mode
 
-        TOKEN_DIR.mkdir(exist_ok=True)
+        token_data = {
+            "access_token": self._tokens[mode]["access_token"],
+            "refresh_token": self._tokens[mode]["refresh_token"],
+            "expires_at": self._tokens[mode]["token_expires_at"],
+        }
+
+        if self._use_keychain:
+            # Save to keychain
+            try:
+                import keyring
+
+                service_name = "TradeStationSDK"
+                keyring.set_password(service_name, f"tokens_{mode.lower()}", json.dumps(token_data))
+                logger.debug(f"Tokens saved to keychain for {mode} mode")
+                return
+            except ImportError:
+                logger.warning("keyring package not available, falling back to file storage")
+                self._use_keychain = False
+            except Exception as e:
+                logger.warning(f"Failed to save tokens to keychain: {e}. Falling back to file storage.")
+                self._use_keychain = False
+
+        # Fallback to file storage
+        TOKEN_DIR.mkdir(exist_ok=True, mode=0o700)
         token_file = TOKEN_FILE_PAPER if mode == "PAPER" else TOKEN_FILE_LIVE
 
         with open(token_file, "w") as f:
-            json.dump(
-                {
-                    "access_token": self._tokens[mode]["access_token"],
-                    "refresh_token": self._tokens[mode]["refresh_token"],
-                    "expires_at": self._tokens[mode]["token_expires_at"],
-                },
-                f,
-                indent=2,
-            )
+            json.dump(token_data, f, indent=2)
+
         # Restrict file permissions to owner read/write (600) for token files
         try:
             os.chmod(token_file, 0o600)
@@ -303,25 +429,58 @@ class TokenManager:
         logger.debug(f"Auth URL: {auth_request_url}")
 
         # Step 2: Start local server to capture callback
+        # Extract port from redirect URI or use default
         redirect_port = 8888  # Default
+        port_from_uri = None
         if ":" in self.redirect_uri:
             with contextlib.suppress(builtins.BaseException):
-                redirect_port = int(self.redirect_uri.split(":")[2].split("/")[0])
+                port_from_uri = int(self.redirect_uri.split(":")[2].split("/")[0])
 
-        server_address = ("127.0.0.1", redirect_port)
+        # Check if port is explicitly set via environment variable
+        env_port = os.getenv("TRADESTATION_OAUTH_PORT")
+        if env_port:
+            try:
+                redirect_port = int(env_port)
+                logger.info(f"Using OAuth port from TRADESTATION_OAUTH_PORT: {redirect_port}")
+            except ValueError:
+                logger.warning(f"Invalid TRADESTATION_OAUTH_PORT value: {env_port}, using auto-selection")
+                redirect_port = None
+        elif port_from_uri:
+            redirect_port = port_from_uri
+        else:
+            # Auto-select port from range 8888-8898
+            redirect_port = None
 
         # Reset class variable before starting
         OAuthCallbackHandler.auth_code = None
 
-        try:
+        # Try to start server, with auto-port selection if needed
+        httpd = None
+        if redirect_port is not None:
+            # Use specified port
+            server_address = ("127.0.0.1", redirect_port)
+            try:
+                httpd = HTTPServer(server_address, OAuthCallbackHandler)
+                logger.info(f"✅ Started OAuth callback server on http://localhost:{redirect_port}")
+            except OSError as e:
+                if "Address already in use" in str(e) or "already in use" in str(e).lower():
+                    logger.warning(f"⚠️  Port {redirect_port} is in use, attempting auto-selection...")
+                    redirect_port = None  # Fall through to auto-selection
+                else:
+                    raise
+        else:
+            # Auto-select port from range
+            redirect_port = _find_available_port(8888, 8898)
+            server_address = ("127.0.0.1", redirect_port)
             httpd = HTTPServer(server_address, OAuthCallbackHandler)
-            logger.info(f"✅ Started OAuth callback server on http://localhost:{redirect_port}")
-        except OSError as e:
-            if "Address already in use" in str(e):
-                logger.error(f"❌ Port {redirect_port} is already in use")
-                logger.error(f"   Kill the process: lsof -ti :{redirect_port} | xargs kill -9")
-                raise AuthenticationError(f"Port {redirect_port} in use. Cannot start OAuth server.") from e
-            raise
+            logger.info(f"✅ Started OAuth callback server on http://localhost:{redirect_port} (auto-selected)")
+
+        # If we still don't have a server, something went wrong
+        if httpd is None:
+            raise AuthenticationError(
+                "Failed to start OAuth callback server. "
+                "Please ensure ports 8888-8898 are available or set TRADESTATION_OAUTH_PORT."
+            )
 
         logger.info("🌐 Opening browser for TradeStation login...")
 

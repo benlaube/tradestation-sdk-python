@@ -278,7 +278,7 @@ class TestHTTPClientRequestExecution:
 
         mock_request = mocker.patch("requests.request", return_value=mock_response)
 
-        result = mock_http_client.make_request("GET", "brokerage/accounts", mode="PAPER")
+        _ = mock_http_client.make_request("GET", "brokerage/accounts", mode="PAPER")
 
         # Verify request was called
         assert mock_request.called

@@ -38,7 +38,7 @@ Best practices and security considerations when using the TradeStation SDK.
 
 **Never commit these files:**
 - ❌ `.env` - Contains API credentials
-- ❌ `logs/tokens_*.json` - Contains access/refresh tokens
+- ❌ `config/tokens_*.json` - Contains access/refresh tokens (or keychain entries)
 - ❌ Any file with `CLIENT_SECRET` or `ACCESS_TOKEN`
 
 **Always commit:**
@@ -50,7 +50,7 @@ Best practices and security considerations when using the TradeStation SDK.
 .env
 .env.local
 .env.*.local
-logs/
+config/
 *.log
 tokens_*.json
 ```
@@ -59,35 +59,51 @@ tokens_*.json
 
 ### 2. Secure Token Storage
 
-**Current Implementation:**
-- Tokens stored as plain JSON in `logs/tokens_*.json`
-- **Not encrypted at rest**
-- Requires file system protection
+**Current Implementation (v1.0.1+):**
+- **Keychain Storage (Recommended):** System keychain integration available
+  - macOS: Keychain Services
+  - Linux: Secret Service API / gnome-keyring
+  - Windows: Windows Credential Manager
+- **File Storage (Fallback):** Secure file storage in `config/tokens_*.json`
+  - Automatic `chmod 600` permissions (owner read/write only)
+  - Automatic `chmod 700` directory permissions
+  - Works on macOS, Linux, and Windows
 
-**Secure Your Token Files:**
+**Enable Keychain Storage:**
+```bash
+# Install keyring package
+pip install keyring
+
+# Enable keychain storage
+export TRADESTATION_TOKEN_STORAGE=keychain
+```
+
+**File Storage (Automatic Fallback):**
+- Tokens stored in `config/tokens_*.json` (not `logs/`)
+- Permissions automatically set to `chmod 600` (owner read/write only)
+- Directory permissions automatically set to `chmod 700` (owner access only)
+- No manual permission setting needed
+
+**Verify Token File Permissions:**
 
 **On Linux/macOS:**
 ```bash
-# Set restrictive permissions (owner read/write only)
-chmod 600 logs/tokens_*.json
-chmod 700 logs/
-
-# Verify permissions
-ls -la logs/tokens_*.json
+# Verify permissions (should show -rw-------)
+ls -la config/tokens_*.json
 # Should show: -rw------- (600)
+
+# Verify directory permissions (should show drwx------)
+ls -ld config/
+# Should show: drwx------ (700)
 ```
 
 **On Windows:**
 ```powershell
-# Remove inheritance and set owner-only access
-icacls logs\tokens_paper.json /inheritance:r
-icacls logs\tokens_paper.json /grant:r "%USERNAME%:(R,W)"
+# Permissions are automatically set by SDK
+# Verify with:
+icacls config\tokens_paper.json
+# Should show owner-only access
 ```
-
-**Planned Improvement (v1.1):**
-- System keychain integration
-- Encrypted token storage
-- No plain-text tokens on disk
 
 **Custom Encryption (Advanced):**
 ```python
@@ -98,7 +114,7 @@ class EncryptedTokenManager(TokenManager):
     def __init__(self, *args, encryption_key=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.cipher = Fernet(encryption_key or Fernet.generate_key())
-    
+
     def save_tokens(self, mode, tokens):
         encrypted = self.cipher.encrypt(json.dumps(tokens).encode())
         # Save encrypted tokens
@@ -167,19 +183,19 @@ def place_order_safe(symbol, side, quantity, price):
     # Validate symbol
     if not symbol or len(symbol) < 1:
         raise ValueError("Invalid symbol")
-    
+
     # Validate side
     if side not in ["BUY", "SELL"]:
         raise ValueError("Side must be BUY or SELL")
-    
+
     # Validate quantity
     if quantity <= 0:
         raise ValueError("Quantity must be positive")
-    
+
     # Validate price
     if price <= 0:
         raise ValueError("Price must be positive")
-    
+
     # Place order
     return sdk.place_order(
         symbol=symbol,
@@ -207,18 +223,18 @@ class TradingLimits:
         self.max_orders_per_day = max_orders_per_day
         self.max_position_size = max_position_size
         self.orders_today = 0
-    
+
     def can_place_order(self, quantity):
         # Check daily order limit
         if self.orders_today >= self.max_orders_per_day:
             raise Exception(f"Daily order limit reached ({self.max_orders_per_day})")
-        
+
         # Check position size limit
         if quantity > self.max_position_size:
             raise Exception(f"Position size exceeds limit ({self.max_position_size})")
-        
+
         return True
-    
+
     def record_order(self):
         self.orders_today += 1
 
@@ -249,7 +265,7 @@ logging.basicConfig(
 def place_order_logged(symbol, side, quantity, **kwargs):
     # Log before placing
     logging.info(f"Placing order: {symbol} {side} {quantity}")
-    
+
     try:
         order_id, status = sdk.place_order(
             symbol=symbol,
@@ -348,7 +364,7 @@ Before deploying to production:
 
 3. **Delete token files:**
    ```bash
-   rm logs/tokens_*.json
+   rm config/tokens_*.json
    sdk.authenticate(mode="PAPER")  # Re-authenticate
    ```
 
@@ -371,16 +387,16 @@ def check_security_indicators(sdk):
     """Check for unusual activity."""
     # Get recent orders
     orders = sdk.get_order_history(limit=100, mode="LIVE")
-    
+
     # Check for orders you didn't place
     for order in orders:
         # Your validation logic here
         pass
-    
+
     # Get balance changes
     balances = sdk.get_account_balances(mode="LIVE")
     # Compare with expected balances
-    
+
     # Log any anomalies
     pass
 ```

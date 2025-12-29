@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "tradestation-python-sdk"
-version = "1.0.0"
+version = "1.0.1"
 description = "Unofficial Python SDK for TradeStation API v3 with full REST API and HTTP Streaming support"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -52,6 +52,8 @@ dev = [
     "pytest-mock>=3.11.0",
     "black>=23.0.0",
     "ruff>=0.1.0",
+    "pre-commit>=4.5.0",
+    "detect-secrets>=1.5.0",
 ]
 examples = [
     "jupyter>=1.0.0",

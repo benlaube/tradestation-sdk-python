@@ -48,9 +48,9 @@ Dynamic: requires-python
 
 # TradeStation SDK
 
-**Version:** 1.0.0  
-**Status:** Production Ready  
-**Python:** 3.10+  
+**Version:** 1.0.0
+**Status:** Production Ready
+**Python:** 3.10+
 **License:** MIT
 
 A comprehensive, self-contained Python SDK for TradeStation API v3. This SDK provides complete access to TradeStation's REST API and HTTP Streaming endpoints without external dependencies.
@@ -304,7 +304,7 @@ import asyncio
 async def stream_quotes():
     sdk = TradeStationSDK()
     sdk.ensure_authenticated(mode="PAPER")
-    
+
     async for quote in sdk.streaming.stream_quotes(["AAPL"], mode="PAPER"):
         print(f"📈 AAPL: Last=${quote.Last}, Bid=${quote.Bid}, Ask=${quote.Ask}")
 
@@ -641,7 +641,7 @@ try:
 except InvalidRequestError as e:
     # Human-readable error message
     print(f"Error: {e}")
-    
+
     # Structured error details
     details = e.to_dict()
     print(f"API Error Code: {details['api_error_code']}")
@@ -758,7 +758,7 @@ from src.lib.tradestation import TradeStationSDK
 async def stream_quotes():
     sdk = TradeStationSDK()
     sdk.ensure_authenticated(mode="PAPER")
-    
+
     # SDK handles reconnection, retry, and fallback automatically
     async for quote in sdk.streaming.stream_quotes(
         ["MNQZ25"],
@@ -1244,7 +1244,7 @@ from src.lib.tradestation import TradeStationSDK, QuoteStream
 async def main():
     sdk = TradeStationSDK()
     sdk.ensure_authenticated(mode="PAPER")
-    
+
     async for quote in sdk.streaming.stream_quotes(["MNQZ25"], mode="PAPER"):
         # Streaming methods now return QuoteStream models directly
         # Control messages (StreamStatus, Heartbeat) are filtered automatically
@@ -1427,15 +1427,15 @@ from src.lib.tradestation import TradeStationSDK, QuoteStream
 async def process_quotes():
     sdk = TradeStationSDK()
     sdk.ensure_authenticated(mode="PAPER")
-    
+
     async for data in sdk.streaming.stream_quotes(["MNQZ25"], mode="PAPER"):
         # Skip control messages
         if "StreamStatus" in data or "Heartbeat" in data:
             continue
-        
+
         try:
             quote = QuoteStream(**data)
-            
+
             # Process quote
             if quote.Last and quote.Bid and quote.Ask:
                 spread = float(quote.Ask) - float(quote.Bid)
@@ -1455,18 +1455,18 @@ from src.lib.tradestation import TradeStationSDK, OrderStream
 async def monitor_orders():
     sdk = TradeStationSDK()
     sdk.ensure_authenticated(mode="PAPER")
-    
+
     account_id = sdk.get_account_info(mode="PAPER")["account_id"]
-    
+
     async for data in sdk.streaming.stream_orders(account_id, mode="PAPER"):
         # Skip control messages
         if "StreamStatus" in data or "Heartbeat" in data:
             continue
-        
+
         try:
             order = OrderStream(**data)
             print(f"Order {order.OrderID}: {order.Status} - {order.StatusDescription}")
-            
+
             if order.Status == "FLL":
                 print(f"Order filled at {order.FilledPrice}")
         except Exception as e:
@@ -1484,21 +1484,21 @@ from src.lib.tradestation import TradeStationSDK, PositionStream
 async def track_pnl():
     sdk = TradeStationSDK()
     sdk.ensure_authenticated(mode="PAPER")
-    
+
     account_id = sdk.get_account_info(mode="PAPER")["account_id"]
-    
+
     async for data in sdk.streaming.stream_positions(account_id, mode="PAPER"):
         # Skip control messages
         if "StreamStatus" in data or "Heartbeat" in data:
             continue
-        
+
         try:
             position = PositionStream(**data)
-            
+
             if position.Deleted:
                 print(f"Position {position.PositionID} closed")
                 continue
-            
+
             print(f"{position.Symbol}: {position.Quantity} @ {position.AveragePrice}")
             print(f"  Unrealized P&L: ${position.UnrealizedProfitLoss}")
             print(f"  Today's P&L: ${position.TodaysProfitLoss}")
@@ -1736,20 +1736,19 @@ See [CHANGELOG.md](CHANGELOG.md) for version history and release notes.
 
 ## 📊 SDK at a Glance
 
-**📦 Installation:** `pip install tradestation-sdk`  
-**⏱️ Time to First Order:** 2-5 minutes  
-**📈 API Coverage:** 92% (57/62 endpoints)  
-**🧪 Test Coverage:** 90%+  
-**🐍 Python Version:** 3.10+  
-**📝 Documentation:** 30,000+ words across 23 files  
-**💡 Examples:** 3 Jupyter notebooks + CLI tools  
-**🔒 Security:** Comprehensive security guide  
-**🚀 Production Ready:** Full deployment guide  
+**📦 Installation:** `pip install tradestation-sdk`
+**⏱️ Time to First Order:** 2-5 minutes
+**📈 API Coverage:** 92% (57/62 endpoints)
+**🧪 Test Coverage:** 90%+
+**🐍 Python Version:** 3.10+
+**📝 Documentation:** 30,000+ words across 23 files
+**💡 Examples:** 3 Jupyter notebooks + CLI tools
+**🔒 Security:** Comprehensive security guide
+**🚀 Production Ready:** Full deployment guide
 
 **See [docs/FEATURE_COMPARISON.md](docs/FEATURE_COMPARISON.md) for complete feature comparison.**
 
 ---
 
-**Last Updated:** 2025-12-07  
+**Last Updated:** 2025-12-07
 **SDK Version:** 1.0.0
-

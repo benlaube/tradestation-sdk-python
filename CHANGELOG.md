@@ -29,6 +29,53 @@ This changelog tracks SDK-specific changes including:
 
 ---
 
+## [1.0.1] - 2025-12-28
+
+**Highlights**
+- ✅ Token storage: Optional keychain/secret-service integration with secure file fallback
+- ✅ OAuth port: Automatic port selection (8888-8898 range) to prevent conflicts
+- ✅ HTTP client: Async support with httpx (optional, backward compatible)
+- ✅ Security: Improved token file permissions and directory security
+
+**Added**
+- Token storage keychain integration (macOS Keychain, Linux Secret Service, Windows Credential Manager)
+- Configurable token storage via `TRADESTATION_TOKEN_STORAGE` environment variable
+- Custom token directory support via `TRADESTATION_TOKEN_DIR` environment variable
+- Automatic OAuth port selection with fallback range 8888-8898
+- OAuth port override via `TRADESTATION_OAUTH_PORT` environment variable
+- Async HTTP client support using httpx (opt-in via `use_async=True` or `TRADESTATION_USE_ASYNC=true`)
+- `make_request_async()` method for async API operations
+- `aclose()` method for async client cleanup
+
+**Changed**
+- Token storage directory permissions automatically set to `chmod 700` (owner access only)
+- Token file permissions automatically set to `chmod 600` (owner read/write only)
+- Improved OAuth port conflict handling with automatic fallback
+- Enhanced error messages for port conflicts and token storage issues
+
+**Fixed**
+- OAuth authentication no longer fails when default port (8888) is in use
+- Token storage security improved with automatic permission restrictions
+- Better error handling for token storage operations
+
+**Documentation**
+- Updated `LIMITATIONS.md` to reflect v1.0.1 improvements (items 1-3 resolved)
+- Updated `API_REFERENCE.md` to clarify SDK API vs TradeStation API endpoints
+- Added async usage examples and configuration documentation
+- Updated `SECURITY.md` with keychain storage instructions
+
+**Files Modified**
+- ✅ `session.py` - Token storage keychain support, OAuth port auto-selection
+- ✅ `client.py` - Async HTTP client support with httpx
+- ✅ `config.py` - Added async client configuration
+- ✅ `__init__.py` - SDK initialization with async support
+- ✅ `LIMITATIONS.md` - Updated to reflect fixes
+- ✅ `CHANGELOG.md` - Added v1.0.1 entry
+- ✅ `docs/API_REFERENCE.md` - Clarified scope
+- ✅ `pyproject.toml` - Version bump to 1.0.1
+
+---
+
 ## 2025-12-18 - Submodule Workflow, Docstrings, Security Hardening
 
 **Highlights**

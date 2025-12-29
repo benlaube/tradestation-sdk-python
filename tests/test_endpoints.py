@@ -5,6 +5,8 @@ Comprehensive endpoint mapping verification for all 72 SDK functions.
 Uses parametrized tests to verify each function calls the correct endpoint.
 """
 
+import json
+
 import pytest
 
 # ============================================================================

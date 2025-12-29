@@ -152,22 +152,22 @@ tradestation_sdk/
 def get_new_feature(self, mode: str | None = None) -> dict[str, Any]:
     """
     Get new feature data.
-    
+
     Args:
         mode: "PAPER" or "LIVE"
-    
+
     Returns:
         Dictionary with feature data
-    
+
     Example:
         >>> result = sdk.get_new_feature(mode="PAPER")
         >>> print(result)
-    
+
     Dependencies: HTTPClient.make_request
     """
     if mode is None:
         mode = self.default_mode
-    
+
     response = self.client.make_request("GET", "new/endpoint", mode=mode)
     return response
 ```
@@ -192,10 +192,10 @@ def test_get_new_feature(self, mock_http_client, mocker):
         "make_request",
         return_value={"data": "test"}
     )
-    
+
     account_ops = AccountOperations(mock_http_client)
     result = account_ops.get_new_feature("PAPER")
-    
+
     assert result == {"data": "test"}
 ```
 
@@ -213,10 +213,10 @@ from pydantic import BaseModel, Field
 
 class NewFeatureResponse(BaseModel):
     """Response model for new feature API."""
-    
+
     field1: str = Field(..., description="Description of field1")
     field2: int | None = Field(None, description="Optional field2")
-    
+
     class Config:
         populate_by_name = True  # Allow both snake_case and PascalCase
 ```
@@ -258,7 +258,7 @@ from tradestation_sdk import TradeStationSDK
 @pytest.mark.unit
 class TestNewFeature:
     """Tests for new feature."""
-    
+
     def test_success_case(self, mock_http_client, mocker):
         """Test new feature returns expected data."""
         # Arrange
@@ -267,13 +267,13 @@ class TestNewFeature:
             "make_request",
             return_value={"expected": "data"}
         )
-        
+
         # Act
         result = sdk.new_feature(mode="PAPER")
-        
+
         # Assert
         assert result == {"expected": "data"}
-    
+
     def test_error_handling(self, mock_http_client, mocker):
         """Test new feature handles errors."""
         mocker.patch.object(
@@ -281,7 +281,7 @@ class TestNewFeature:
             "make_request",
             side_effect=TradeStationAPIError("Test error")
         )
-        
+
         with pytest.raises(TradeStationAPIError):
             sdk.new_feature(mode="PAPER")
 ```
@@ -330,31 +330,31 @@ Use Google-style docstrings:
 def function_name(param1: str, param2: int = 0) -> dict[str, Any]:
     """
     Brief description of function (one line).
-    
+
     Longer description if needed. Explain what the function does,
     any important behavior, and caveats.
-    
+
     Args:
         param1: Description of param1
         param2: Description of param2 (default: 0)
-    
+
     Returns:
         Dictionary with result data including:
         - key1: Description
         - key2: Description
-    
+
     Raises:
         ValueError: If param1 is empty
         TradeStationAPIError: If API request fails
-    
+
     Example:
         >>> result = function_name("test", 42)
         >>> print(result['key1'])
         'value'
-    
+
     See Also:
         - related_function(): Related functionality
-    
+
     Dependencies: module1, module2
     """
 ```
@@ -421,13 +421,13 @@ def get_data(symbol, mode=None):
 3. **Update CHANGELOG.md:**
    ```markdown
    ## [Unreleased]
-   
+
    ### Added
    - New feature description
-   
+
    ### Changed
    - What changed
-   
+
    ### Fixed
    - Bug fix description
    ```

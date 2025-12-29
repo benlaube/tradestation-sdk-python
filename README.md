@@ -1,8 +1,8 @@
 # TradeStation SDK
 
-**Version:** 1.0.0  
-**Status:** Production Ready  
-**Python:** 3.10+  
+**Version:** 1.0.1
+**Status:** Production Ready
+**Python:** 3.10+
 **License:** MIT
 
 ## About This Document
@@ -294,7 +294,7 @@ import asyncio
 async def stream_quotes():
     sdk = TradeStationSDK()
     sdk.ensure_authenticated(mode="PAPER")
-    
+
     async for quote in sdk.streaming.stream_quotes(["AAPL"], mode="PAPER"):
         print(f"📈 AAPL: Last=${quote.Last}, Bid=${quote.Bid}, Ask=${quote.Ask}")
 
@@ -508,21 +508,20 @@ except RateLimitError as e:
 
 ### Current Constraints
 
-1. **Token Storage Security**
-   - **Issue:** Tokens stored as plain JSON in `logs/tokens_*.json`
-   - **Not encrypted at rest**
-   - **Risk:** Local file access = token access
-   - **Mitigation:** Planned for v1.1 (system keychain encryption)
-   - **Workaround:** Secure file permissions on Linux/macOS:
-     ```bash
-     chmod 600 logs/tokens_*.json
-     ```
+1. **Token Storage Security** ✅ **Improved in v1.0.1**
+   - **Status:** Optional keychain/secret-service integration available
+   - **Current:** Tokens stored in `config/tokens_*.json` with automatic `chmod 600` permissions
+   - **Enhanced:** System keychain support (macOS Keychain, Linux Secret Service, Windows Credential Manager)
+   - **Configuration:** Set `TRADESTATION_TOKEN_STORAGE=keychain` (requires `pip install keyring`)
+   - **Auto-fallback:** Falls back to secure file storage if keychain unavailable
+   - **See:** [LIMITATIONS.md](LIMITATIONS.md#1-token-storage--improved-in-v101) for details
 
-2. **OAuth Port Conflicts**
-   - **Issue:** OAuth callback requires port 8888 (or configured port)
-   - **Manual intervention needed if port in use**
-   - **Mitigation:** Planned for v1.1 (auto-port selection)
-   - **Workaround:** Change port in `.env` or kill process on port 8888
+2. **OAuth Port Conflicts** ✅ **Fixed in v1.0.1**
+   - **Status:** Automatic port selection implemented
+   - **Current:** SDK automatically finds available port in range 8888-8898
+   - **Override:** Set `TRADESTATION_OAUTH_PORT` environment variable for specific port
+   - **No manual intervention needed** - handles port conflicts automatically
+   - **See:** [LIMITATIONS.md](LIMITATIONS.md#2-oauth-port-conflicts--fixed-in-v101) for details
 
 3. **Built-in Retry Logic for REST API** ✅ **Implemented in v1.0.0**
    - **Status:** All REST API methods now have automatic retry with exponential backoff
@@ -535,11 +534,12 @@ except RateLimitError as e:
    - **Includes:** Exponential backoff, REST polling fallback, health tracking
    - **Future:** v1.2 will add circuit breaker pattern
 
-5. **Synchronous HTTP Client**
-   - **Issue:** Uses `requests` library (blocking I/O)
-   - **Not ideal for high-concurrency applications**
-   - **Mitigation:** Planned for v2.0 (native async with `httpx`)
-   - **Workaround:** Use thread pools for concurrent requests
+5. **Synchronous HTTP Client** ✅ **Async Support Added in v1.0.1**
+   - **Status:** Optional async HTTP client available
+   - **Current:** Default synchronous mode (backward compatible)
+   - **Enhanced:** Enable async mode with `use_async=True` or `TRADESTATION_USE_ASYNC=true`
+   - **Features:** Non-blocking I/O, connection pooling, same retry logic
+   - **See:** [LIMITATIONS.md](LIMITATIONS.md#3-synchronous-http-client--async-support-added-in-v101) for details
 
 6. **Bar Data Interval Limits**
    - **Issue:** Only minute-based intervals supported (1, 2, 5, etc.)
@@ -623,7 +623,7 @@ try:
 except InvalidRequestError as e:
     # Human-readable error message
     print(f"Error: {e}")
-    
+
     # Structured error details
     details = e.to_dict()
     print(f"API Error Code: {details['api_error_code']}")
@@ -740,7 +740,7 @@ from src.lib.tradestation import TradeStationSDK
 async def stream_quotes():
     sdk = TradeStationSDK()
     sdk.ensure_authenticated(mode="PAPER")
-    
+
     # SDK handles reconnection, retry, and fallback automatically
     async for quote in sdk.streaming.stream_quotes(
         ["MNQZ25"],
@@ -864,9 +864,14 @@ src/lib/tradestation/
 ├── mappers.py                # Data normalization functions
 ├── models/                  # Pydantic models
 │   ├── __init__.py
-│   ├── requests.py          # Request models (order placement, etc.)
-│   ├── responses.py         # REST API response models
-│   └── streaming.py         # Streaming API response models
+│   ├── orders.py            # Order models (requests, responses, nested components)
+│   ├── order_executions.py  # Order execution (fill) models
+│   ├── streaming.py         # HTTP Streaming API response models
+│   ├── accounts.py          # REST account models (single account, balances, BOD)
+│   ├── accounts_list.py     # REST account list response
+│   ├── accounts_rest.py     # Additional account REST models
+│   ├── positions.py         # REST position models
+│   └── quotes.py            # REST quote models
 └── docs/                    # SDK documentation
     ├── README.md            # This file
     ├── API_COVERAGE.md      # API endpoint coverage analysis
@@ -875,30 +880,30 @@ src/lib/tradestation/
 
 ### Core Components
 
-**TradeStationSDK** (`__init__.py`)
+**TradeStationSDK** ([`__init__.py`](__init__.py))
 - Main SDK class that composes all modules
 - Provides unified interface for all operations
 - Manages authentication and mode switching
 
-**TokenManager** (`session.py`)
+**TokenManager** ([`session.py`](session.py))
 - OAuth2 token management
 - Automatic token refresh
 - Separate token storage for PAPER and LIVE modes
 
-**HTTPClient** (`client.py`)
+**HTTPClient** ([`client.py`](client.py))
 - HTTP request handling
 - Authentication header injection
 - Request/response logging
 - HTTP Streaming support (NDJSON)
 
-**Operation Modules** (`accounts.py`, `order_executions.py`, `orders.py`, `positions.py`, `market_data.py`)
-- Domain-specific API operations
-- Type-safe method signatures
-- Comprehensive error handling
-- **OrderExecutionOperations** - Order placement, modification, cancellation, executions (uses `/orderexecution/` endpoints)
-- **OrderOperations** - Order queries and streaming (uses `/brokerage/accounts/.../orders` endpoints)
+**Operation Modules:**
+- [`accounts.py`](accounts.py) - Account operations (list accounts, balances, BOD)
+- [`market_data.py`](market_data.py) - Market data operations (bars, quotes, symbol search)
+- [`orders.py`](orders.py) - Order query operations (history, current orders, by IDs)
+- [`order_executions.py`](order_executions.py) - Order execution operations (placement, modification, cancellation, executions)
+- [`positions.py`](positions.py) - Position operations (get positions, flatten)
 
-**StreamingManager** (`streaming.py`)
+**StreamingManager** ([`streaming.py`](streaming.py))
 - HTTP Streaming session management
 - Real-time data streaming
 - Automatic reconnection with exponential backoff
@@ -906,16 +911,29 @@ src/lib/tradestation/
 - REST polling fallback
 - Stream health tracking
 
-**Models** (`models/`)
+**Models** ([`models/`](models/))
 - Pydantic models for type safety
-- Request models (order placement, etc.)
-- Response models (REST API)
-- Streaming models (HTTP Streaming API)
+- [`models/orders.py`](models/orders.py) - Order request/response models, nested components
+- [`models/order_executions.py`](models/order_executions.py) - Order execution models
+- [`models/streaming.py`](models/streaming.py) - Streaming API response models
+- [`models/accounts.py`](models/accounts.py) - Account and balance models
+- [`models/accounts_list.py`](models/accounts_list.py) - Account list models
+- [`models/positions.py`](models/positions.py) - Position models
+- [`models/quotes.py`](models/quotes.py) - Quote snapshot models
 
-**Mappers** (`mappers.py`)
+**Mappers** ([`mappers.py`](mappers.py))
 - Data normalization functions
 - Handles attribute name variations (PascalCase, camelCase)
 - Converts API responses to consistent format
+
+**Exceptions** ([`exceptions.py`](exceptions.py))
+- Custom SDK exceptions with structured error details
+- Error categorization (recoverable vs non-recoverable)
+- Automatic retry logic integration
+
+**Configuration** ([`config.py`](config.py))
+- Environment variable loading and validation
+- Configuration management for SDK settings
 
 ---
 
@@ -1226,7 +1244,7 @@ from src.lib.tradestation import TradeStationSDK, QuoteStream
 async def main():
     sdk = TradeStationSDK()
     sdk.ensure_authenticated(mode="PAPER")
-    
+
     async for quote in sdk.streaming.stream_quotes(["MNQZ25"], mode="PAPER"):
         # Streaming methods now return QuoteStream models directly
         # Control messages (StreamStatus, Heartbeat) are filtered automatically
@@ -1409,15 +1427,15 @@ from src.lib.tradestation import TradeStationSDK, QuoteStream
 async def process_quotes():
     sdk = TradeStationSDK()
     sdk.ensure_authenticated(mode="PAPER")
-    
+
     async for data in sdk.streaming.stream_quotes(["MNQZ25"], mode="PAPER"):
         # Skip control messages
         if "StreamStatus" in data or "Heartbeat" in data:
             continue
-        
+
         try:
             quote = QuoteStream(**data)
-            
+
             # Process quote
             if quote.Last and quote.Bid and quote.Ask:
                 spread = float(quote.Ask) - float(quote.Bid)
@@ -1437,18 +1455,18 @@ from src.lib.tradestation import TradeStationSDK, OrderStream
 async def monitor_orders():
     sdk = TradeStationSDK()
     sdk.ensure_authenticated(mode="PAPER")
-    
+
     account_id = sdk.get_account_info(mode="PAPER")["account_id"]
-    
+
     async for data in sdk.streaming.stream_orders(account_id, mode="PAPER"):
         # Skip control messages
         if "StreamStatus" in data or "Heartbeat" in data:
             continue
-        
+
         try:
             order = OrderStream(**data)
             print(f"Order {order.OrderID}: {order.Status} - {order.StatusDescription}")
-            
+
             if order.Status == "FLL":
                 print(f"Order filled at {order.FilledPrice}")
         except Exception as e:
@@ -1466,21 +1484,21 @@ from src.lib.tradestation import TradeStationSDK, PositionStream
 async def track_pnl():
     sdk = TradeStationSDK()
     sdk.ensure_authenticated(mode="PAPER")
-    
+
     account_id = sdk.get_account_info(mode="PAPER")["account_id"]
-    
+
     async for data in sdk.streaming.stream_positions(account_id, mode="PAPER"):
         # Skip control messages
         if "StreamStatus" in data or "Heartbeat" in data:
             continue
-        
+
         try:
             position = PositionStream(**data)
-            
+
             if position.Deleted:
                 print(f"Position {position.PositionID} closed")
                 continue
-            
+
             print(f"{position.Symbol}: {position.Quantity} @ {position.AveragePrice}")
             print(f"  Unrealized P&L: ${position.UnrealizedProfitLoss}")
             print(f"  Today's P&L: ${position.TodaysProfitLoss}")
@@ -1718,19 +1736,19 @@ See [CHANGELOG.md](CHANGELOG.md) for version history and release notes.
 
 ## 📊 SDK at a Glance
 
-**📦 Installation:** `pip install tradestation-sdk`  
-**⏱️ Time to First Order:** 2-5 minutes  
-**📈 API Coverage:** 92% (57/62 endpoints)  
-**🧪 Test Coverage:** 90%+  
-**🐍 Python Version:** 3.10+  
-**📝 Documentation:** 30,000+ words across 23 files  
-**💡 Examples:** 3 Jupyter notebooks + CLI tools  
-**🔒 Security:** Comprehensive security guide  
-**🚀 Production Ready:** Full deployment guide  
+**📦 Installation:** `pip install tradestation-sdk`
+**⏱️ Time to First Order:** 2-5 minutes
+**📈 API Coverage:** 92% (57/62 endpoints)
+**🧪 Test Coverage:** 90%+
+**🐍 Python Version:** 3.10+
+**📝 Documentation:** 30,000+ words across 23 files
+**💡 Examples:** 3 Jupyter notebooks + CLI tools
+**🔒 Security:** Comprehensive security guide
+**🚀 Production Ready:** Full deployment guide
 
 **See [docs/FEATURE_COMPARISON.md](docs/FEATURE_COMPARISON.md) for complete feature comparison.**
 
 ---
 
-**Last Updated:** 2025-12-07  
+**Last Updated:** 2025-12-07
 **SDK Version:** 1.0.0

@@ -161,7 +161,7 @@ All mock responses are in `fixtures/api_responses.py` and match TradeStation API
 @pytest.mark.accounts
 class TestAccountOperationsGetAccountInfo:
     """Tests for get_account_info method."""
-    
+
     def test_get_account_info_success(self, mock_http_client, mocker):
         """Test get_account_info returns account information."""
         mock_request = mocker.patch.object(
@@ -169,13 +169,13 @@ class TestAccountOperationsGetAccountInfo:
             "make_request",
             return_value=api_responses.MOCK_ACCOUNTS_LIST
         )
-        
+
         account_ops = AccountOperations(mock_http_client, default_mode="PAPER")
         result = account_ops.get_account_info("PAPER")
-        
+
         # Verify endpoint was called
         mock_request.assert_called_once_with("GET", "brokerage/accounts", mode="PAPER")
-        
+
         # Verify result structure
         assert "account_id" in result
 ```

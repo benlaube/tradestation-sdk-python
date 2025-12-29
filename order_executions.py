@@ -167,11 +167,11 @@ class OrderExecutionOperations:
                 None,
                 f"ERROR: order_type must be a string, got {type(order_type).__name__ if order_type is not None else 'None'}",
             )
-        VALID_ORDER_TYPES = ["MARKET", "LIMIT", "STOP", "STOPLIMIT", "TRAILINGSTOP"]
+        valid_order_types = ["MARKET", "LIMIT", "STOP", "STOPLIMIT", "TRAILINGSTOP"]
         order_type_upper = order_type.upper().strip()
-        if order_type_upper not in VALID_ORDER_TYPES:
-            logger.error(f"❌ order_type must be one of {VALID_ORDER_TYPES}, got '{order_type}'")
-            return None, f"ERROR: order_type must be one of {VALID_ORDER_TYPES}, got '{order_type}'"
+        if order_type_upper not in valid_order_types:
+            logger.error(f"❌ order_type must be one of {valid_order_types}, got '{order_type}'")
+            return None, f"ERROR: order_type must be one of {valid_order_types}, got '{order_type}'"
 
         # Validate time_in_force
         if not time_in_force or not isinstance(time_in_force, str):
@@ -182,11 +182,11 @@ class OrderExecutionOperations:
                 None,
                 f"ERROR: time_in_force must be a string, got {type(time_in_force).__name__ if time_in_force is not None else 'None'}",
             )
-        VALID_TIME_IN_FORCE = ["DAY", "DYP", "GTC", "GCP", "GTD", "GDP", "OPG", "CLO", "IOC", "FOK", "1", "3", "5"]
+        valid_time_in_force = ["DAY", "DYP", "GTC", "GCP", "GTD", "GDP", "OPG", "CLO", "IOC", "FOK", "1", "3", "5"]
         time_in_force_upper = time_in_force.upper().strip()
-        if time_in_force_upper not in VALID_TIME_IN_FORCE:
-            logger.error(f"❌ time_in_force must be one of {VALID_TIME_IN_FORCE}, got '{time_in_force}'")
-            return None, f"ERROR: time_in_force must be one of {VALID_TIME_IN_FORCE}, got '{time_in_force}'"
+        if time_in_force_upper not in valid_time_in_force:
+            logger.error(f"❌ time_in_force must be one of {valid_time_in_force}, got '{time_in_force}'")
+            return None, f"ERROR: time_in_force must be one of {valid_time_in_force}, got '{time_in_force}'"
 
         # Get account ID for the specified mode
         account_info = self.accounts.get_account_info(mode)
@@ -1809,11 +1809,11 @@ class OrderExecutionOperations:
             raise ValueError(
                 f"time_in_force must be a string, got {type(time_in_force).__name__ if time_in_force is not None else 'None'}"
             )
-        VALID_TIME_IN_FORCE = ["DAY", "DYP", "GTC", "GCP", "GTD", "GDP", "OPG", "CLO", "IOC", "FOK", "1", "3", "5"]
+        valid_time_in_force = ["DAY", "DYP", "GTC", "GCP", "GTD", "GDP", "OPG", "CLO", "IOC", "FOK", "1", "3", "5"]
         time_in_force_upper = time_in_force.upper().strip()
-        if time_in_force_upper not in VALID_TIME_IN_FORCE:
-            logger.error(f"❌ time_in_force must be one of {VALID_TIME_IN_FORCE}, got '{time_in_force}'")
-            raise ValueError(f"time_in_force must be one of {VALID_TIME_IN_FORCE}, got '{time_in_force}'")
+        if time_in_force_upper not in valid_time_in_force:
+            logger.error(f"❌ time_in_force must be one of {valid_time_in_force}, got '{time_in_force}'")
+            raise ValueError(f"time_in_force must be one of {valid_time_in_force}, got '{time_in_force}'")
 
         # Validate mode if provided
         if mode is not None:

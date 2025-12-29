@@ -335,7 +335,7 @@ class TestOrderExecutionOperationsGroupOrders:
             {"Symbol": "MNQZ25", "TradeAction": "BUY", "Quantity": "2", "OrderType": "Limit", "LimitPrice": "25000"},
             {"Symbol": "MNQZ25", "TradeAction": "SELL", "Quantity": "2", "OrderType": "Limit", "LimitPrice": "25100"},
         ]
-        result = order_exec.place_group_order("OCO", orders, mode="PAPER")
+        _ = order_exec.place_group_order("OCO", orders, mode="PAPER")
 
         call_args = mock_http_client.make_request.call_args
         assert "orderexecution/ordergroups" in call_args[0][1]
@@ -355,7 +355,7 @@ class TestOrderExecutionOperationsGroupOrders:
             {"Symbol": "MNQZ25", "TradeAction": "SELL", "Quantity": "2", "OrderType": "Limit", "LimitPrice": "25100"},
             {"Symbol": "MNQZ25", "TradeAction": "SELL", "Quantity": "2", "OrderType": "Stop", "StopPrice": "24900"},
         ]
-        result = order_exec.place_group_order("BRK", orders, mode="PAPER")
+        _ = order_exec.place_group_order("BRK", orders, mode="PAPER")
 
         call_args = mock_http_client.make_request.call_args
         json_data = call_args[1]["json_data"]
@@ -370,7 +370,7 @@ class TestOrderExecutionOperationsGroupOrders:
 
         order_exec = OrderExecutionOperations(mock_http_client, mock_accounts, default_mode="PAPER")
         orders = [{"Symbol": "MNQZ25", "TradeAction": "BUY", "Quantity": "2"}]
-        result = order_exec.confirm_group_order("OCO", orders, mode="PAPER")
+        _ = order_exec.confirm_group_order("OCO", orders, mode="PAPER")
 
         call_args = mock_http_client.make_request.call_args
         assert "orderexecution/ordergroupconfirm" in call_args[0][1]
@@ -455,7 +455,7 @@ class TestOrderExecutionOperationsConvenienceFunctions:
             {"Symbol": "MNQZ25", "TradeAction": "BUY", "Quantity": "2", "OrderType": "Limit", "LimitPrice": "25000"},
             {"Symbol": "MNQZ25", "TradeAction": "SELL", "Quantity": "2", "OrderType": "Limit", "LimitPrice": "25100"},
         ]
-        result = order_exec.place_oco_order(orders, mode="PAPER")
+        _ = order_exec.place_oco_order(orders, mode="PAPER")
 
         call_args = mock_http_client.make_request.call_args
         json_data = call_args[1]["json_data"]
@@ -469,9 +469,7 @@ class TestOrderExecutionOperationsConvenienceFunctions:
         mocker.patch.object(mock_http_client, "make_request", return_value=api_responses.MOCK_GROUP_ORDER_PLACEMENT)
 
         order_exec = OrderExecutionOperations(mock_http_client, mock_accounts, default_mode="PAPER")
-        result = order_exec.place_bracket_order(
-            "MNQZ25", "BUY", 2, profit_target=25100.0, stop_loss=24900.0, mode="PAPER"
-        )
+        _ = order_exec.place_bracket_order("MNQZ25", "BUY", 2, profit_target=25100.0, stop_loss=24900.0, mode="PAPER")
 
         call_args = mock_http_client.make_request.call_args
         json_data = call_args[1]["json_data"]
@@ -542,7 +540,7 @@ class TestOrderExecutionOperationsOtherMethods:
         order_exec = OrderExecutionOperations(mock_http_client, mock_accounts, default_mode="PAPER")
         order_exec._orders = mock_order_ops  # Inject mock
 
-        result = order_exec.cancel_all_orders_for_symbol("MNQZ25", mode="PAPER")
+        _ = order_exec.cancel_all_orders_for_symbol("MNQZ25", mode="PAPER")
 
         # Verify get_current_orders was called
         mock_order_ops.get_current_orders.assert_called_once()
@@ -564,7 +562,7 @@ class TestOrderExecutionOperationsOtherMethods:
         order_exec = OrderExecutionOperations(mock_http_client, mock_accounts, default_mode="PAPER")
         order_exec._orders = mock_order_ops
 
-        result = order_exec.cancel_all_orders(mode="PAPER")
+        _ = order_exec.cancel_all_orders(mode="PAPER")
 
         mock_order_ops.get_current_orders.assert_called_once()
 

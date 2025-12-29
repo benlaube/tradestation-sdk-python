@@ -99,7 +99,7 @@ jobs:
     strategy:
       matrix:
         python-version: ['3.10', '3.11', '3.12']
-    
+
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python
@@ -346,5 +346,5 @@ jobs:
 
 ---
 
-**Last Updated:** 2025-12-07  
+**Last Updated:** 2025-12-07
 **Current Version:** 1.0.0

@@ -268,7 +268,7 @@ def get_credentials():
     client = boto3.client('secretsmanager', region_name='us-east-1')
     response = client.get_secret_value(SecretId='trading-bot-credentials')
     secrets = json.loads(response['SecretString'])
-    
+
     os.environ['TRADESTATION_CLIENT_ID'] = secrets['CLIENT_ID']
     os.environ['TRADESTATION_CLIENT_SECRET'] = secrets['CLIENT_SECRET']
     os.environ['TRADING_MODE'] = secrets['TRADING_MODE']
@@ -290,7 +290,7 @@ def get_credentials():
         vault_url="https://trading-vault.vault.azure.net/",
         credential=credential
     )
-    
+
     os.environ['TRADESTATION_CLIENT_ID'] = client.get_secret('client-id').value
     os.environ['TRADESTATION_CLIENT_SECRET'] = client.get_secret('client-secret').value
     os.environ['TRADING_MODE'] = client.get_secret('trading-mode').value
@@ -411,7 +411,7 @@ def health():
         # Check SDK is working
         info = sdk.info()
         account = sdk.get_account_info(mode="LIVE")
-        
+
         return jsonify({
             "status": "healthy",
             "sdk_version": info['version'],
@@ -450,7 +450,7 @@ def send_alert(subject, body):
     msg['Subject'] = subject
     msg['From'] = 'bot@example.com'
     msg['To'] = 'admin@example.com'
-    
+
     with smtplib.SMTP('smtp.gmail.com', 587) as smtp:
         smtp.starttls()
         smtp.login('bot@example.com', 'password')
@@ -502,7 +502,7 @@ def save_state(positions, orders, balances):
         "orders": orders,
         "balances": balances
     }
-    
+
     with open(f"state_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json", 'w') as f:
         json.dump(state, f, indent=2)
 ```
@@ -572,20 +572,20 @@ class RateLimiter:
         self.max_requests = max_requests
         self.window = window
         self.requests = deque()
-    
+
     def wait_if_needed(self):
         now = time.time()
-        
+
         # Remove old requests outside window
         while self.requests and self.requests[0] < now - self.window:
             self.requests.popleft()
-        
+
         # Check if at limit
         if len(self.requests) >= self.max_requests:
             sleep_time = self.window - (now - self.requests[0])
             if sleep_time > 0:
                 time.sleep(sleep_time)
-        
+
         self.requests.append(now)
 
 # Usage
@@ -695,7 +695,7 @@ audit_logger.addHandler(audit_handler)
 def place_order_audited(symbol, side, quantity, **kwargs):
     # Log before placing
     audit_logger.info(f"ORDER_INTENT: {symbol} {side} {quantity} {kwargs}")
-    
+
     try:
         order_id, status = sdk.place_order(
             symbol=symbol,
@@ -703,11 +703,11 @@ def place_order_audited(symbol, side, quantity, **kwargs):
             quantity=quantity,
             **kwargs
         )
-        
+
         # Log success
         audit_logger.info(f"ORDER_PLACED: {order_id} {status}")
         return order_id, status
-        
+
     except Exception as e:
         # Log failure
         audit_logger.error(f"ORDER_FAILED: {e}")
@@ -731,7 +731,7 @@ def place_order_audited(symbol, side, quantity, **kwargs):
 def can_day_trade(sdk):
     balances = sdk.get_account_balances(mode="LIVE")
     equity = balances['equity']
-    
+
     if equity < 25000:
         # Check day trades in last 5 days
         orders = sdk.get_order_history(
@@ -739,10 +739,10 @@ def can_day_trade(sdk):
             mode="LIVE"
         )
         day_trades = count_day_trades(orders)
-        
+
         if day_trades >= 3:
             return False
-    
+
     return True
 ```
 
@@ -883,5 +883,5 @@ def can_day_trade(sdk):
 
 ---
 
-**Last Updated:** 2025-12-07  
+**Last Updated:** 2025-12-07
 **SDK Version:** 1.0.0

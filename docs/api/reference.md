@@ -4,12 +4,14 @@
 
 This is the **complete API reference** for all SDK classes, methods, models, and exceptions. It provides detailed parameter descriptions, return types, usage patterns, and code examples for every function in the SDK.
 
-**Use this if:** You need to look up a specific function, understand parameters, see return types, or find detailed method documentation.
+**Important:** This document focuses on the **SDK's API** (the methods and classes provided by this Python SDK). For information about which TradeStation API v3 endpoints the SDK calls, see **[API_ENDPOINT_MAPPING.md](API_ENDPOINT_MAPPING.md)**.
+
+**Use this if:** You need to look up a specific SDK function, understand parameters, see return types, or find detailed method documentation.
 
 **Related Documents:**
 - 📋 **[CHEATSHEET.md](../CHEATSHEET.md)** - Quick code snippets (faster lookup)
 - 💡 **[SDK_USAGE_EXAMPLES.md](SDK_USAGE_EXAMPLES.md)** - Real-world usage examples
-- 📚 **[API_ENDPOINT_MAPPING.md](API_ENDPOINT_MAPPING.md)** - SDK functions mapped to TradeStation API endpoints
+- 📚 **[API_ENDPOINT_MAPPING.md](API_ENDPOINT_MAPPING.md)** - SDK functions mapped to TradeStation API v3 endpoints (shows which API endpoints are called)
 - 📝 **[ORDER_FUNCTIONS_REFERENCE.md](ORDER_FUNCTIONS_REFERENCE.md)** - Detailed order function documentation
 - 🏗️ **[MODELS.md](MODELS.md)** - Pydantic model documentation
 - 📖 **[README.md](../README.md)** - SDK overview and getting started
