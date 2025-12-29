@@ -80,8 +80,7 @@ Welcome to the TradeStation SDK documentation. This directory contains comprehen
 
 **Quick reference materials and technical references.**
 
-- **[SDK Functions List](reference/functions-list.md)** - Complete function list
-- **[New Functions Summary](reference/new-functions.md)** - Recently added functions
+- **[SDK Functions List](reference/functions-list.md)** - Complete function list (includes [New Functions section](reference/functions-list.md#new-functions))
 - **[Trailing Stop Variations](reference/trailing-stops.md)** - Trailing stop options
 - **[Audit File References](reference/audit-references.md)** - Audit documentation links
 
@@ -123,8 +122,7 @@ docs/
 │   └── gap-analysis.md        # Gap analysis
 ├── reference/                 # Reference materials
 │   ├── README.md              # Reference index
-│   ├── functions-list.md      # Functions list
-│   ├── new-functions.md       # New functions
+│   ├── functions-list.md      # Functions list (includes new functions)
 │   ├── trailing-stops.md     # Trailing stops
 │   └── audit-references.md   # Audit references
 └── analysis/                  # Analysis & research

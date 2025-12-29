@@ -17,8 +17,8 @@ This is a **quick reference index** of all functions available in the SDK, organ
 
 - **Status:** Active
 - **Created:** 12-05-2025
-- **Last Updated:** 12-05-2025 14:43:09 EST
-- **Version:** 1.1.0
+- **Last Updated:** 12-29-2025 13:19:35 EST
+- **Version:** 1.2.0
 - **Description:** Quick reference list of all functions available in the TradeStation SDK across all modules and endpoints, organized by category for quick lookup
 - **Type:** Function Index - Quick reference for developers looking up SDK functions
 - **Applicability:** When quickly looking up available SDK functions, understanding function organization, or finding functions by category
@@ -32,6 +32,7 @@ This is a **quick reference index** of all functions available in the SDK, organ
 
 ## Table of Contents
 
+- [New Functions](#new-functions)
 - [Authentication Functions](#authentication-functions)
 - [Account Functions](#account-functions)
 - [Market Data Functions](#market-data-functions)
@@ -42,7 +43,102 @@ This is a **quick reference index** of all functions available in the SDK, organ
 - [Order Status Convenience Functions](#order-status-convenience-functions)
 - [Streaming Functions](#streaming-functions)
 - [Utility Functions](#utility-functions)
+- [Coverage Status](#coverage-status)
 - [Summary](#summary)
+
+---
+
+## New Functions
+
+The following functions were recently added to ensure all required trading operations are covered:
+
+### 1. `is_order_filled()`
+
+**Location:** `OrderExecutionOperations.is_order_filled()` / `TradeStationSDK.is_order_filled()`
+
+**Purpose:** Convenience function to check if an order has been filled.
+
+**Returns:** `bool` - True if order status is "FLL" (Filled) or "FLP" (Partial Fill)
+
+**Example:**
+```python
+if sdk.is_order_filled("924243071", mode="PAPER"):
+    print("Order is filled!")
+```
+
+### 2. `cancel_all_orders_for_symbol()`
+
+**Location:** `OrderExecutionOperations.cancel_all_orders_for_symbol()` / `TradeStationSDK.cancel_all_orders_for_symbol()`
+
+**Purpose:** Cancel all open orders for a specific symbol.
+
+**Returns:** `list[dict[str, Any]]` - List of cancellation results with order_id, symbol, success, message
+
+**Example:**
+```python
+results = sdk.cancel_all_orders_for_symbol("MNQZ25", mode="PAPER")
+for result in results:
+    print(f"Order {result['order_id']}: {result['success']}")
+```
+
+### 3. `cancel_all_orders()`
+
+**Location:** `OrderExecutionOperations.cancel_all_orders()` / `TradeStationSDK.cancel_all_orders()`
+
+**Purpose:** Cancel all open orders for account(s).
+
+**Returns:** `list[dict[str, Any]]` - List of cancellation results with order_id, symbol, success, message
+
+**Example:**
+```python
+results = sdk.cancel_all_orders(mode="PAPER")
+print(f"Cancelled {len(results)} orders")
+```
+
+### 4. `replace_order()`
+
+**Location:** `OrderExecutionOperations.replace_order()` / `TradeStationSDK.replace_order()`
+
+**Purpose:** Replace an order by canceling the old one and placing a new one. Useful when you need to change symbol, side, or other parameters that cannot be modified with `modify_order()`.
+
+**Returns:** `tuple[str | None, str]` - (new_order_id, status_message)
+
+**Example:**
+```python
+new_order_id, status = sdk.replace_order(
+    old_order_id="924243071",
+    symbol="ESZ25",  # Different symbol
+    side="SELL",     # Different side
+    quantity=3,
+    order_type="Limit",
+    limit_price=25000.00,
+    mode="PAPER"
+)
+```
+
+### Enhanced: `place_bracket_order()` - Trailing Stop Support
+
+**Location:** `OrderExecutionOperations.place_bracket_order()` / `TradeStationSDK.place_bracket_order()`
+
+**New Parameters:**
+- `stop_loss` (float | None): Now optional when using trailing stop
+- `trail_amount` (float | None): Trail amount in price units (points)
+- `trail_percent` (float | None): Trail percentage
+- `use_trailing_stop` (bool): If True, use trailing stop instead of fixed stop-loss
+
+**Example:**
+```python
+# Bracket order with trailing stop (NEW)
+result = sdk.place_bracket_order(
+    symbol="MNQZ25",
+    entry_side="BUY",
+    quantity=2,
+    profit_target=25100.00,
+    use_trailing_stop=True,
+    trail_amount=1.5,  # $3.00 trail for MNQ
+    mode="PAPER"
+)
+```
 
 ---
 
@@ -78,22 +174,22 @@ This is a **quick reference index** of all functions available in the SDK, organ
 
 | Function | Description | Returns | API Endpoint / Dependency |
 |----------|-------------|---------|--------------------------|
-| `get_bars(symbol, interval, unit, bars_back, start_date, end_date, mode)` | Fetch historical bar data (OHLCV) | list[dict[str, Any]] | `GET /v3/marketdata/barcharts/{symbol}` |
-| `search_symbols(pattern, category, asset_type, mode)` | Search for symbols matching criteria | list[dict[str, Any]] | `GET /v3/marketdata/symbols/search` |
+| `get_bars(symbol, interval, unit, bars_back, start_date, end_date, mode)` | Fetch historical bar data (OHLCV) | BarsResponse \| list[dict[str, Any]] | `GET /v3/marketdata/barcharts/{symbol}` |
+| `search_symbols(pattern, category, asset_type, mode)` | Search for symbols matching criteria | SymbolSearchResponse \| list[dict[str, Any]] | `GET /v3/marketdata/symbols/search` |
 | `get_futures_index_symbols(mode)` | Get list of available futures index symbols | list[dict[str, Any]] | `GET /v3/marketdata/symbollists/futures/index/symbolnames` |
 | `get_quote_snapshots(symbols, mode)` | Get quote snapshots for one or more symbols | dict[str, Any] | `GET /v3/marketdata/quotes/{symbols}` |
-| `get_symbol_details(symbols, mode)` | Get symbol details and formatting information | dict[str, Any] | `GET /v3/marketdata/symbols/{symbols}` |
+| `get_symbol_details(symbols, mode)` | Get symbol details and formatting information | SymbolDetailsResponse \| dict[str, Any] | `GET /v3/marketdata/symbols/{symbols}` |
 | `get_crypto_symbol_names(mode)` | Get list of available crypto symbol names | list[str] | `GET /v3/marketdata/symbollists/cryptopairs/symbolnames` |
-| `get_option_expirations(underlying, mode)` | Get option expiration dates for an underlying | list[str] | `GET /v3/marketdata/options/expirations/{underlying}` |
-| `get_option_risk_reward(request, mode)` | Calculate option risk/reward analysis | dict[str, Any] | `POST /v3/marketdata/options/riskreward` |
-| `get_option_spread_types(mode)` | Get available option spread types | list[dict[str, Any]] | `GET /v3/marketdata/options/spreadtypes` |
-| `get_option_strikes(underlying, expiration_date, min_strike, max_strike, mode)` | Get available strike prices for an underlying and expiration | list[float] | `GET /v3/marketdata/options/strikes/{underlying}` |
+| `get_option_expirations(underlying, mode)` | Get option expiration dates for an underlying | OptionExpirationsResponse \| list[str] | `GET /v3/marketdata/options/expirations/{underlying}` |
+| `get_option_risk_reward(request, mode)` | Calculate option risk/reward analysis | OptionRiskRewardResponse \| dict[str, Any] | `POST /v3/marketdata/options/riskreward` |
+| `get_option_spread_types(mode)` | Get available option spread types | OptionSpreadTypesResponse \| list[dict[str, Any]] | `GET /v3/marketdata/options/spreadtypes` |
+| `get_option_strikes(underlying, expiration_date, min_strike, max_strike, mode)` | Get available strike prices for an underlying and expiration | OptionStrikesResponse \| list[float] | `GET /v3/marketdata/options/strikes/{underlying}` |
 | `stream_quotes(symbols, mode)` | Stream quotes via HTTP Streaming (async) | AsyncGenerator[dict[str, Any], None] | `GET /v3/marketdata/stream/quotes/{symbols}` |
-| `stream_bars(symbol, interval, unit, mode)` | Stream bars via HTTP Streaming (async) | AsyncGenerator[dict[str, Any], None] | `GET /v3/marketdata/stream/barcharts/{symbol}` |
-| `stream_option_chains(underlying, mode)` | Stream option chain data (async) | AsyncGenerator[dict[str, Any], None] | `GET /v3/marketdata/stream/options/chains/{underlying}` |
-| `stream_option_quotes(legs, mode)` | Stream option quotes for specified legs (async) | AsyncGenerator[dict[str, Any], None] | `GET /v3/marketdata/stream/options/quotes` |
-| `stream_market_depth_quotes(symbol, mode)` | Stream Level 2 market depth quotes (async) | AsyncGenerator[dict[str, Any], None] | `GET /v3/marketdata/stream/marketdepth/quotes/{symbol}` |
-| `stream_market_depth_aggregates(symbol, mode)` | Stream aggregated market depth data (async) | AsyncGenerator[dict[str, Any], None] | `GET /v3/marketdata/stream/marketdepth/aggregates/{symbol}` |
+| `stream_bars(symbol, interval, unit, mode)` | Stream bars via HTTP Streaming (async) | AsyncGenerator[BarStream, None] | `GET /v3/marketdata/stream/barcharts/{symbol}` |
+| `stream_option_chains(underlying, mode)` | Stream option chain data (async) | AsyncGenerator[OptionChainStream, None] | `GET /v3/marketdata/stream/options/chains/{underlying}` |
+| `stream_option_quotes(legs, mode)` | Stream option quotes for specified legs (async) | AsyncGenerator[OptionQuoteStream, None] | `GET /v3/marketdata/stream/options/quotes` |
+| `stream_market_depth_quotes(symbol, mode)` | Stream Level 2 market depth quotes (async) | AsyncGenerator[MarketDepthQuoteStream, None] | `GET /v3/marketdata/stream/marketdepth/quotes/{symbol}` |
+| `stream_market_depth_aggregates(symbol, mode)` | Stream aggregated market depth data (async) | AsyncGenerator[MarketDepthAggregateStream, None] | `GET /v3/marketdata/stream/marketdepth/aggregates/{symbol}` |
 
 ---
 
@@ -202,6 +298,22 @@ This is a **quick reference index** of all functions available in the SDK, organ
 | `normalize_position(position)` | `mappers.normalize_position()` | Normalize TradeStation position object to consistent dictionary format | dict[str, Any] \| None | Internal utility function |
 | `get_base_url(mode)` | `client.get_base_url()` | Get base URL for specified mode (PAPER/LIVE) | str | Internal utility function |
 | `parse_api_error_response(response)` | `client.parse_api_error_response()` | Parse TradeStation API error response into structured ErrorDetails | ErrorDetails | Internal utility function |
+
+---
+
+## Coverage Status
+
+All 9 required trading operations are now fully covered:
+
+- ✅ **Replace an open order with a new one** - `replace_order()`
+- ✅ **Cancel an order** - `cancel_order()`
+- ✅ **Place a bracket order with trailing stop** - `place_bracket_order(..., use_trailing_stop=True)`
+- ✅ **Confirm an order has been filled** - `is_order_filled()`, `get_order_executions()`
+- ✅ **Cancel all orders (symbol)** - `cancel_all_orders_for_symbol()`
+- ✅ **Cancel all orders on account** - `cancel_all_orders()`
+- ✅ **Flatten position (symbol)** - `flatten_position(symbol)`
+- ✅ **Flatten all positions** - `flatten_position()`
+- ✅ **Trailing stop order** - `place_trailing_stop_order()`
 
 ---
 

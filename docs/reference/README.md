@@ -19,8 +19,7 @@ This section contains quick reference materials and technical references.
 
 ### Available References
 
-- **[SDK Functions List](functions-list.md)** - Complete list of all SDK functions
-- **[New Functions Summary](new-functions.md)** - Summary of newly added functions
+- **[SDK Functions List](functions-list.md)** - Complete list of all SDK functions (includes [New Functions section](functions-list.md#new-functions))
 - **[Trailing Stop Variations](trailing-stops.md)** - Trailing stop order variations and examples
 - **[Audit File References](audit-references.md)** - References to audit and analysis files
 
@@ -30,7 +29,7 @@ This section contains quick reference materials and technical references.
 - Use [SDK Functions List](functions-list.md) - Complete alphabetical list
 
 **Checking new features?**
-- See [New Functions Summary](new-functions.md) - Recently added functions
+- See [New Functions section](functions-list.md#new-functions) in Functions List - Recently added functions
 
 **Working with trailing stops?**
 - Review [Trailing Stop Variations](trailing-stops.md) - All trailing stop options
