@@ -17,22 +17,22 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import TypeVar
 
-from .client import HTTPClient
-from .config import sdk_config
-from .exceptions import (
+from ..utils.client import HTTPClient
+from ..config import sdk_config
+from ..exceptions import (
     NetworkError,
     NonRecoverableError,
     RateLimitError,
     RecoverableError,
 )
-from .logger import setup_logger
-from .models import BalanceStream
-from .models.streaming import (
+from ..utils.logger import setup_logger
+from ..models import BalanceStream
+from ..models.streaming import (
     OrderStream,
     PositionStream,
     QuoteStream,
 )
-from .session import Session, TokenManager
+from ..session import Session, TokenManager
 
 logger = setup_logger(__name__, sdk_config.log_level)
 

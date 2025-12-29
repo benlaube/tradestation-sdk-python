@@ -25,12 +25,12 @@ This document provides **comprehensive API coverage analysis** showing which Tra
 - **Applicability:** When reviewing SDK completeness, planning new endpoint implementations, or understanding API coverage status
 - **Dependencies:**
   - [`tradestation-api-v3-openapi.json`](../reference/tradestation-api-v3-openapi.json) - Source OpenAPI specification
-  - [`order_executions.py`](../order_executions.py) - Order execution operations
-  - [`orders.py`](../orders.py) - Order query operations
-  - [`accounts.py`](../accounts.py) - Account operations
-  - [`market_data.py`](../market_data.py) - Market data operations
-  - [`positions.py`](../positions.py) - Position operations
-  - [`streaming.py`](../streaming.py) - Streaming operations
+- [`operations/order_executions.py`](../operations/order_executions.py) - Order execution operations
+- [`operations/orders.py`](../operations/orders.py) - Order query operations
+- [`operations/accounts.py`](../operations/accounts.py) - Account operations
+- [`operations/market_data.py`](../operations/market_data.py) - Market data operations
+- [`operations/positions.py`](../operations/positions.py) - Position operations
+- [`operations/streaming.py`](../operations/streaming.py) - Streaming operations
   - [`session.py`](../session.py) - Session management
 - **How to Use:** Reference this document to understand which TradeStation API endpoints are implemented in the SDK, which models are used, and what coverage gaps exist
 
@@ -55,7 +55,7 @@ This document provides **comprehensive API coverage analysis** showing which Tra
 
 ## Endpoint Inventory (SDK → TradeStation API)
 
-**Source of Truth:** SDK code in `src/lib/tradestation` (order_executions.py, orders.py, accounts.py, market_data.py, positions.py, streaming.py, session.py)
+**Source of Truth:** SDK code in `src/lib/tradestation` (`operations/order_executions.py`, `operations/orders.py`, `operations/accounts.py`, `operations/market_data.py`, `operations/positions.py`, `operations/streaming.py`, `session.py`)
 
 ### REST Endpoints
 
@@ -63,45 +63,45 @@ This document provides **comprehensive API coverage analysis** showing which Tra
 |--------|----------|--------|---------------------|-------|------------|
 | Auth | `signin.tradestation.com/authorize` | GET | `session.py` (TokenManager) | Used | - |
 | Auth | `signin.tradestation.com/oauth/token` | POST | `session.py` (TokenManager) | Used | - |
-| Accounts | `brokerage/accounts` | GET | `accounts.py#get_account_info` | Used | `AccountsListResponse` |
-| Accounts | `brokerage/accounts/{accountId}` | GET | `accounts.py#get_account_balances` | Used | `AccountBalancesResponse` |
-| Accounts | `brokerage/accounts/{accounts}/balances` | GET | `accounts.py#get_detailed_balances` | Available (not used) | - |
-| Accounts | `brokerage/accounts/{accounts}/bodbalances` | GET | `accounts.py#get_account_balances_bod` | Used | `BODBalancesResponse` |
-| Market Data | `marketdata/barcharts/{symbol}` | GET | `market_data.py#get_bars` | Used | `BarsResponse` (wraps `BarResponse`) |
-| Market Data | `marketdata/quotes/{symbols}` | GET | `market_data.py#get_quote_snapshots` | Used | `QuotesResponse` |
-| Market Data | `marketdata/symbols/{symbols}` | GET | `market_data.py#get_symbol_details` | Used | `SymbolDetailsResponse` |
-| Market Data | `marketdata/symbols/search` | GET | `market_data.py#search_symbols` | Used | `SymbolSearchResponse` |
-| Market Data | `marketdata/symbollists/cryptopairs/symbolnames` | GET | `market_data.py#get_crypto_symbol_names` | Used | Raw dict |
-| Market Data | Options (chains/strikes/expirations/risk-reward/spreads) | GET | `market_data.py` option methods | Available (not actively used) | Option* responses (typed) |
-| Orders | `orderexecution/orders` | POST | `order_executions.py#place_order` | Used | `TradeStationOrderRequest` → `TradeStationOrderResponse` |
-| Orders | `orderexecution/orders/{orderId}` | PUT | `order_executions.py#modify_order` | Used | `TradeStationOrderResponse` |
-| Orders | `orderexecution/orders/{orderId}` | DELETE | `order_executions.py#cancel_order` | Used | Raw dict |
-| Orders | `orderexecution/orders/{orderId}/executions` | GET | `order_executions.py#get_order_executions` | Used | `TradeStationExecutionResponse` |
-| Orders | `orderexecution/orderconfirm` | POST | `order_executions.py#confirm_order` | Available (not used) | - |
-| Orders | `orderexecution/ordergroups` | POST | `order_executions.py#place_group_order` | Used | `TradeStationOrderGroupRequest` → `TradeStationOrderGroupResponse` |
-| Orders | `orderexecution/ordergroupconfirm` | POST | `order_executions.py#confirm_group_order` | Available (not used) | - |
-| Orders | `orderexecution/activationtriggers` | GET | `order_executions.py#get_activation_triggers` | Available (not used) | - |
-| Orders | `orderexecution/routes` | GET | `order_executions.py#get_routes` | Available (not used) | - |
-| Orders | `brokerage/accounts/{accounts}/orders` | GET | `orders.py#get_current_orders` | Used | `OrdersWrapper` |
-| Orders | `brokerage/accounts/{accounts}/historicalorders` | GET | `orders.py#get_order_history` | Used | Raw dict (uses `TradeStationOrderResponse` internally) |
-| Orders | `brokerage/accounts/{accounts}/orders/{orderIds}` | GET | `orders.py#get_orders_by_ids` | Available (not used) | `OrdersWrapper` |
-| Orders | `brokerage/accounts/{accounts}/historicalorders/{orderIds}` | GET | `orders.py#get_historical_orders_by_ids` | Available (not used) | - |
-| Positions | `brokerage/accounts/{accountId}/positions` | GET | `positions.py#get_positions` | Used | `PositionsResponse` |
+| Accounts | `brokerage/accounts` | GET | `operations/accounts.py#get_account_info` | Used | `AccountsListResponse` |
+| Accounts | `brokerage/accounts/{accountId}` | GET | `operations/accounts.py#get_account_balances` | Used | `AccountBalancesResponse` |
+| Accounts | `brokerage/accounts/{accounts}/balances` | GET | `operations/accounts.py#get_detailed_balances` | Available (not used) | - |
+| Accounts | `brokerage/accounts/{accounts}/bodbalances` | GET | `operations/accounts.py#get_account_balances_bod` | Used | `BODBalancesResponse` |
+| Market Data | `marketdata/barcharts/{symbol}` | GET | `operations/market_data.py#get_bars` | Used | `BarsResponse` (wraps `BarResponse`) |
+| Market Data | `marketdata/quotes/{symbols}` | GET | `operations/market_data.py#get_quote_snapshots` | Used | `QuotesResponse` |
+| Market Data | `marketdata/symbols/{symbols}` | GET | `operations/market_data.py#get_symbol_details` | Used | `SymbolDetailsResponse` |
+| Market Data | `marketdata/symbols/search` | GET | `operations/market_data.py#search_symbols` | Used | `SymbolSearchResponse` |
+| Market Data | `marketdata/symbollists/cryptopairs/symbolnames` | GET | `operations/market_data.py#get_crypto_symbol_names` | Used | Raw dict |
+| Market Data | Options (chains/strikes/expirations/risk-reward/spreads) | GET | `operations/market_data.py` option methods | Available (not actively used) | Option* responses (typed) |
+| Orders | `orderexecution/orders` | POST | `operations/order_executions.py#place_order` | Used | `TradeStationOrderRequest` → `TradeStationOrderResponse` |
+| Orders | `orderexecution/orders/{orderId}` | PUT | `operations/order_executions.py#modify_order` | Used | `TradeStationOrderResponse` |
+| Orders | `orderexecution/orders/{orderId}` | DELETE | `operations/order_executions.py#cancel_order` | Used | Raw dict |
+| Orders | `orderexecution/orders/{orderId}/executions` | GET | `operations/order_executions.py#get_order_executions` | Used | `TradeStationExecutionResponse` |
+| Orders | `orderexecution/orderconfirm` | POST | `operations/order_executions.py#confirm_order` | Available (not used) | - |
+| Orders | `orderexecution/ordergroups` | POST | `operations/order_executions.py#place_group_order` | Used | `TradeStationOrderGroupRequest` → `TradeStationOrderGroupResponse` |
+| Orders | `orderexecution/ordergroupconfirm` | POST | `operations/order_executions.py#confirm_group_order` | Available (not used) | - |
+| Orders | `orderexecution/activationtriggers` | GET | `operations/order_executions.py#get_activation_triggers` | Available (not used) | - |
+| Orders | `orderexecution/routes` | GET | `operations/order_executions.py#get_routes` | Available (not used) | - |
+| Orders | `brokerage/accounts/{accounts}/orders` | GET | `operations/orders.py#get_current_orders` | Used | `OrdersWrapper` |
+| Orders | `brokerage/accounts/{accounts}/historicalorders` | GET | `operations/orders.py#get_order_history` | Used | Raw dict (uses `TradeStationOrderResponse` internally) |
+| Orders | `brokerage/accounts/{accounts}/orders/{orderIds}` | GET | `operations/orders.py#get_orders_by_ids` | Available (not used) | `OrdersWrapper` |
+| Orders | `brokerage/accounts/{accounts}/historicalorders/{orderIds}` | GET | `operations/orders.py#get_historical_orders_by_ids` | Available (not used) | - |
+| Positions | `brokerage/accounts/{accountId}/positions` | GET | `operations/positions.py#get_positions` | Used | `PositionsResponse` |
 
 ### Streaming Endpoints
 
 | Domain | Endpoint | Method | SDK File / Function | Usage | Model Used |
 |--------|----------|--------|---------------------|-------|------------|
-| Streaming | `marketdata/stream/quotes/{symbols}` | GET | `streaming.py#stream_quotes` | Used | `QuoteStream` |
-| Streaming | `marketdata/stream/barcharts/{symbol}` | GET | `market_data.py#stream_bars` | Available (not used) | `BarStream` |
-| Streaming | `brokerage/stream/accounts/{accountId}/orders` | GET | `streaming.py#stream_orders` | Used | `OrderStream` |
-| Streaming | `brokerage/stream/accounts/{accounts}/orders/{ordersIds}` | GET | `streaming.py#stream_orders_by_ids` | Available (not widely used) | `OrderStream` |
-| Streaming | `brokerage/stream/accounts/{accountId}/positions` | GET | `streaming.py#stream_positions` | Used | `PositionStream` |
-| Streaming | `brokerage/stream/accounts/{accountId}/balances` | GET | `streaming.py#stream_balances` | Used | `BalanceStream` |
-| Streaming | `marketdata/stream/options/chains/{underlying}` | GET | `market_data.py#stream_option_chains` | Available (not used) | `OptionChainStream` |
-| Streaming | `marketdata/stream/options/quotes` | GET | `market_data.py#stream_option_quotes` | Available (not used) | `OptionQuoteStream` |
-| Streaming | `marketdata/stream/marketdepth/quotes/{symbol}` | GET | `market_data.py#stream_market_depth_quotes` | Available (not used) | `MarketDepthQuoteStream` |
-| Streaming | `marketdata/stream/marketdepth/aggregates/{symbol}` | GET | `market_data.py#stream_market_depth_aggregates` | Available (not used) | `MarketDepthAggregateStream` |
+| Streaming | `marketdata/stream/quotes/{symbols}` | GET | `operations/streaming.py#stream_quotes` | Used | `QuoteStream` |
+| Streaming | `marketdata/stream/barcharts/{symbol}` | GET | `operations/market_data.py#stream_bars` | Available (not used) | `BarStream` |
+| Streaming | `brokerage/stream/accounts/{accountId}/orders` | GET | `operations/streaming.py#stream_orders` | Used | `OrderStream` |
+| Streaming | `brokerage/stream/accounts/{accounts}/orders/{ordersIds}` | GET | `operations/streaming.py#stream_orders_by_ids` | Available (not widely used) | `OrderStream` |
+| Streaming | `brokerage/stream/accounts/{accountId}/positions` | GET | `operations/streaming.py#stream_positions` | Used | `PositionStream` |
+| Streaming | `brokerage/stream/accounts/{accountId}/balances` | GET | `operations/streaming.py#stream_balances` | Used | `BalanceStream` |
+| Streaming | `marketdata/stream/options/chains/{underlying}` | GET | `operations/market_data.py#stream_option_chains` | Available (not used) | `OptionChainStream` |
+| Streaming | `marketdata/stream/options/quotes` | GET | `operations/market_data.py#stream_option_quotes` | Available (not used) | `OptionQuoteStream` |
+| Streaming | `marketdata/stream/marketdepth/quotes/{symbol}` | GET | `operations/market_data.py#stream_market_depth_quotes` | Available (not used) | `MarketDepthQuoteStream` |
+| Streaming | `marketdata/stream/marketdepth/aggregates/{symbol}` | GET | `operations/market_data.py#stream_market_depth_aggregates` | Available (not used) | `MarketDepthAggregateStream` |
 
 ---
 
@@ -117,26 +117,26 @@ This document provides **comprehensive API coverage analysis** showing which Tra
 
 | Method | Endpoint | SDK Location | Model Used |
 |--------|----------|--------------|------------|
-| GET | `/v3/brokerage/accounts` | `accounts.py#get_account_info` | `AccountsListResponse` |
-| GET | `/v3/brokerage/accounts/{accountId}` | `accounts.py#get_account_balances` | `AccountBalancesResponse` |
-| GET | `/v3/brokerage/accounts/{accounts}/bodbalances` | `accounts.py#get_account_balances_bod` | `BODBalancesResponse` |
-| GET | `/v3/brokerage/accounts/{accounts}/historicalorders` | `orders.py#get_historical_orders` | `OrdersWrapper` |
-| GET | `/v3/brokerage/accounts/{accounts}/orders` | `orders.py#get_current_orders` | `OrdersWrapper` |
-| GET | `/v3/brokerage/accounts/{accountId}/positions` | `positions.py#get_positions` | `PositionsResponse` |
-| GET | `/v3/marketdata/barcharts/{symbol}` | `market_data.py#get_bars` | Raw dict |
-| GET | `/v3/marketdata/quotes/{symbols}` | `market_data.py#get_quote_snapshots` | `QuotesResponse` |
-| GET | `/v3/marketdata/symbols/{symbols}` | `market_data.py#get_symbol_details` | Raw dict |
-| GET | `/v3/marketdata/symbollists/cryptopairs/symbolnames` | `market_data.py#get_crypto_symbol_names` | Raw dict |
-| POST | `/v3/orderexecution/orders` | `orders.py#place_order` | `TradeStationOrderRequest` → `TradeStationOrderResponse` |
-| PUT | `/v3/orderexecution/orders/{orderID}` | `orders.py#modify_order` | `TradeStationOrderResponse` |
-| DELETE | `/v3/orderexecution/orders/{orderID}` | `orders.py#cancel_order` | `CancelOrderResponse` |
-| GET | `/v3/orderexecution/orders/{orderID}/executions` | `orders.py#get_order_executions` | `TradeStationExecutionResponse` |
-| POST | `/v3/orderexecution/ordergroups` | `orders.py#place_group_order` | `TradeStationOrderGroupRequest` → `TradeStationOrderGroupResponse` |
-| GET | `/v3/brokerage/stream/accounts/{accounts}/orders` | `streaming.py#stream_orders` | `OrderStream` |
-| GET | `/v3/brokerage/stream/accounts/{accounts}/orders/{ordersIds}` | `streaming.py#stream_orders_by_ids` | `OrderStream` |
-| GET | `/v3/brokerage/stream/accounts/{accounts}/positions` | `streaming.py#stream_positions` | `PositionStream` |
-| GET | `/v3/brokerage/stream/accounts/{accounts}/balances` | `streaming.py#stream_balances` | `BalanceStream` |
-| GET | `/v3/marketdata/stream/quotes/{symbols}` | `streaming.py#stream_quotes` | `QuoteStream` |
+| GET | `/v3/brokerage/accounts` | `operations/accounts.py#get_account_info` | `AccountsListResponse` |
+| GET | `/v3/brokerage/accounts/{accountId}` | `operations/accounts.py#get_account_balances` | `AccountBalancesResponse` |
+| GET | `/v3/brokerage/accounts/{accounts}/bodbalances` | `operations/accounts.py#get_account_balances_bod` | `BODBalancesResponse` |
+| GET | `/v3/brokerage/accounts/{accounts}/historicalorders` | `operations/orders.py#get_historical_orders` | `OrdersWrapper` |
+| GET | `/v3/brokerage/accounts/{accounts}/orders` | `operations/orders.py#get_current_orders` | `OrdersWrapper` |
+| GET | `/v3/brokerage/accounts/{accountId}/positions` | `operations/positions.py#get_positions` | `PositionsResponse` |
+| GET | `/v3/marketdata/barcharts/{symbol}` | `operations/market_data.py#get_bars` | Raw dict |
+| GET | `/v3/marketdata/quotes/{symbols}` | `operations/market_data.py#get_quote_snapshots` | `QuotesResponse` |
+| GET | `/v3/marketdata/symbols/{symbols}` | `operations/market_data.py#get_symbol_details` | Raw dict |
+| GET | `/v3/marketdata/symbollists/cryptopairs/symbolnames` | `operations/market_data.py#get_crypto_symbol_names` | Raw dict |
+| POST | `/v3/orderexecution/orders` | `operations/order_executions.py#place_order` | `TradeStationOrderRequest` → `TradeStationOrderResponse` |
+| PUT | `/v3/orderexecution/orders/{orderID}` | `operations/order_executions.py#modify_order` | `TradeStationOrderResponse` |
+| DELETE | `/v3/orderexecution/orders/{orderID}` | `operations/order_executions.py#cancel_order` | `CancelOrderResponse` |
+| GET | `/v3/orderexecution/orders/{orderID}/executions` | `operations/order_executions.py#get_order_executions` | `TradeStationExecutionResponse` |
+| POST | `/v3/orderexecution/ordergroups` | `operations/order_executions.py#place_group_order` | `TradeStationOrderGroupRequest` → `TradeStationOrderGroupResponse` |
+| GET | `/v3/brokerage/stream/accounts/{accounts}/orders` | `operations/streaming.py#stream_orders` | `OrderStream` |
+| GET | `/v3/brokerage/stream/accounts/{accounts}/orders/{ordersIds}` | `operations/streaming.py#stream_orders_by_ids` | `OrderStream` |
+| GET | `/v3/brokerage/stream/accounts/{accounts}/positions` | `operations/streaming.py#stream_positions` | `PositionStream` |
+| GET | `/v3/brokerage/stream/accounts/{accounts}/balances` | `operations/streaming.py#stream_balances` | `BalanceStream` |
+| GET | `/v3/marketdata/stream/quotes/{symbols}` | `operations/streaming.py#stream_quotes` | `QuoteStream` |
 
 #### Implemented but Not Actively Used ⚠️
 

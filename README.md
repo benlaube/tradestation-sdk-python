@@ -875,14 +875,19 @@ print(f"Bracket order placed: {result}")
 src/lib/tradestation/
 ├── __init__.py              # Main SDK class and exports
 ├── session.py               # OAuth authentication and token management
-├── client.py                # HTTP client for API requests
 ├── exceptions.py            # Custom SDK exceptions
-├── accounts.py              # Account operations
-├── market_data.py           # Market data operations
-├── orders.py                # Order operations
-├── positions.py             # Position operations
-├── streaming.py              # HTTP streaming manager
-├── mappers.py                # Data normalization functions
+├── config.py                # SDK configuration
+├── operations/              # Domain operations (accounts, orders, market data, streaming)
+│   ├── accounts.py
+│   ├── market_data.py
+│   ├── order_executions.py
+│   ├── orders.py
+│   ├── positions.py
+│   └── streaming.py
+├── utils/                   # Shared utilities
+│   ├── client.py            # HTTP client for API requests
+│   ├── logger.py            # Structured logging helpers
+│   └── mappers.py           # Data normalization functions
 ├── models/                  # Pydantic models
 │   ├── __init__.py
 │   ├── orders.py            # Order models (requests, responses, nested components)
@@ -911,20 +916,20 @@ src/lib/tradestation/
 - Automatic token refresh
 - Separate token storage for PAPER and LIVE modes
 
-**HTTPClient** ([`client.py`](client.py))
+**HTTPClient** ([`utils/client.py`](utils/client.py))
 - HTTP request handling
 - Authentication header injection
 - Request/response logging
 - HTTP Streaming support (NDJSON)
 
 **Operation Modules:**
-- [`accounts.py`](accounts.py) - Account operations (list accounts, balances, BOD)
-- [`market_data.py`](market_data.py) - Market data operations (bars, quotes, symbol search)
-- [`orders.py`](orders.py) - Order query operations (history, current orders, by IDs)
-- [`order_executions.py`](order_executions.py) - Order execution operations (placement, modification, cancellation, executions)
-- [`positions.py`](positions.py) - Position operations (get positions, flatten)
+- [`operations/accounts.py`](operations/accounts.py) - Account operations (list accounts, balances, BOD)
+- [`operations/market_data.py`](operations/market_data.py) - Market data operations (bars, quotes, symbol search)
+- [`operations/orders.py`](operations/orders.py) - Order query operations (history, current orders, by IDs)
+- [`operations/order_executions.py`](operations/order_executions.py) - Order execution operations (placement, modification, cancellation, executions)
+- [`operations/positions.py`](operations/positions.py) - Position operations (get positions, flatten)
 
-**StreamingManager** ([`streaming.py`](streaming.py))
+**StreamingManager** ([`operations/streaming.py`](operations/streaming.py))
 - HTTP Streaming session management
 - Real-time data streaming
 - Automatic reconnection with exponential backoff
@@ -942,7 +947,7 @@ src/lib/tradestation/
 - [`models/positions.py`](models/positions.py) - Position models
 - [`models/quotes.py`](models/quotes.py) - Quote snapshot models
 
-**Mappers** ([`mappers.py`](mappers.py))
+**Mappers** ([`utils/mappers.py`](utils/mappers.py))
 - Data normalization functions
 - Handles attribute name variations (PascalCase, camelCase)
 - Converts API responses to consistent format

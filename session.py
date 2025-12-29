@@ -38,7 +38,7 @@ import jwt
 
 from .config import sdk_config
 from .exceptions import AuthenticationError, TokenExpiredError
-from .logger import setup_logger
+from .utils.logger import setup_logger
 
 logger = setup_logger(__name__, sdk_config.log_level)
 

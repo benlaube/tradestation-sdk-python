@@ -22,7 +22,7 @@ This is the **complete API reference** for all SDK classes, methods, models, and
 - **Status:** Active
 - **Created:** 12-05-2025
 - **Last Updated:** 12-29-2025 13:41:00 EST
-- **Version:** 1.0.2
+- **Version:** 1.1.0
 - **Description:** Complete API reference documentation for all SDK classes, methods, models, and exceptions with detailed parameter descriptions and usage patterns
 - **Type:** API Reference - Technical reference for developers using the SDK
 - **Applicability:** When implementing SDK features, understanding method signatures, or looking up specific class/method documentation
@@ -310,6 +310,185 @@ quotes = sdk.get_quote_snapshots("MNQZ25,ESZ25", mode="PAPER")
 for quote in quotes["Quotes"]:
     print(f"{quote['Symbol']}: Last={quote['Last']}, Bid={quote['Bid']}, Ask={quote['Ask']}")
 ```
+
+---
+
+#### `get_futures_index_symbols(mode: str | None = None) -> list[dict[str, Any]]`
+
+Get curated futures index symbols (e.g., `$SPX.X`, `$NDX.X`).
+
+**Parameters:**
+- `mode: str | None` - "PAPER" or "LIVE". Defaults to `secrets.trading_mode`
+
+**Returns:**
+- `list[dict[str, Any]]` - List of curated futures index symbol dictionaries
+
+---
+
+#### `get_symbol_details(symbols: str, mode: str | None = None) -> dict[str, Any]`
+
+Get symbol details and formatting information.
+
+**Parameters:**
+- `symbols: str` - Comma-separated symbols (e.g., "AAPL,MSFT")
+- `mode: str | None` - "PAPER" or "LIVE". Defaults to `secrets.trading_mode`
+
+**Returns:**
+- `SymbolDetailsResponse | dict[str, Any]` - Symbol details (Pydantic model or dict)
+
+---
+
+#### `get_crypto_symbol_names(mode: str | None = None) -> list[str]`
+
+Get list of available crypto symbol names.
+
+**Parameters:**
+- `mode: str | None` - "PAPER" or "LIVE". Defaults to `secrets.trading_mode`
+
+**Returns:**
+- `list[str]` - List of crypto symbol name strings
+
+---
+
+#### `get_option_expirations(underlying: str, mode: str | None = None, strike_price: float | None = None) -> list[str]`
+
+Get option expiration dates for an underlying symbol.
+
+**Parameters:**
+- `underlying: str` - Underlying symbol (e.g., "MSFT")
+- `mode: str | None` - "PAPER" or "LIVE". Defaults to `secrets.trading_mode`
+- `strike_price: float | None` - Optional strike price filter
+
+**Returns:**
+- `list[str]` - Expiration date strings (ISO)
+
+---
+
+#### `get_option_risk_reward(request: dict[str, Any], mode: str | None = None) -> dict[str, Any]`
+
+Calculate option risk/reward analysis.
+
+**Parameters:**
+- `request: dict[str, Any]` - OptionRiskRewardRequest payload
+- `mode: str | None` - "PAPER" or "LIVE". Defaults to `secrets.trading_mode`
+
+**Returns:**
+- `dict[str, Any]` - Risk/reward calculations
+
+---
+
+#### `get_option_spread_types(mode: str | None = None) -> list[dict[str, Any]]`
+
+Get available option spread types.
+
+**Parameters:**
+- `mode: str | None` - "PAPER" or "LIVE". Defaults to `secrets.trading_mode`
+
+**Returns:**
+- `list[dict[str, Any]]` - Spread type dictionaries
+
+---
+
+#### `get_option_strikes(underlying: str, expiration_date: str | None = None, min_strike: float | None = None, max_strike: float | None = None, mode: str | None = None, spread_type: str | None = None, strike_interval: int | None = None, expiration: str | None = None, expiration2: str | None = None) -> list[float]`
+
+Get available strike prices for an underlying and expiration.
+
+**Parameters:**
+- `underlying: str` - Underlying symbol (e.g., "MSFT")
+- `expiration_date: str | None` - Expiration date (alias to `expiration`)
+- `min_strike: float | None` - Optional minimum strike filter
+- `max_strike: float | None` - Optional maximum strike filter
+- `mode: str | None` - "PAPER" or "LIVE". Defaults to `secrets.trading_mode`
+- `spread_type: str | None` - Optional spread type
+- `strike_interval: int | None` - Optional strike interval
+- `expiration: str | None` - Primary expiration (API-aligned)
+- `expiration2: str | None` - Secondary expiration (calendar/diagonal)
+
+**Returns:**
+- `list[float]` - Strike prices
+
+---
+
+#### `stream_quotes(symbols: list[str], mode: str | None = None) -> AsyncGenerator[dict[str, Any], None]`
+
+Stream quotes via HTTP streaming (async).
+
+**Parameters:**
+- `symbols: list[str]` - Symbols to stream
+- `mode: str | None` - "PAPER" or "LIVE". Defaults to `secrets.trading_mode`
+
+**Yields:**
+- `dict[str, Any]` - Quote updates
+
+---
+
+#### `stream_bars(symbol: str, interval: str, unit: str, mode: str | None = None, start_date: str | None = None, end_date: str | None = None, bars_back: int | None = None, session_template: str | None = None, price_type: str | None = None) -> AsyncGenerator[dict[str, Any], None]`
+
+Stream bars via HTTP streaming (async).
+
+**Parameters:**
+- `symbol: str` - Symbol to stream
+- `interval: str` - Interval (e.g., "1", "5")
+- `unit: str` - "Minute", "Daily", etc.
+- `mode: str | None` - "PAPER" or "LIVE". Defaults to `secrets.trading_mode`
+- Other optional filters: `start_date`, `end_date`, `bars_back`, `session_template`, `price_type`
+
+**Yields:**
+- `dict[str, Any]` - Bar updates
+
+---
+
+#### `stream_option_chains(underlying: str, mode: str | None = None, expiration: str | None = None, expiration2: str | None = None, strike_proximity: int | None = None, spread_type: str | None = None, risk_free_rate: float | None = None, price_center: float | None = None, strike_interval: int | None = None, enable_greeks: bool | None = None, strike_range: str | None = None, option_type: str | None = None) -> AsyncGenerator[dict[str, Any], None]`
+
+Stream option chain data for an underlying symbol.
+
+**Parameters:** Matches API filters (expiration, strike proximity, spread type, greeks, ITM/OTM filters, etc.)
+
+**Yields:**
+- `dict[str, Any]` - Option chain updates
+
+---
+
+#### `stream_option_quotes(legs: list[dict[str, str]], mode: str | None = None, risk_free_rate: float | None = None, enable_greeks: bool | None = None) -> AsyncGenerator[dict[str, Any], None]`
+
+Stream option quotes for specified legs.
+
+**Parameters:**
+- `legs: list[dict[str, str]]` - Legs with `Symbol` (and optional `Ratio`)
+- `risk_free_rate: float | None` - Optional risk-free rate override
+- `enable_greeks: bool | None` - Include greeks (default True)
+- `mode: str | None` - "PAPER" or "LIVE". Defaults to `secrets.trading_mode`
+
+**Yields:**
+- `dict[str, Any]` - Option quote updates
+
+---
+
+#### `stream_market_depth_quotes(symbol: str, mode: str | None = None, max_levels: int | None = None) -> AsyncGenerator[dict[str, Any], None]`
+
+Stream Level 2 market depth quotes for a symbol.
+
+**Parameters:**
+- `symbol: str` - Symbol to stream
+- `mode: str | None` - "PAPER" or "LIVE". Defaults to `secrets.trading_mode`
+- `max_levels: int | None` - Optional depth levels (default API max 20)
+
+**Yields:**
+- `dict[str, Any]` - Market depth quote updates
+
+---
+
+#### `stream_market_depth_aggregates(symbol: str, mode: str | None = None, max_levels: int | None = None) -> AsyncGenerator[dict[str, Any], None]`
+
+Stream aggregated market depth data for a symbol.
+
+**Parameters:**
+- `symbol: str` - Symbol to stream
+- `mode: str | None` - "PAPER" or "LIVE". Defaults to `secrets.trading_mode`
+- `max_levels: int | None` - Optional depth levels (default API max 20)
+
+**Yields:**
+- `dict[str, Any]` - Aggregated market depth updates
 
 ---
 

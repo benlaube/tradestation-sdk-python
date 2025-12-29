@@ -17,8 +17,8 @@ from typing import Any
 import httpx
 import requests
 
-from .config import sdk_config
-from .exceptions import (
+from ..config import sdk_config
+from ..exceptions import (
     AuthenticationError,
     ErrorDetails,
     InvalidRequestError,
@@ -29,7 +29,7 @@ from .exceptions import (
     TradeStationAPIError,
 )
 from .logger import log_with_context, setup_logger
-from .session import TokenManager
+from ..session import TokenManager
 
 logger = setup_logger(__name__, sdk_config.log_level)
 

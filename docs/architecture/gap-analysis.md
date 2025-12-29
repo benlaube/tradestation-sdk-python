@@ -71,17 +71,17 @@ The OpenAPI specification defines **33 v3 endpoints** across 3 main categories:
 
 | Method | Path | Operation ID | SDK Implementation |
 |--------|------|--------------|-------------------|
-| GET | `/v3/brokerage/accounts` | `GetAccounts` | ✅ `accounts.py#get_account_info` |
+| GET | `/v3/brokerage/accounts` | `GetAccounts` | ✅ `operations/accounts.py#get_account_info` |
 | GET | `/v3/brokerage/accounts/{accounts}/balances` | `GetBalances` | ✅ `accounts.py#get_detailed_balances` |
 | GET | `/v3/brokerage/accounts/{accounts}/bodbalances` | `GetBalancesBOD` | ✅ `accounts.py#get_account_balances_bod` |
 | GET | `/v3/brokerage/accounts/{accounts}/historicalorders` | `GetHistoricalOrders` | ✅ `orders.py#get_historical_orders` |
 | GET | `/v3/brokerage/accounts/{accounts}/historicalorders/{orderIds}` | `GetHistoricalOrdersByOrderID` | ✅ `orders.py#get_historical_orders_by_ids` |
 | GET | `/v3/brokerage/accounts/{accounts}/orders` | `GetOrders` | ✅ `orders.py#get_current_orders` |
-| GET | `/v3/brokerage/accounts/{accounts}/orders/{orderIds}` | `GetOrdersByOrderID` | ✅ `orders.py#get_orders_by_ids` |
-| GET | `/v3/brokerage/accounts/{accounts}/positions` | `GetPositions` | ✅ `positions.py#get_positions` |
-| GET | `/v3/brokerage/stream/accounts/{accounts}/orders` | `StreamOrders` | ✅ `streaming.py#stream_orders` |
-| GET | `/v3/brokerage/stream/accounts/{accounts}/orders/{ordersIds}` | `StreamOrdersByOrderId` | ✅ `streaming.py#stream_orders_by_ids` |
-| GET | `/v3/brokerage/stream/accounts/{accounts}/positions` | `StreamPositions` | ✅ `streaming.py#stream_positions` |
+| GET | `/v3/brokerage/accounts/{accounts}/orders/{orderIds}` | `GetOrdersByOrderID` | ✅ `operations/orders.py#get_orders_by_ids` |
+| GET | `/v3/brokerage/accounts/{accounts}/positions` | `GetPositions` | ✅ `operations/positions.py#get_positions` |
+| GET | `/v3/brokerage/stream/accounts/{accounts}/orders` | `StreamOrders` | ✅ `operations/streaming.py#stream_orders` |
+| GET | `/v3/brokerage/stream/accounts/{accounts}/orders/{ordersIds}` | `StreamOrdersByOrderId` | ✅ `operations/streaming.py#stream_orders_by_ids` |
+| GET | `/v3/brokerage/stream/accounts/{accounts}/positions` | `StreamPositions` | ✅ `operations/streaming.py#stream_positions` |
 
 **Note:** Missing from OpenAPI but implemented: `/v3/brokerage/stream/accounts/{accounts}/balances` (Balance streaming)
 
@@ -89,20 +89,20 @@ The OpenAPI specification defines **33 v3 endpoints** across 3 main categories:
 
 | Method | Path | Operation ID | SDK Implementation |
 |--------|------|--------------|-------------------|
-| GET | `/v3/marketdata/barcharts/{symbol}` | `GetBars` | ✅ `market_data.py#get_bars` |
-| GET | `/v3/marketdata/options/expirations/{underlying}` | `GetOptionExpirations` | ✅ `market_data.py#get_option_expirations` |
-| POST | `/v3/marketdata/options/riskreward` | `GetOptionRiskReward` | ✅ `market_data.py#get_option_risk_reward` |
-| GET | `/v3/marketdata/options/spreadtypes` | `GetOptionSpreadTypes` | ✅ `market_data.py#get_option_spread_types` |
-| GET | `/v3/marketdata/options/strikes/{underlying}` | `GetOptionStrikes` | ✅ `market_data.py#get_option_strikes` |
-| GET | `/v3/marketdata/quotes/{symbols}` | `GetQuoteSnapshots` | ✅ `market_data.py#get_quote_snapshots` |
-| GET | `/v3/marketdata/stream/barcharts/{symbol}` | `StreamBars` | ✅ `market_data.py#stream_bars` |
-| GET | `/v3/marketdata/stream/marketdepth/aggregates/{symbol}` | `StreamMarketDepthAggregates` | ✅ `market_data.py#stream_market_depth_aggregates` |
-| GET | `/v3/marketdata/stream/marketdepth/quotes/{symbol}` | `StreamMarketDepthQuotes` | ✅ `market_data.py#stream_market_depth_quotes` |
-| GET | `/v3/marketdata/stream/options/chains/{underlying}` | `GetOptionChain` | ✅ `market_data.py#stream_option_chains` |
-| GET | `/v3/marketdata/stream/options/quotes` | `GetOptionQuotes` | ✅ `market_data.py#stream_option_quotes` |
-| GET | `/v3/marketdata/stream/quotes/{symbols}` | `GetQuoteChangeStream` | ✅ `streaming.py#stream_quotes` |
-| GET | `/v3/marketdata/symbollists/cryptopairs/symbolnames` | `GetCryptoSymbolNames` | ✅ `market_data.py#get_crypto_symbol_names` |
-| GET | `/v3/marketdata/symbols/{symbols}` | `GetSymbolDetails` | ✅ `market_data.py#get_symbol_details` |
+| GET | `/v3/marketdata/barcharts/{symbol}` | `GetBars` | ✅ `operations/market_data.py#get_bars` |
+| GET | `/v3/marketdata/options/expirations/{underlying}` | `GetOptionExpirations` | ✅ `operations/market_data.py#get_option_expirations` |
+| POST | `/v3/marketdata/options/riskreward` | `GetOptionRiskReward` | ✅ `operations/market_data.py#get_option_risk_reward` |
+| GET | `/v3/marketdata/options/spreadtypes` | `GetOptionSpreadTypes` | ✅ `operations/market_data.py#get_option_spread_types` |
+| GET | `/v3/marketdata/options/strikes/{underlying}` | `GetOptionStrikes` | ✅ `operations/market_data.py#get_option_strikes` |
+| GET | `/v3/marketdata/quotes/{symbols}` | `GetQuoteSnapshots` | ✅ `operations/market_data.py#get_quote_snapshots` |
+| GET | `/v3/marketdata/stream/barcharts/{symbol}` | `StreamBars` | ✅ `operations/market_data.py#stream_bars` |
+| GET | `/v3/marketdata/stream/marketdepth/aggregates/{symbol}` | `StreamMarketDepthAggregates` | ✅ `operations/market_data.py#stream_market_depth_aggregates` |
+| GET | `/v3/marketdata/stream/marketdepth/quotes/{symbol}` | `StreamMarketDepthQuotes` | ✅ `operations/market_data.py#stream_market_depth_quotes` |
+| GET | `/v3/marketdata/stream/options/chains/{underlying}` | `GetOptionChain` | ✅ `operations/market_data.py#stream_option_chains` |
+| GET | `/v3/marketdata/stream/options/quotes` | `GetOptionQuotes` | ✅ `operations/market_data.py#stream_option_quotes` |
+| GET | `/v3/marketdata/stream/quotes/{symbols}` | `GetQuoteChangeStream` | ✅ `operations/streaming.py#stream_quotes` |
+| GET | `/v3/marketdata/symbollists/cryptopairs/symbolnames` | `GetCryptoSymbolNames` | ✅ `operations/market_data.py#get_crypto_symbol_names` |
+| GET | `/v3/marketdata/symbols/{symbols}` | `GetSymbolDetails` | ✅ `operations/market_data.py#get_symbol_details` |
 
 **Note:** Missing from OpenAPI: Symbol search endpoint (implemented via v2 endpoint)
 
@@ -110,14 +110,14 @@ The OpenAPI specification defines **33 v3 endpoints** across 3 main categories:
 
 | Method | Path | Operation ID | SDK Implementation |
 |--------|------|--------------|-------------------|
-| GET | `/v3/orderexecution/activationtriggers` | `GetActivationTriggers` | ✅ `orders.py#get_activation_triggers` |
-| POST | `/v3/orderexecution/orderconfirm` | `ConfirmOrder` | ✅ `orders.py#confirm_order` |
-| POST | `/v3/orderexecution/ordergroupconfirm` | `ConfirmGroupOrder` | ✅ `orders.py#confirm_group_order` |
-| POST | `/v3/orderexecution/ordergroups` | `PlaceGroupOrder` | ✅ `orders.py#place_group_order` |
-| POST | `/v3/orderexecution/orders` | `PlaceOrder` | ✅ `orders.py#place_order` |
-| PUT | `/v3/orderexecution/orders/{orderID}` | `ReplaceOrder` | ✅ `orders.py#modify_order` |
-| DELETE | `/v3/orderexecution/orders/{orderID}` | `CancelOrder` | ✅ `orders.py#cancel_order` |
-| GET | `/v3/orderexecution/routes` | `Routes` | ✅ `orders.py#get_routing_options` |
+| GET | `/v3/orderexecution/activationtriggers` | `GetActivationTriggers` | ✅ `operations/orders.py#get_activation_triggers` |
+| POST | `/v3/orderexecution/orderconfirm` | `ConfirmOrder` | ✅ `operations/orders.py#confirm_order` |
+| POST | `/v3/orderexecution/ordergroupconfirm` | `ConfirmGroupOrder` | ✅ `operations/orders.py#confirm_group_order` |
+| POST | `/v3/orderexecution/ordergroups` | `PlaceGroupOrder` | ✅ `operations/orders.py#place_group_order` |
+| POST | `/v3/orderexecution/orders` | `PlaceOrder` | ✅ `operations/orders.py#place_order` |
+| PUT | `/v3/orderexecution/orders/{orderID}` | `ReplaceOrder` | ✅ `operations/orders.py#modify_order` |
+| DELETE | `/v3/orderexecution/orders/{orderID}` | `CancelOrder` | ✅ `operations/orders.py#cancel_order` |
+| GET | `/v3/orderexecution/routes` | `Routes` | ✅ `operations/orders.py#get_routing_options` |
 
 **Note:** Missing from OpenAPI but implemented: `/v3/orderexecution/orders/{orderID}/executions` (Get order executions)
 

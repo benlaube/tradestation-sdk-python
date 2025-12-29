@@ -26,16 +26,16 @@ graph TB
     SDK[TradeStationSDK<br/>Main SDK Class]
     
     SDK -->|delegates to| TokenManager[TokenManager<br/>session.py]
-    SDK -->|delegates to| HTTPClient[HTTPClient<br/>client.py]
+    SDK -->|delegates to| HTTPClient[HTTPClient<br/>utils/client.py]
     
     TokenManager -->|uses| OAuth2[OAuth2 Server<br/>callback]
     TokenManager -->|provides tokens| HTTPClient
     
-    HTTPClient -->|used by| Accounts[AccountOperations<br/>accounts.py]
-    HTTPClient -->|used by| MarketData[MarketDataOperations<br/>market_data.py]
-    HTTPClient -->|used by| Orders[OrderExecutionOperations<br/>orders.py, order_executions.py]
-    HTTPClient -->|used by| Positions[PositionOperations<br/>positions.py]
-    HTTPClient -->|used by| Streaming[StreamingManager<br/>streaming.py]
+    HTTPClient -->|used by| Accounts[AccountOperations<br/>operations/accounts.py]
+    HTTPClient -->|used by| MarketData[MarketDataOperations<br/>operations/market_data.py]
+    HTTPClient -->|used by| Orders[OrderExecutionOperations<br/>operations/orders.py, operations/order_executions.py]
+    HTTPClient -->|used by| Positions[PositionOperations<br/>operations/positions.py]
+    HTTPClient -->|used by| Streaming[StreamingManager<br/>operations/streaming.py]
     
     Accounts -->|uses| Models[Models<br/>Pydantic]
     MarketData -->|uses| Models
@@ -158,12 +158,12 @@ flowchart TD
 
 Each module handles a specific domain:
 
-**AccountOperations (`accounts.py`):**
+**AccountOperations (`operations/accounts.py`):**
 - Get account information
 - Get account balances (basic, detailed, BOD)
 - Multi-account support
 
-**MarketDataOperations (`market_data.py`):**
+**MarketDataOperations (`operations/market_data.py`):**
 - Historical bars
 - Symbol search
 - Quote snapshots
@@ -171,7 +171,7 @@ Each module handles a specific domain:
 - Futures/crypto symbols
 - Option expirations, strikes
 
-**OrderExecutionOperations (`order_executions.py`):**
+**OrderExecutionOperations (`operations/order_executions.py`):**
 - Place orders (all types)
 - Cancel orders
 - Modify orders
@@ -179,14 +179,14 @@ Each module handles a specific domain:
 - Group orders (Bracket, OCO)
 - Convenience functions
 
-**OrderOperations (`orders.py`):**
+**OrderOperations (`operations/orders.py`):**
 - Order history queries
 - Current orders
 - Orders by ID
 - Orders by status
 - Order streaming
 
-**PositionOperations (`positions.py`):**
+**PositionOperations (`operations/positions.py`):**
 - Get positions
 - Flatten positions
 - Position streaming
@@ -418,13 +418,13 @@ graph TD
     SDK[TradeStationSDK]
     
     SDK --> TokenManager[TokenManager<br/>session.py]
-    SDK --> HTTPClient[HTTPClient<br/>client.py]
-    SDK --> Accounts[AccountOperations<br/>accounts.py]
-    SDK --> MarketData[MarketDataOperations<br/>market_data.py]
-    SDK --> OrderExec[OrderExecutionOperations<br/>order_executions.py]
-    SDK --> Orders[OrderOperations<br/>orders.py]
-    SDK --> Positions[PositionOperations<br/>positions.py]
-    SDK --> Streaming[StreamingManager<br/>streaming.py]
+    SDK --> HTTPClient[HTTPClient<br/>utils/client.py]
+    SDK --> Accounts[AccountOperations<br/>operations/accounts.py]
+    SDK --> MarketData[MarketDataOperations<br/>operations/market_data.py]
+    SDK --> OrderExec[OrderExecutionOperations<br/>operations/order_executions.py]
+    SDK --> Orders[OrderOperations<br/>operations/orders.py]
+    SDK --> Positions[PositionOperations<br/>operations/positions.py]
+    SDK --> Streaming[StreamingManager<br/>operations/streaming.py]
     
     HTTPClient --> TokenManager
     HTTPClient --> Exceptions[exceptions.py]

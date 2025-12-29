@@ -10,8 +10,8 @@ Dependencies: All tradestation SDK submodules
 from typing import Any
 
 # Import operation modules
-from .accounts import AccountOperations
-from .client import HTTPClient, get_base_url
+from .operations.accounts import AccountOperations
+from .utils.client import HTTPClient, get_base_url
 from .config import sdk_config
 from .exceptions import (
     AuthenticationError,
@@ -22,11 +22,20 @@ from .exceptions import (
     TokenExpiredError,
     TradeStationAPIError,
 )
-from .logger import setup_logger
+from .utils.logger import setup_logger
 
 # Import mappers
-from .mappers import normalize_order, normalize_position
-from .market_data import MarketDataOperations
+from .utils.mappers import (
+    normalize_account,
+    normalize_account_balances,
+    normalize_bod_balance,
+    normalize_balances,
+    normalize_execution,
+    normalize_order,
+    normalize_position,
+    normalize_quote,
+)
+from .operations.market_data import MarketDataOperations
 from .models.accounts import (
     AccountBalancesResponse,
     AccountSummary,
@@ -64,13 +73,13 @@ from .models.streaming import (
     StreamErrorResponse,
     StreamStatus,
 )
-from .order_executions import OrderExecutionOperations
-from .orders import OrderOperations
-from .positions import PositionOperations
+from .operations.order_executions import OrderExecutionOperations
+from .operations.orders import OrderOperations
+from .operations.positions import PositionOperations
 
 # Import core SDK components
 from .session import OAuthCallbackHandler, Session, TokenManager
-from .streaming import StreamingManager, WebSocketManager
+from .operations.streaming import StreamingManager, WebSocketManager
 
 logger = setup_logger(__name__, sdk_config.log_level)
 
@@ -1198,8 +1207,14 @@ __all__ = [
     "QuoteSnapshot",
     "QuotesResponse",
     # Mappers
+    "normalize_account",
+    "normalize_account_balances",
+    "normalize_bod_balance",
+    "normalize_balances",
+    "normalize_execution",
     "normalize_order",
     "normalize_position",
+    "normalize_quote",
     # Version
     "__version__",
 ]

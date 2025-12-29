@@ -176,18 +176,22 @@ tradestation-python-sdk/
 ├── tests/ (14 files)
 │   └── ... (90%+ coverage)
 │
-└── Source Code (11 .py files)
+└── Source Code
     ├── __init__.py            ✅ Fixed info() bug
     ├── session.py
-    ├── client.py
-    ├── accounts.py
-    ├── market_data.py
-    ├── orders.py
-    ├── order_executions.py
-    ├── positions.py
-    ├── streaming.py
+    ├── config.py
     ├── exceptions.py
-    └── mappers.py
+    ├── operations/
+    │   ├── accounts.py
+    │   ├── market_data.py
+    │   ├── order_executions.py
+    │   ├── orders.py
+    │   ├── positions.py
+    │   └── streaming.py
+    └── utils/
+        ├── client.py
+        ├── logger.py
+        └── mappers.py
 ```
 
 ---

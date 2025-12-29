@@ -9,10 +9,40 @@ Dependencies: None
 
 from typing import Any
 
-from .config import sdk_config
+from ..config import sdk_config
 from .logger import setup_logger
 
 logger = setup_logger(__name__, sdk_config.log_level)
+
+
+def _get_value(obj: Any, keys: list[str]) -> Any:
+    """
+    Safely fetch the first non-null value from obj using the provided keys.
+
+    Dependencies: None
+    """
+    for key in keys:
+        if isinstance(obj, dict) and key in obj:
+            return obj.get(key)
+        if hasattr(obj, key):
+            return getattr(obj, key)
+    return None
+
+
+def _to_float(value: Any) -> float | None:
+    """Convert value to float when possible."""
+    try:
+        return float(value) if value is not None else None
+    except (TypeError, ValueError):
+        return None
+
+
+def _to_int(value: Any) -> int | None:
+    """Convert value to int when possible."""
+    try:
+        return int(float(value)) if value is not None else None
+    except (TypeError, ValueError):
+        return None
 
 
 def normalize_order(order: Any) -> dict[str, Any] | None:
@@ -320,6 +350,216 @@ def normalize_order(order: Any) -> dict[str, Any] | None:
 
     except Exception as e:
         logger.error(f"Failed to normalize order: {e}")
+        return None
+
+
+def normalize_quote(quote: Any) -> dict[str, Any] | None:
+    """
+    Normalize TradeStation quote snapshot to dictionary.
+
+    Handles REST quote snapshots with PascalCase/camelCase variations.
+
+    Args:
+        quote: Quote object from TradeStation API (dict or object)
+
+    Returns:
+        Normalized quote dictionary or None if invalid
+
+    Dependencies: None
+    """
+    try:
+        symbol = _get_value(quote, ["Symbol", "symbol"])
+        if not symbol:
+            return None
+
+        return {
+            "symbol": str(symbol),
+            "last": _to_float(_get_value(quote, ["Last", "last"])),
+            "bid": _to_float(_get_value(quote, ["Bid", "bid"])),
+            "ask": _to_float(_get_value(quote, ["Ask", "ask"])),
+            "bid_size": _to_int(_get_value(quote, ["BidSize", "bidSize", "bid_size"])),
+            "ask_size": _to_int(_get_value(quote, ["AskSize", "askSize", "ask_size"])),
+            "volume": _to_int(_get_value(quote, ["Volume", "volume"])),
+            "trade_time": _get_value(quote, ["TradeTime", "tradeTime", "trade_time"]),
+            "open": _to_float(_get_value(quote, ["Open", "open"])),
+            "high": _to_float(_get_value(quote, ["High", "high"])),
+            "low": _to_float(_get_value(quote, ["Low", "low"])),
+            "close": _to_float(_get_value(quote, ["Close", "close"])),
+            "previous_close": _to_float(_get_value(quote, ["PreviousClose", "previousClose", "previous_close"])),
+            "net_change": _to_float(_get_value(quote, ["NetChange", "netChange", "net_change"])),
+            "net_change_pct": _to_float(_get_value(quote, ["NetChangePct", "netChangePct", "net_change_pct"])),
+        }
+    except Exception as e:
+        logger.error(f"Failed to normalize quote: {e}")
+        return None
+
+
+def normalize_execution(execution: Any) -> dict[str, Any] | None:
+    """
+    Normalize TradeStation execution (fill) object to dictionary.
+
+    Args:
+        execution: Execution object from TradeStation API (dict or object)
+
+    Returns:
+        Normalized execution dictionary or None if invalid
+
+    Dependencies: None
+    """
+    try:
+        execution_id = _get_value(execution, ["ExecutionID", "executionId", "execution_id"])
+        symbol = _get_value(execution, ["Symbol", "symbol"])
+        if not execution_id or not symbol:
+            return None
+
+        return {
+            "execution_id": str(execution_id),
+            "symbol": str(symbol),
+            "action": (_get_value(execution, ["TradeAction", "tradeAction", "action"]) or "").upper() or None,
+            "quantity": _to_int(_get_value(execution, ["Quantity", "quantity"])),
+            "price": _to_float(_get_value(execution, ["Price", "price"])),
+            "commission": _to_float(_get_value(execution, ["Commission", "commission"])),
+            "exchange_fees": _to_float(_get_value(execution, ["ExchangeFees", "exchangeFees", "exchange_fees"])),
+            "execution_time": _get_value(execution, ["ExecutionTime", "executionTime", "execution_time"]),
+            "venue": _get_value(execution, ["Venue", "venue"]),
+        }
+    except Exception as e:
+        logger.error(f"Failed to normalize execution: {e}")
+        return None
+
+
+def normalize_account(account: Any) -> dict[str, Any] | None:
+    """
+    Normalize account summary to dictionary.
+
+    Args:
+        account: Account summary object (dict or AccountSummary)
+
+    Returns:
+        Normalized account dictionary or None if invalid
+
+    Dependencies: None
+    """
+    try:
+        account_id = _get_value(account, ["AccountID", "account_id", "accountId"])
+        if not account_id:
+            return None
+
+        return {
+            "account_id": str(account_id),
+            "account_type": _get_value(account, ["AccountType", "accountType", "account_type"]),
+            "status": _get_value(account, ["Status", "status"]),
+            "currency": _get_value(account, ["Currency", "currency"]),
+            "alias": _get_value(account, ["Alias", "alias"]),
+        }
+    except Exception as e:
+        logger.error(f"Failed to normalize account: {e}")
+        return None
+
+
+def normalize_balances(balances: Any) -> dict[str, Any] | None:
+    """
+    Normalize balance detail to dictionary.
+
+    Args:
+        balances: Balances object or dict
+
+    Returns:
+        Normalized balances dictionary or None if invalid
+
+    Dependencies: None
+    """
+    try:
+        if balances is None:
+            return None
+
+        return {
+            "equity": _to_float(_get_value(balances, ["Equity", "equity"])),
+            "cash_balance": _to_float(_get_value(balances, ["CashBalance", "cashBalance", "cash_balance"])),
+            "buying_power": _to_float(_get_value(balances, ["BuyingPower", "buyingPower", "buying_power"])),
+            "day_trading_buying_power": _to_float(
+                _get_value(balances, ["DayTradingBuyingPower", "dayTradingBuyingPower", "day_trading_buying_power"])
+            ),
+            "margin_available": _to_float(_get_value(balances, ["MarginAvailable", "marginAvailable", "margin_available"])),
+            "margin_used": _to_float(_get_value(balances, ["MarginUsed", "marginUsed", "margin_used"])),
+            "maintenance_margin": _to_float(
+                _get_value(balances, ["MaintenanceMargin", "maintenanceMargin", "maintenance_margin"])
+            ),
+            "initial_margin_requirement": _to_float(
+                _get_value(balances, ["InitialMarginRequirement", "initialMarginRequirement", "initial_margin_requirement"])
+            ),
+            "net_liquidation_value": _to_float(
+                _get_value(balances, ["NetLiquidationValue", "netLiquidationValue", "net_liquidation_value"])
+            ),
+            "open_pnl": _to_float(_get_value(balances, ["OpenPnL", "openPnL", "open_pnl"])),
+            "realized_pnl": _to_float(_get_value(balances, ["RealizedPnL", "realizedPnL", "realized_pnl"])),
+            "unrealized_pnl": _to_float(_get_value(balances, ["UnrealizedPnL", "unrealizedPnL", "unrealized_pnl"])),
+        }
+    except Exception as e:
+        logger.error(f"Failed to normalize balances: {e}")
+        return None
+
+
+def normalize_account_balances(response: Any) -> dict[str, Any] | None:
+    """
+    Normalize account balances response to dictionary.
+
+    Args:
+        response: AccountBalancesResponse object or dict
+
+    Returns:
+        Normalized account balances dictionary or None if invalid
+
+    Dependencies: normalize_account, normalize_balances
+    """
+    try:
+        account = _get_value(response, ["Account", "account"])
+        normalized_account = normalize_account(account) if account else None
+        balances = _get_value(response, ["Balances", "balances"])
+        normalized_balances = normalize_balances(balances) if balances else None
+
+        if not normalized_account and not normalized_balances:
+            return None
+
+        return {
+            "account": normalized_account,
+            "balances": normalized_balances,
+        }
+    except Exception as e:
+        logger.error(f"Failed to normalize account balances: {e}")
+        return None
+
+
+def normalize_bod_balance(bod_balance: Any) -> dict[str, Any] | None:
+    """
+    Normalize beginning-of-day balance entry to dictionary.
+
+    Args:
+        bod_balance: BOD balance entry (dict or BODBalance)
+
+    Returns:
+        Normalized BOD balance dictionary or None if invalid
+
+    Dependencies: None
+    """
+    try:
+        account_id = _get_value(bod_balance, ["AccountID", "account_id", "accountId"])
+        if not account_id:
+            return None
+
+        return {
+            "account_id": str(account_id),
+            "date": _get_value(bod_balance, ["Date", "date"]),
+            "equity": _to_float(_get_value(bod_balance, ["Equity", "equity"])),
+            "cash_balance": _to_float(_get_value(bod_balance, ["CashBalance", "cashBalance", "cash_balance"])),
+            "buying_power": _to_float(_get_value(bod_balance, ["BuyingPower", "buyingPower", "buying_power"])),
+            "margin_used": _to_float(_get_value(bod_balance, ["MarginUsed", "marginUsed", "margin_used"])),
+            "net_liquidation_value": _to_float(
+                _get_value(bod_balance, ["NetLiquidationValue", "netLiquidationValue", "net_liquidation_value"])
+            ),
+        }
+    except Exception as e:
+        logger.error(f"Failed to normalize BOD balance: {e}")
         return None
 
 

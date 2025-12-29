@@ -123,15 +123,19 @@ The SDK is organized by domain:
 tradestation_sdk/
 ├── __init__.py           # Main SDK class
 ├── session.py            # OAuth authentication
-├── client.py             # HTTP client
-├── accounts.py           # Account operations
-├── market_data.py        # Market data operations
-├── order_executions.py   # Order execution operations
-├── orders.py             # Order query operations
-├── positions.py          # Position operations
-├── streaming.py          # Streaming manager
 ├── exceptions.py         # Custom exceptions
-├── mappers.py            # Data normalization
+├── config.py             # SDK configuration
+├── operations/           # Domain operations
+│   ├── accounts.py
+│   ├── market_data.py
+│   ├── order_executions.py
+│   ├── orders.py
+│   ├── positions.py
+│   └── streaming.py
+├── utils/                # Shared utilities
+│   ├── client.py         # HTTP client
+│   ├── logger.py         # Logging helpers
+│   └── mappers.py        # Data normalization
 └── models/               # Pydantic models
     ├── orders.py
     ├── order_executions.py

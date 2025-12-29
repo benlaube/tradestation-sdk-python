@@ -26,8 +26,8 @@ This is a **detailed reference guide** for all order-related functions in the SD
   - [`SDK_FUNCTIONS_LIST.md`](./SDK_FUNCTIONS_LIST.md) - Quick list of all SDK functions
   - [`API_REFERENCE.md`](./API_REFERENCE.md) - Complete API reference
   - [`SDK_USAGE_EXAMPLES.md`](./SDK_USAGE_EXAMPLES.md) - Usage examples
-  - [`order_executions.py`](../order_executions.py) - Order execution operations implementation
-  - [`orders.py`](../orders.py) - Order query operations implementation
+- [`operations/order_executions.py`](../operations/order_executions.py) - Order execution operations implementation
+- [`operations/orders.py`](../operations/orders.py) - Order query operations implementation
 - **How to Use:** Reference this document when implementing order operations, understanding function parameters, or looking up order function documentation
 
 ---

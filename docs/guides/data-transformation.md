@@ -1,7 +1,7 @@
 # Data Transformation Guide
 
-**Version:** 1.0.0  
-**Last Updated:** 2025-12-29 14:00:00 EST  
+**Version:** 1.0.1  
+**Last Updated:** 12-29-2025 13:54:55 EST  
 **Status:** Active
 
 ## Overview
@@ -79,10 +79,11 @@ from src.lib.tradestation import (
     normalize_order,
     normalize_position,
     normalize_quote,
+    normalize_execution,
     normalize_account,
     normalize_balances,
-    normalize_execution,
     normalize_bod_balance,
+    normalize_account_balances,
 )
 ```
 
@@ -112,6 +113,17 @@ for order_model in orders.Orders:
         # normalized is now snake_case: {"order_id": "...", "symbol": "..."}
         db.insert_order(normalized)
 ```
+
+### Mapper Coverage (what each normalizes)
+
+- `normalize_order` - Orders (REST/stream)
+- `normalize_position` - Positions (REST/stream)
+- `normalize_quote` - Quote snapshots
+- `normalize_execution` - Executions/fills
+- `normalize_account` - Account summary
+- `normalize_balances` - Balance detail
+- `normalize_account_balances` - Account balances response wrapper
+- `normalize_bod_balance` - Beginning-of-day balance entries
 
 ---
 
