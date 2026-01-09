@@ -1,7 +1,9 @@
-# TradeStation SDK - Operation Coverage Analysis
+---
+version: 1.0.0
+lastUpdated: 12-05-2025 17:19:33 EST
+---
 
-**Version:** 1.0.0  
-**Last Updated:** 2025-12-05
+# TradeStation SDK - Operation Coverage Analysis
 
 Analysis of required trading operations and their coverage in the TradeStation SDK.
 

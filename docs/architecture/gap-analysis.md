@@ -1,3 +1,14 @@
+---
+status: Active
+created: 12-05-2025 17:19:33 EST
+lastUpdated: 12-29-2025 13:21:47 EST
+version: 1.1.0
+description: Comprehensive analysis of functionality gaps, missing endpoints, code quality gaps, documentation gaps, and recommendations for SDK improvements
+type: Analysis Report - Technical reference for developers and AI agents planning SDK enhancements
+applicability: When planning SDK enhancements, identifying missing features, or reviewing code quality improvements
+howtouse: Review this document to identify gaps between API capabilities and SDK implementation, prioritize improvements, and plan enhancement work
+---
+
 # TradeStation SDK Gap Analysis
 
 ## About This Document
@@ -13,22 +24,6 @@ This document provides **comprehensive gap analysis** identifying missing endpoi
 - 📖 **[README.md](../README.md)** - SDK documentation
 - ⚠️ **[LIMITATIONS.md](../LIMITATIONS.md)** - Known limitations
 
-## Metadata
-
-- **Status:** Active
-- **Created:** 12-05-2025
-- **Last Updated:** 12-29-2025 13:21:47 EST
-- **Version:** 1.1.0
-- **Description:** Comprehensive analysis of functionality gaps, missing endpoints, code quality gaps, documentation gaps, and recommendations for SDK improvements
-- **Type:** Analysis Report - Technical reference for developers and AI agents planning SDK enhancements
-- **Applicability:** When planning SDK enhancements, identifying missing features, or reviewing code quality improvements
-- **Dependencies:**
-  - [`tradestation-api-v3-openapi.json`](../reference/tradestation-api-v3-openapi.json) - Source OpenAPI specification for gap comparison
-  - [`API_COVERAGE.md`](./API_COVERAGE.md) - Current API coverage status
-  - [`SUMMARY.md`](./SUMMARY.md) - SDK enhancement summary
-- **How to Use:** Review this document to identify gaps between API capabilities and SDK implementation, prioritize improvements, and plan enhancement work
-
----
 
 ---
 
@@ -132,7 +127,7 @@ The OpenAPI specification defines **33 v3 endpoints** across 3 main categories:
 
 The OpenAPI specification contains **190 code examples** across multiple languages:
 - **Shell (curl)** - 33 examples
-- **Node.js** - 33 examples  
+- **Node.js** - 33 examples
 - **Python** - 33 examples
 - **C#** - 33 examples
 - **JSON (requestBody examples)** - 58 examples
@@ -559,4 +554,3 @@ Visual representations of the API structure:
 ---
 
 **Last Updated:** 12-29-2025 13:21:47 EST
-

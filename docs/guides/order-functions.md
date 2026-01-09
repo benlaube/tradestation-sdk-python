@@ -1,3 +1,14 @@
+---
+status: Active
+created: 12-05-2025 17:19:33 EST
+lastUpdated: 12-05-2025 14:21:15 EST
+version: 1.0.0
+description: Detailed reference guide for all order-related functions in the TradeStation SDK, including parameters, return types, API endpoints, code examples, and access patterns
+type: Function Reference - Technical reference for developers implementing order operations
+applicability: When implementing order operations, understanding order function parameters, or reviewing order execution patterns
+howtouse: Reference this document when implementing order operations, understanding function parameters, or looking up order function documentation
+---
+
 # TradeStation SDK - Order Functions Reference
 
 ## About This Document
@@ -13,24 +24,6 @@ This is a **detailed reference guide** for all order-related functions in the SD
 - 📋 **[CHEATSHEET.md](../CHEATSHEET.md)** - Quick order code snippets
 - ⚠️ **[LIMITATIONS.md](../LIMITATIONS.md)** - Order-related limitations (trailing stops, etc.)
 
-## Metadata
-
-- **Status:** Active
-- **Created:** 12-05-2025
-- **Last Updated:** 12-05-2025 14:21:15 EST
-- **Version:** 1.0.0
-- **Description:** Detailed reference guide for all order-related functions in the TradeStation SDK, including parameters, return types, API endpoints, code examples, and access patterns
-- **Type:** Function Reference - Technical reference for developers implementing order operations
-- **Applicability:** When implementing order operations, understanding order function parameters, or reviewing order execution patterns
-- **Dependencies:**
-  - [`SDK_FUNCTIONS_LIST.md`](./SDK_FUNCTIONS_LIST.md) - Quick list of all SDK functions
-  - [`API_REFERENCE.md`](./API_REFERENCE.md) - Complete API reference
-  - [`SDK_USAGE_EXAMPLES.md`](./SDK_USAGE_EXAMPLES.md) - Usage examples
-- [`operations/order_executions.py`](../operations/order_executions.py) - Order execution operations implementation
-- [`operations/orders.py`](../operations/orders.py) - Order query operations implementation
-- **How to Use:** Reference this document when implementing order operations, understanding function parameters, or looking up order function documentation
-
----
 
 ---
 
@@ -68,18 +61,18 @@ The following diagram shows the relationships between order-related classes and 
 ```mermaid
 graph TB
     SDK[TradeStationSDK<br/>Main SDK Class]
-    
+
     SDK -->|delegates to| OEO[OrderExecutionOperations<br/>Order Execution]
     SDK -->|delegates to| OO[OrderOperations<br/>Order Queries]
     SDK -->|delegates to| SM[StreamingManager<br/>Real-time Streaming]
-    
+
     OEO -->|uses| HTTP[HTTPClient<br/>API Requests]
     OO -->|uses| HTTP
     SM -->|uses| HTTP
-    
+
     OEO -->|uses| AO[AccountOperations<br/>Account Info]
     OO -->|uses| AO
-    
+
     subgraph "Order Execution Functions"
         OEO --> PO[place_order]
         OEO --> CO[cancel_order]
@@ -91,7 +84,7 @@ graph TB
         OEO --> GAT[get_activation_triggers]
         OEO --> GR[get_routes]
     end
-    
+
     subgraph "Convenience Functions"
         OEO --> PLO[place_limit_order]
         OEO --> PSO[place_stop_order]
@@ -100,7 +93,7 @@ graph TB
         OEO --> POCO[place_oco_order]
         OEO --> PBO[place_bracket_order]
     end
-    
+
     subgraph "Order Query Functions"
         OO --> GOH[get_order_history]
         OO --> GCO[get_current_orders]
@@ -108,16 +101,16 @@ graph TB
         OO --> GHOBI[get_historical_orders_by_ids]
         OO --> SO1[stream_orders]
     end
-    
+
     subgraph "Streaming Functions"
         SM --> SO2[stream_orders]
         SM --> SOBI[stream_orders_by_ids]
     end
-    
+
     subgraph "Utilities"
         MAP[mappers] --> NO[normalize_order]
     end
-    
+
     style SDK fill:#e1f5ff
     style OEO fill:#fff4e1
     style OO fill:#fff4e1
@@ -961,7 +954,7 @@ import asyncio
 
 async def stream_orders_example():
     account_id = sdk.get_account_info(mode="PAPER")["account_id"]
-    
+
     async for order_data in sdk.orders.stream_orders(account_id, mode="PAPER"):
         print(f"Order update: {order_data}")
 
@@ -992,14 +985,14 @@ from src.lib.tradestation import OrderStream
 async def stream_orders_example():
     sdk = TradeStationSDK()
     sdk.ensure_authenticated(mode="PAPER")
-    
+
     account_id = sdk.get_account_info(mode="PAPER")["account_id"]
-    
+
     async for order in sdk.streaming.stream_orders(account_id, mode="PAPER"):
         # Streaming methods return OrderStream models directly
         # Control messages (StreamStatus, Heartbeat) are filtered automatically
         print(f"Order {order.OrderID}: {order.Status} - {order.StatusDescription}")
-        
+
         if order.Status == "FLL":
             print(f"  Filled: {order.FilledQuantity} @ ${order.FilledPrice}")
         print(f"  Type: {order.OrderType}, Quantity: {order.Quantity}")
@@ -1031,7 +1024,7 @@ import asyncio
 async def stream_specific_orders():
     sdk = TradeStationSDK()
     sdk.ensure_authenticated(mode="PAPER")
-    
+
     async for order in sdk.streaming.stream_orders_by_ids(
         account_ids="SIM123456",
         order_ids="812767578,812941051",
@@ -1142,9 +1135,9 @@ from src.lib.tradestation import TradeStationSDK
 async def monitor_orders():
     sdk = TradeStationSDK()
     sdk.ensure_authenticated(mode="PAPER")
-    
+
     account_id = sdk.get_account_info(mode="PAPER")["account_id"]
-    
+
     async for order in sdk.streaming.stream_orders(account_id, mode="PAPER"):
         print(f"Order {order.OrderID}: {order.Status}")
 

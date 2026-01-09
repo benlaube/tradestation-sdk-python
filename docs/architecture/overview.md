@@ -1,3 +1,10 @@
+---
+version: 1.0.0
+lastUpdated: 12-29-2025 17:19:33 EST
+type: Documentation
+description: Documentation file
+---
+
 # TradeStation SDK - Architecture
 
 ## About This Document
@@ -24,19 +31,19 @@ Visual overview of SDK architecture, design decisions, and data flow.
 ```mermaid
 graph TB
     SDK[TradeStationSDK<br/>Main SDK Class]
-    
+
     SDK -->|delegates to| TokenManager[TokenManager<br/>session.py]
     SDK -->|delegates to| HTTPClient[HTTPClient<br/>utils/client.py]
-    
+
     TokenManager -->|uses| OAuth2[OAuth2 Server<br/>callback]
     TokenManager -->|provides tokens| HTTPClient
-    
+
     HTTPClient -->|used by| Accounts[AccountOperations<br/>operations/accounts.py]
     HTTPClient -->|used by| MarketData[MarketDataOperations<br/>operations/market_data.py]
     HTTPClient -->|used by| Orders[OrderExecutionOperations<br/>operations/orders.py, operations/order_executions.py]
     HTTPClient -->|used by| Positions[PositionOperations<br/>operations/positions.py]
     HTTPClient -->|used by| Streaming[StreamingManager<br/>operations/streaming.py]
-    
+
     Accounts -->|uses| Models[Models<br/>Pydantic]
     MarketData -->|uses| Models
     Orders -->|uses| Models
@@ -416,7 +423,7 @@ print(quote.Last)  # AttributeError caught by Pydantic
 ```mermaid
 graph TD
     SDK[TradeStationSDK]
-    
+
     SDK --> TokenManager[TokenManager<br/>session.py]
     SDK --> HTTPClient[HTTPClient<br/>utils/client.py]
     SDK --> Accounts[AccountOperations<br/>operations/accounts.py]
@@ -425,28 +432,28 @@ graph TD
     SDK --> Orders[OrderOperations<br/>operations/orders.py]
     SDK --> Positions[PositionOperations<br/>operations/positions.py]
     SDK --> Streaming[StreamingManager<br/>operations/streaming.py]
-    
+
     HTTPClient --> TokenManager
     HTTPClient --> Exceptions[exceptions.py]
-    
+
     Accounts --> HTTPClient
     Accounts --> ModelsAccounts[models.accounts]
-    
+
     MarketData --> HTTPClient
     MarketData --> ModelsQuotes[models.quotes]
-    
+
     OrderExec --> HTTPClient
     OrderExec --> Accounts
     OrderExec --> ModelsOrders[models.orders]
-    
+
     Orders --> HTTPClient
     Orders --> Accounts
     Orders --> ModelsOrders
-    
+
     Positions --> HTTPClient
     Positions --> Accounts
     Positions --> ModelsPositions[models.positions]
-    
+
     Streaming --> TokenManager
     Streaming --> HTTPClient
     Streaming --> ModelsStreaming[models.streaming]
@@ -538,20 +545,20 @@ graph TD
 graph TD
     Exception[Exception<br/>Python built-in]
     Exception --> TSAPIError[TradeStationAPIError]
-    
+
     TSAPIError --> AuthError[AuthenticationError]
     TSAPIError --> RateLimit[RateLimitError]
     TSAPIError --> InvalidRequest[InvalidRequestError]
     TSAPIError --> NetworkError[NetworkError]
     TSAPIError --> Recoverable[RecoverableError<br/>mixin]
     TSAPIError --> NonRecoverable[NonRecoverableError<br/>mixin]
-    
+
     AuthError --> TokenExpired[TokenExpiredError]
     AuthError --> InvalidToken[InvalidTokenError]
-    
+
     Recoverable -.->|Used for| RecoverableDesc[Network errors,<br/>rate limits,<br/>server errors]
     NonRecoverable -.->|Used for| NonRecoverableDesc[Auth errors,<br/>invalid requests,<br/>not found]
-    
+
     style RecoverableDesc fill:#e1f5e1
     style NonRecoverableDesc fill:#ffe1e1
 ```
@@ -582,7 +589,7 @@ try:
 except TradeStationAPIError as e:
     # Human-readable
     print(e)  # Calls e.details.to_human_readable()
-    
+
     # Structured
     error_dict = e.to_dict()
     print(error_dict['api_error_code'])
@@ -692,7 +699,7 @@ class CustomTokenManager(TokenManager):
         # Your custom storage logic
         encrypted = encrypt(tokens)
         save_to_database(mode, encrypted)
-    
+
     def load_tokens(self, mode: str) -> dict:
         # Your custom retrieval logic
         encrypted = load_from_database(mode)
@@ -751,9 +758,9 @@ class CustomHTTPClient(HTTPClient):
 async def main():
     sdk = TradeStationSDK()
     await sdk.authenticate(mode="PAPER")
-    
+
     account = await sdk.get_account_info(mode="PAPER")
-    
+
     async for quote in sdk.streaming.stream_quotes(["AAPL"]):
         print(quote.Last)
 ```
@@ -791,5 +798,5 @@ flowchart TD
 
 ---
 
-**Last Updated:** 2025-12-07  
+**Last Updated:** 2025-12-07
 **SDK Version:** 1.0.0

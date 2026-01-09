@@ -1,13 +1,12 @@
-# Operations Subpackage
-
-## Metadata
-- **Version:** 1.0.0
-- **Last Updated:** 2025-12-29 16:26:28 EST
-- **Type:** Reference Material
-- **Status:** Active
-- **Description:** Domain-specific operation modules for TradeStation API v3
-
 ---
+version: 1.0.0
+lastUpdated: 12-29-2025 17:14:49 EST
+type: Reference Material
+status: Active
+description: Domain-specific operation modules for TradeStation API v3
+---
+
+# Operations Subpackage
 
 ## Overview
 

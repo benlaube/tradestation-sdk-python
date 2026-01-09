@@ -1,8 +1,10 @@
+---
+version: 1.0.1
+lastUpdated: 12-29-2025 13:54:55 EST
+---
+
 # Data Transformation Guide
 
-**Version:** 1.0.1  
-**Last Updated:** 12-29-2025 13:54:55 EST  
-**Status:** Active
 
 ## Overview
 
@@ -131,10 +133,10 @@ for order_model in orders.Orders:
 
 ### Use Pydantic Models (Default) When:
 
-✅ **You want type safety and validation**  
-✅ **You're working with the data in Python**  
-✅ **You want to match the TradeStation API format exactly**  
-✅ **You're building a new application**  
+✅ **You want type safety and validation**
+✅ **You're working with the data in Python**
+✅ **You want to match the TradeStation API format exactly**
+✅ **You're building a new application**
 ✅ **You don't need snake_case**
 
 **Example Use Cases:**
@@ -145,9 +147,9 @@ for order_model in orders.Orders:
 
 ### Use Mappers When:
 
-✅ **You need snake_case for database storage**  
-✅ **You're migrating from an old system that used snake_case**  
-✅ **You have existing code expecting snake_case**  
+✅ **You need snake_case for database storage**
+✅ **You're migrating from an old system that used snake_case**
+✅ **You have existing code expecting snake_case**
 ✅ **You're integrating with systems that require snake_case**
 
 **Example Use Cases:**
@@ -158,8 +160,8 @@ for order_model in orders.Orders:
 
 ### Use Pydantic's Built-in Serialization When:
 
-✅ **You need custom transformations**  
-✅ **You want to exclude/include specific fields**  
+✅ **You need custom transformations**
+✅ **You want to exclude/include specific fields**
 ✅ **You need different serialization formats**
 
 **Example:**
@@ -195,7 +197,7 @@ orders_response = sdk.get_current_orders(mode="PAPER")
 # Access data directly (PascalCase)
 for order in orders_response.Orders:
     print(f"Order {order.OrderID}: {order.Symbol} - {order.Status}")
-    
+
     # Type-safe access with validation
     if order.FilledQuantity:
         print(f"Filled: {order.FilledQuantity}")
@@ -253,7 +255,7 @@ def to_camel_case(s: str) -> str:
 for order in orders_response.Orders:
     # Get as dict
     order_dict = order.model_dump(exclude_none=True)
-    
+
     # Transform keys to camelCase
     camel_dict = {to_camel_case(k): v for k, v in order_dict.items()}
     # {"orderId": "...", "symbol": "...", "status": "..."}
@@ -271,7 +273,7 @@ sdk.ensure_authenticated(mode="PAPER")
 async for order_stream in sdk.streaming.stream_orders(account_id="SIM123456"):
     # order_stream is a Pydantic OrderStream model (PascalCase)
     print(f"Order {order_stream.OrderID}: {order_stream.Status}")
-    
+
     # Transform to snake_case if needed for database
     normalized = normalize_order(order_stream)
     if normalized:
@@ -427,5 +429,5 @@ camel_dict = {to_camel_case(k): v for k, v in order_dict.items()}
 
 ---
 
-**Last Updated:** 2025-12-29 14:00:00 EST  
+**Last Updated:** 2025-12-29 14:00:00 EST
 **Version:** 1.0.0

@@ -480,13 +480,17 @@ def normalize_balances(balances: Any) -> dict[str, Any] | None:
             "day_trading_buying_power": _to_float(
                 _get_value(balances, ["DayTradingBuyingPower", "dayTradingBuyingPower", "day_trading_buying_power"])
             ),
-            "margin_available": _to_float(_get_value(balances, ["MarginAvailable", "marginAvailable", "margin_available"])),
+            "margin_available": _to_float(
+                _get_value(balances, ["MarginAvailable", "marginAvailable", "margin_available"])
+            ),
             "margin_used": _to_float(_get_value(balances, ["MarginUsed", "marginUsed", "margin_used"])),
             "maintenance_margin": _to_float(
                 _get_value(balances, ["MaintenanceMargin", "maintenanceMargin", "maintenance_margin"])
             ),
             "initial_margin_requirement": _to_float(
-                _get_value(balances, ["InitialMarginRequirement", "initialMarginRequirement", "initial_margin_requirement"])
+                _get_value(
+                    balances, ["InitialMarginRequirement", "initialMarginRequirement", "initial_margin_requirement"]
+                )
             ),
             "net_liquidation_value": _to_float(
                 _get_value(balances, ["NetLiquidationValue", "netLiquidationValue", "net_liquidation_value"])

@@ -1,3 +1,14 @@
+---
+status: Active
+created: 12-05-2025 17:19:33 EST
+lastUpdated: 12-05-2025 14:21:15 EST
+version: 1.0.0
+description: Comprehensive examples demonstrating SDK usage patterns, error handling, best practices, and common implementation scenarios
+type: Usage Guide - Practical reference for developers implementing SDK features
+applicability: When implementing SDK features, learning SDK usage patterns, or understanding best practices
+howtouse: Reference this document when implementing SDK features, learning usage patterns, or looking for code examples
+---
+
 # TradeStation SDK Examples
 
 ## About This Document
@@ -13,22 +24,6 @@ This document provides **comprehensive usage examples** demonstrating SDK usage 
 - 🚀 **[QUICKSTART.md](../QUICKSTART.md)** - 2-minute getting started
 - 📊 **[examples/README.md](../examples/README.md)** - Interactive Jupyter notebooks
 
-## Metadata
-
-- **Status:** Active
-- **Created:** 12-05-2025
-- **Last Updated:** 12-05-2025 14:21:15 EST
-- **Version:** 1.0.0
-- **Description:** Comprehensive examples demonstrating SDK usage patterns, error handling, best practices, and common implementation scenarios
-- **Type:** Usage Guide - Practical reference for developers implementing SDK features
-- **Applicability:** When implementing SDK features, learning SDK usage patterns, or understanding best practices
-- **Dependencies:**
-  - [`API_REFERENCE.md`](./API_REFERENCE.md) - Complete API reference
-  - [`ORDER_FUNCTIONS_REFERENCE.md`](./ORDER_FUNCTIONS_REFERENCE.md) - Detailed order function documentation
-  - [`API_ENDPOINT_MAPPING.md`](./API_ENDPOINT_MAPPING.md) - SDK function to API endpoint mapping
-- **How to Use:** Reference this document when implementing SDK features, learning usage patterns, or looking for code examples
-
----
 
 ---
 
@@ -154,13 +149,13 @@ for balance in detailed["Balances"]:
     print(f"Account: {balance['AccountID']}")
     print(f"  Equity: {balance['Equity']}")
     print(f"  Buying Power: {balance['BuyingPower']}")
-    
+
     # BalanceDetail (varies by account type)
     if "BalanceDetail" in balance:
         detail = balance["BalanceDetail"]
         print(f"  Day Trade Excess: {detail.get('DayTradeExcess', 'N/A')}")
         print(f"  Realized P&L: {detail.get('RealizedProfitLoss', 'N/A')}")
-    
+
     # CurrencyDetails (for futures accounts)
     if "CurrencyDetails" in balance:
         for currency in balance["CurrencyDetails"]:
@@ -641,7 +636,7 @@ from src.lib.tradestation import TradeStationSDK, QuoteStream, StreamStatus, Hea
 async def stream_quotes_example():
     sdk = TradeStationSDK()
     sdk.ensure_authenticated(mode="PAPER")
-    
+
     async for quote in sdk.streaming.stream_quotes(["MNQZ25"], mode="PAPER"):
         # Streaming methods now return QuoteStream models directly
         # Control messages (StreamStatus, Heartbeat) are filtered automatically
@@ -661,14 +656,14 @@ from src.lib.tradestation import TradeStationSDK, OrderStream
 async def stream_orders_example():
     sdk = TradeStationSDK()
     sdk.ensure_authenticated(mode="PAPER")
-    
+
     account_id = sdk.get_account_info(mode="PAPER")["account_id"]
-    
+
     async for order in sdk.streaming.stream_orders(account_id, mode="PAPER"):
         # Streaming methods now return OrderStream models directly
         # Control messages (StreamStatus, Heartbeat) are filtered automatically
         print(f"Order {order.OrderID}: {order.Status} - {order.StatusDescription}")
-        
+
         if order.Status == "FLL":
             print(f"  Filled: {order.FilledQuantity} @ ${order.FilledPrice}")
         print(f"  Type: {order.OrderType}, Quantity: {order.Quantity}")
@@ -685,18 +680,18 @@ from src.lib.tradestation import TradeStationSDK, PositionStream
 async def stream_positions_example():
     sdk = TradeStationSDK()
     sdk.ensure_authenticated(mode="PAPER")
-    
+
     account_id = sdk.get_account_info(mode="PAPER")["account_id"]
-    
+
     async for position in sdk.streaming.stream_positions(account_id, mode="PAPER"):
         # Streaming methods now return PositionStream models directly
         # Control messages (StreamStatus, Heartbeat) are filtered automatically
-        
+
         # Handle position deletion
         if position.Deleted:
             print(f"Position {position.PositionID} closed")
             continue
-        
+
         print(f"{position.Symbol}: {position.Quantity} @ {position.AveragePrice}")
         print(f"  Unrealized P&L: ${position.UnrealizedProfitLoss}")
         print(f"  Market Value: {position.MarketValue}")
@@ -715,13 +710,13 @@ asyncio.run(stream_positions_example())
 async def stream_multiple_symbols():
     sdk = TradeStationSDK()
     sdk.ensure_authenticated(mode="PAPER")
-    
+
     symbols = ["MNQZ25", "ESZ25", "MESZ25"]
-    
+
     async for quote in sdk.streaming.stream_quotes(symbols, mode="PAPER"):
         if "StreamStatus" in quote or "Heartbeat" in quote:
             continue
-        
+
         quote_obj = QuoteStream(**quote)
         print(f"{quote_obj.Symbol}: Last={quote_obj.Last}")
 ```
@@ -759,13 +754,13 @@ try:
 except AuthenticationError as e:
     # Human-readable error message
     print(f"Authentication failed: {e}")
-    
+
     # Structured error details
     error_dict = e.to_dict()
     print(f"Error code: {error_dict['code']}")
     print(f"API error: {error_dict['api_error_code']}")
     print(f"Request: {error_dict['request_method']} {error_dict['request_endpoint']}")
-    
+
     # Re-authenticate
     sdk.authenticate(mode="PAPER")
 except TokenExpiredError as e:
@@ -802,14 +797,14 @@ except Exception as e:
 Order placement failed: Invalid symbol 'INVALID_SYMBOL'
   - API Error Code: INVALID_SYMBOL
   - API Error Message: Symbol 'INVALID_SYMBOL' not found
-  
+
   Request Details:
     - Method: POST
     - Endpoint: orderexecution/orders
     - Mode: PAPER
     - Parameters: None
     - Body: {'AccountID': 'SIM123456', 'Symbol': 'INVALID_SYMBOL', ...}
-  
+
   Response Details:
     - Status: 400
     - Body: {'Error': 'Invalid symbol', 'Code': 'INVALID_SYMBOL'}
@@ -878,20 +873,20 @@ from src.lib.tradestation import TradeStationSDK, OrderStream
 async def monitor_order_status(order_id_to_monitor):
     sdk = TradeStationSDK()
     sdk.ensure_authenticated(mode="PAPER")
-    
+
     account_id = sdk.get_account_info(mode="PAPER")["account_id"]
-    
+
     async for data in sdk.streaming.stream_orders(account_id, mode="PAPER"):
         if "StreamStatus" in data or "Heartbeat" in data:
             continue
-        
+
         try:
             order = OrderStream(**data)
-            
+
             # Monitor specific order
             if order.OrderID == order_id_to_monitor:
                 print(f"Order {order.OrderID}: {order.Status} - {order.StatusDescription}")
-                
+
                 if order.Status == "FLL":
                     print(f"✅ Order filled at ${order.FilledPrice}")
                     break
@@ -922,21 +917,21 @@ from src.lib.tradestation import TradeStationSDK, PositionStream
 async def track_position_pnl(symbol_to_track):
     sdk = TradeStationSDK()
     sdk.ensure_authenticated(mode="PAPER")
-    
+
     account_id = sdk.get_account_info(mode="PAPER")["account_id"]
-    
+
     async for data in sdk.streaming.stream_positions(account_id, mode="PAPER"):
         if "StreamStatus" in data or "Heartbeat" in data:
             continue
-        
+
         try:
             position = PositionStream(**data)
-            
+
             if position.Symbol == symbol_to_track:
                 if position.Deleted:
                     print(f"Position {position.PositionID} closed")
                     break
-                
+
                 print(f"{position.Symbol}: {position.Quantity} @ ${position.AveragePrice}")
                 print(f"  Current Price: ${position.Last}")
                 print(f"  Unrealized P&L: ${position.UnrealizedProfitLoss} ({position.UnrealizedProfitLossPercent}%)")
@@ -957,14 +952,14 @@ from src.lib.tradestation import TradeStationSDK
 async def stream_balances_example():
     sdk = TradeStationSDK()
     sdk.ensure_authenticated(mode="PAPER")
-    
+
     account_id = sdk.get_account_info(mode="PAPER")["account_id"]
-    
+
     async for data in sdk.streaming.stream_balances(account_id, mode="PAPER"):
         # Skip control messages
         if "StreamStatus" in data or "Heartbeat" in data:
             continue
-        
+
         print(f"Account: {data.get('AccountID')}")
         print(f"  Equity: {data.get('Equity')}")
         print(f"  Buying Power: {data.get('BuyingPower')}")
@@ -1030,7 +1025,7 @@ order_dict = order_request.model_dump(exclude_none=True)
 async for data in sdk.streaming.stream_quotes(["MNQZ25"], mode="PAPER"):
     if "StreamStatus" in data:
         continue
-    
+
     quote = QuoteStream(**data)  # Type-safe parsing
     print(f"52-week high: {quote.High52Week}")
     print(f"Market flags: {quote.MarketFlags}")
@@ -1039,4 +1034,3 @@ async for data in sdk.streaming.stream_quotes(["MNQZ25"], mode="PAPER"):
 ---
 
 **Last Updated:** 2025-12-05
-

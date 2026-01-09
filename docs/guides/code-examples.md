@@ -1,21 +1,16 @@
+---
+status: Active
+created: 12-05-2025 17:19:33 EST
+lastUpdated: 12-05-2025 14:02:18 EST
+version: 1.0
+description: Centralized documentation of 190 code examples (Shell, Node.js, Python, C#, JSON) extracted from the TradeStation API v3 OpenAPI specification
+type: Code Reference - Technical reference for developers implementing API integrations
+applicability: When implementing API calls, understanding request/response formats, or learning API usage patterns
+howtouse: Reference this document when implementing API calls in different languages, understanding request body formats, or comparing SDK implementation with raw API examples
+---
+
 # TradeStation API Code Examples from OpenAPI Spec
 
-## Metadata
-
-- **Status:** Active
-- **Created:** 12-05-2025
-- **Last Updated:** 12-05-2025 14:02:18 EST
-- **Version:** 1.0
-- **Description:** Centralized documentation of 190 code examples (Shell, Node.js, Python, C#, JSON) extracted from the TradeStation API v3 OpenAPI specification
-- **Type:** Code Reference - Technical reference for developers implementing API integrations
-- **Applicability:** When implementing API calls, understanding request/response formats, or learning API usage patterns
-- **Dependencies:**
-  - [`tradestation-api-v3-openapi.json`](../reference/tradestation-api-v3-openapi.json) - Source OpenAPI specification containing all examples
-  - [`API_REFERENCE.md`](./API_REFERENCE.md) - Complete SDK API reference
-  - [`SDK_USAGE_EXAMPLES.md`](./SDK_USAGE_EXAMPLES.md) - SDK-specific usage examples
-- **How to Use:** Reference this document when implementing API calls in different languages, understanding request body formats, or comparing SDK implementation with raw API examples
-
----
 
 **Total Examples Found:** 190
 
@@ -4705,4 +4700,3 @@ curl --request GET \
 ```
 
 ---
-

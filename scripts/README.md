@@ -1,13 +1,12 @@
-# Scripts Directory
-
-## Metadata
-- **Version:** 1.0.0
-- **Last Updated:** 2025-12-29 16:26:28 EST
-- **Type:** Reference Material
-- **Status:** Active
-- **Description:** Utility scripts for SDK development and maintenance
-
 ---
+version: 1.0.0
+lastUpdated: 12-29-2025 17:18:15 EST
+type: Reference Material
+status: Active
+description: Utility scripts for SDK development and maintenance
+---
+
+# Scripts Directory
 
 ## Overview
 
@@ -57,11 +56,11 @@ pre-commit run validate-markdown-metadata --all-files
 - Prevents commits with invalid metadata
 
 **Validation Rules:**
-- Requires `## Metadata` section
-- Requires `**Version:**` field (format: X.Y or X.Y.Z)
-- Requires `**Last Updated:**` field (format: YYYY-MM-DD HH:MM:SS EST)
+- Requires YAML frontmatter (starts with `---`)
+- Requires `version` field (format: X.Y or X.Y.Z)
+- Requires `lastUpdated` field (format: MM-DD-YYYY HH:MM:SS EST)
 - Validates version format is numeric
-- Validates date format matches expected pattern
+- Validates date format matches expected pattern (MM-DD-YYYY HH:MM:SS EST)
 
 **Integration:**
 - Configured in `.pre-commit-config.yaml`

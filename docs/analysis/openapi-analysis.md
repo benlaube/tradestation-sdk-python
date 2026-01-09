@@ -1,24 +1,16 @@
+---
+status: Active
+created: 12-05-2025 17:19:33 EST
+lastUpdated: 12-05-2025 14:02:18 EST
+version: 1.0
+description: High-level summary of OpenAPI specification analysis, file comparisons, and documentation updates for TradeStation API v3
+type: Analysis Summary - Technical reference for developers and AI agents
+applicability: When understanding OpenAPI analysis results, reviewing SDK coverage, or planning API enhancements
+howtouse: Read this summary to quickly understand what OpenAPI analysis was performed, what files were created/updated, and where to find detailed information
+---
+
 # OpenAPI Specification Analysis Summary
 
-## Metadata
-
-- **Status:** Active
-- **Created:** 12-05-2025
-- **Last Updated:** 12-05-2025 14:02:18 EST
-- **Version:** 1.0
-- **Description:** High-level summary of OpenAPI specification analysis, file comparisons, and documentation updates for TradeStation API v3
-- **Type:** Analysis Summary - Technical reference for developers and AI agents
-- **Applicability:** When understanding OpenAPI analysis results, reviewing SDK coverage, or planning API enhancements
-- **Dependencies:**
-  - [`tradestation-api-v3-openapi.json`](../reference/tradestation-api-v3-openapi.json) - Source OpenAPI specification
-  - [`API_STRUCTURE.md`](./API_STRUCTURE.md) - API structure diagram
-  - [`API_STRUCTURE_DETAILED.md`](./API_STRUCTURE_DETAILED.md) - Detailed API structure diagram
-  - [`OPENAPI_CODE_EXAMPLES.md`](./OPENAPI_CODE_EXAMPLES.md) - Code examples extracted from OpenAPI spec
-  - [`GAP_ANALYSIS.md`](./GAP_ANALYSIS.md) - SDK gap analysis (updated with OpenAPI analysis)
-  - [`API_COVERAGE.md`](./API_COVERAGE.md) - API coverage documentation
-- **How to Use:** Read this summary to quickly understand what OpenAPI analysis was performed, what files were created/updated, and where to find detailed information
-
----
 
 ## Quick Answers
 
@@ -32,7 +24,7 @@
 1. **OpenAPI Specification:** [`tradestation-api-v3-openapi.json`](../reference/tradestation-api-v3-openapi.json)
    - Authoritative API contract definition
    - Contains all endpoint schemas, request/response structures, authentication requirements
-   
+
 2. **Pydantic Models:** [`models/`](../models/)
    - SDK implementation of the API contract
    - Type-safe Python models for all requests and responses
@@ -111,4 +103,3 @@ All file references in SDK documentation have been updated to:
 - **Code Examples:** [`OPENAPI_CODE_EXAMPLES.md`](./OPENAPI_CODE_EXAMPLES.md)
 - **Gap Analysis:** [`GAP_ANALYSIS.md`](./GAP_ANALYSIS.md) (updated with OpenAPI analysis)
 - **API Coverage:** [`API_COVERAGE.md`](./API_COVERAGE.md)
-

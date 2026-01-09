@@ -17,7 +17,6 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import TypeVar
 
-from ..utils.client import HTTPClient
 from ..config import sdk_config
 from ..exceptions import (
     NetworkError,
@@ -25,7 +24,6 @@ from ..exceptions import (
     RateLimitError,
     RecoverableError,
 )
-from ..utils.logger import setup_logger
 from ..models import BalanceStream
 from ..models.streaming import (
     OrderStream,
@@ -33,6 +31,8 @@ from ..models.streaming import (
     QuoteStream,
 )
 from ..session import Session, TokenManager
+from ..utils.client import HTTPClient
+from ..utils.logger import setup_logger
 
 logger = setup_logger(__name__, sdk_config.log_level)
 

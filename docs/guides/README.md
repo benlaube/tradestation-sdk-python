@@ -1,17 +1,13 @@
+---
+version: 1.1
+lastUpdated: 12-28-2025 17:18:15 EST
+type: How-To Guide
+status: Active
+description: How-to guides, code examples, and integration instructions
+---
+
 # Guides & Examples
 
-## Metadata
-
-- **Version:** 1.1
-- **Last Updated:** 12-28-2025 EST
-- **Type:** How-To Guide
-- **Status:** Active
-- **Description:** How-to guides, code examples, and integration instructions
-- **Related Documents:**
-  - [API Reference](../api/reference.md) - Complete API reference
-  - [Getting Started](../getting-started/README.md) - Getting started guides
-
----
 
 ## Guides & Examples
 

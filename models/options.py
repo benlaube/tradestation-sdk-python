@@ -2,7 +2,7 @@
 Option response models (expirations, strikes, risk/reward, spread types).
 """
 
-from typing import Any, List
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -10,15 +10,15 @@ from pydantic import BaseModel, Field
 class OptionExpirationsResponse(BaseModel):
     """Response wrapper for GET /v3/marketdata/options/expirations/{underlying}."""
 
-    Expirations: List[str] = Field(default_factory=list, description="Expiration dates")
-    Errors: List[Any] = Field(default_factory=list, description="Errors (if any)")
+    Expirations: list[str] = Field(default_factory=list, description="Expiration dates")
+    Errors: list[Any] = Field(default_factory=list, description="Errors (if any)")
 
 
 class OptionStrikesResponse(BaseModel):
     """Response wrapper for GET /v3/marketdata/options/strikes/{underlying}."""
 
-    Strikes: List[float | str] = Field(default_factory=list, description="Available strikes")
-    Errors: List[Any] = Field(default_factory=list, description="Errors (if any)")
+    Strikes: list[float | str] = Field(default_factory=list, description="Available strikes")
+    Errors: list[Any] = Field(default_factory=list, description="Errors (if any)")
 
 
 class OptionRiskRewardResponse(BaseModel):
@@ -41,5 +41,5 @@ class OptionSpreadType(BaseModel):
 class OptionSpreadTypesResponse(BaseModel):
     """Response wrapper for GET /v3/marketdata/options/spreadtypes."""
 
-    SpreadTypes: List[OptionSpreadType] = Field(default_factory=list, description="Spread types")
-    Errors: List[Any] = Field(default_factory=list, description="Errors (if any)")
+    SpreadTypes: list[OptionSpreadType] = Field(default_factory=list, description="Spread types")
+    Errors: list[Any] = Field(default_factory=list, description="Errors (if any)")

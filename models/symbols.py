@@ -2,7 +2,7 @@
 Symbol detail and search response models.
 """
 
-from typing import Any, List
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -25,12 +25,12 @@ class SymbolDetail(BaseModel):
 class SymbolDetailsResponse(BaseModel):
     """Response wrapper for GET /v3/marketdata/symbols/{symbols}."""
 
-    Symbols: List[SymbolDetail] = Field(default_factory=list, description="List of symbol details")
-    Errors: List[Any] = Field(default_factory=list, description="Error list from API (if any)")
+    Symbols: list[SymbolDetail] = Field(default_factory=list, description="List of symbol details")
+    Errors: list[Any] = Field(default_factory=list, description="Error list from API (if any)")
 
 
 class SymbolSearchResponse(BaseModel):
     """Response wrapper for GET /v3/marketdata/symbols/search."""
 
-    Symbols: List[SymbolDetail] = Field(default_factory=list, description="Matched symbols")
-    Errors: List[Any] = Field(default_factory=list, description="Error list from API (if any)")
+    Symbols: list[SymbolDetail] = Field(default_factory=list, description="Matched symbols")
+    Errors: list[Any] = Field(default_factory=list, description="Error list from API (if any)")

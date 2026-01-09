@@ -1,3 +1,14 @@
+---
+status: Active
+created: 12-05-2025 17:19:33 EST
+lastUpdated: 12-29-2025 13:16:21 EST
+version: 1.3
+description: Comprehensive mapping between SDK functions and TradeStation API endpoints, including HTTP methods, request/response models, and usage examples organized by operation class
+type: API Reference - Technical reference for developers implementing API integrations
+applicability: When understanding which SDK method calls which API endpoint, what models are used, or how to use specific SDK functions
+howtouse: Use this document as a quick reference to find which SDK function maps to which API endpoint, what models are required, and see usage examples
+---
+
 # TradeStation SDK API Endpoint Mapping
 
 ## About This Document
@@ -13,23 +24,6 @@ This document provides a **comprehensive mapping** between SDK functions and Tra
 - 📊 **[API_COVERAGE.md](API_COVERAGE.md)** - API coverage analysis
 - 🏗️ **[MODELS.md](MODELS.md)** - Pydantic model documentation
 
-## Metadata
-
-- **Status:** Active
-- **Created:** 12-05-2025
-- **Last Updated:** 12-29-2025 13:16:21 EST
-- **Version:** 1.3
-- **Description:** Comprehensive mapping between SDK functions and TradeStation API endpoints, including HTTP methods, request/response models, and usage examples organized by operation class
-- **Type:** API Reference - Technical reference for developers implementing API integrations
-- **Applicability:** When understanding which SDK method calls which API endpoint, what models are used, or how to use specific SDK functions
-- **Dependencies:**
-  - [`API_REFERENCE.md`](./API_REFERENCE.md) - Complete SDK API reference
-  - [`ORDER_FUNCTIONS_REFERENCE.md`](./ORDER_FUNCTIONS_REFERENCE.md) - Detailed order function documentation
-  - [`SDK_USAGE_EXAMPLES.md`](./SDK_USAGE_EXAMPLES.md) - Usage examples
-  - [`tradestation-api-v3-openapi.json`](../reference/tradestation-api-v3-openapi.json) - Source OpenAPI specification
-- **How to Use:** Use this document as a quick reference to find which SDK function maps to which API endpoint, what models are required, and see usage examples
-
----
 
 ## Overview
 

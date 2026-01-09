@@ -1,3 +1,10 @@
+---
+version: 1.0.0
+lastUpdated: 12-29-2025 17:19:32 EST
+type: Documentation
+description: Documentation file
+---
+
 # TradeStation SDK - Release Checklist
 
 ## About This Document

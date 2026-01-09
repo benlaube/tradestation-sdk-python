@@ -1,3 +1,10 @@
+---
+version: 1.0.0
+lastUpdated: 12-29-2025 17:19:25 EST
+type: Documentation
+description: Documentation file
+---
+
 # TradeStation SDK - Known Limitations
 
 ## About This Document
@@ -127,7 +134,7 @@ export TRADESTATION_REDIRECT_URI=http://localhost:8888/callback
 ```python
 # SDK automatically handles port conflicts
 sdk = TradeStationSDK()
-sdk.authenticate(mode="PAPER")  
+sdk.authenticate(mode="PAPER")
 # If port 8888 is busy, SDK will:
 # 1. Auto-select port 8889
 # 2. Update redirect_uri to http://localhost:8889/callback

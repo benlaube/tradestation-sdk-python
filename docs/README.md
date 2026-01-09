@@ -1,17 +1,13 @@
+---
+version: 1.1
+lastUpdated: 12-29-2025 17:18:15 EST
+type: Documentation Index
+status: Active
+description: Main documentation index and navigation hub for TradeStation SDK documentation
+---
+
 # TradeStation SDK Documentation
 
-## Metadata
-
-- **Version:** 1.1
-- **Last Updated:** 12-28-2025 EST
-- **Type:** Documentation Index
-- **Status:** Active
-- **Description:** Main documentation index and navigation hub for TradeStation SDK documentation
-- **Related Documents:**
-  - [Main README](../README.md) - SDK overview and quick start
-  - [Quick Start Guide](../QUICKSTART.md) - 2-minute quick start
-
----
 
 ## Documentation Index
 

@@ -1,11 +1,13 @@
+---
+lastUpdated: 12-18-2025 17:19:33 EST
+version: 1.0.0
+---
+
 # Using the TradeStation SDK as a Git Submodule
 
 ## About This Document
 
-- **Status:** Active  
-- **Last Updated:** 2025-12-18  
-- **Purpose:** How to embed this SDK into another repository via `git submodule`, keep it updated, and install it in downstream environments.  
-- **Use this if:** You want to vendor the SDK without publishing to PyPI or you need deterministic version pinning across projects.  
+- **Status:** Active
 - **Related docs:** [INSTALLATION.md](../INSTALLATION.md), [DEPLOYMENT.md](../DEPLOYMENT.md), [SECURITY.md](../SECURITY.md)
 
 ---
@@ -56,7 +58,7 @@ your-app/
 └── src/ or app/                 # your application code
 ```
 
-Imports stay the same because the SDK is packaged:  
+Imports stay the same because the SDK is packaged:
 ```python
 from tradestation import TradeStationSDK
 ```

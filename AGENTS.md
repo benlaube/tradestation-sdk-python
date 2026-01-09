@@ -1,3 +1,10 @@
+---
+version: 1.0.0
+lastUpdated: 12-29-2025 17:19:34 EST
+type: Documentation
+description: Documentation file
+---
+
 # AI Agent Context & Memory (TradeStation SDK)
 > **Audience:** AI Developer Agents working in `src/lib/tradestation/` (this SDK).
 >

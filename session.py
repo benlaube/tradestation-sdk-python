@@ -414,8 +414,7 @@ class TokenManager:
         # Extract port from redirect URI or use default
         redirect_port = 8888  # Default
         port_from_uri = None
-        original_redirect_uri = self.redirect_uri
-        
+
         if ":" in self.redirect_uri:
             with contextlib.suppress(builtins.BaseException):
                 port_from_uri = int(self.redirect_uri.split(":")[2].split("/")[0])
@@ -441,7 +440,7 @@ class TokenManager:
         # Step 2: Start local server to capture callback (with auto-port selection if needed)
         httpd = None
         port_was_auto_selected = False
-        
+
         if redirect_port is not None:
             # Use specified port
             server_address = ("127.0.0.1", redirect_port)
@@ -454,7 +453,7 @@ class TokenManager:
                     redirect_port = None  # Fall through to auto-selection
                 else:
                     raise
-        
+
         if redirect_port is None:
             # Auto-select port from range
             redirect_port = _find_available_port(8888, 8898)
@@ -476,7 +475,7 @@ class TokenManager:
             parsed = urlparse(self.redirect_uri)
             # Update redirect_uri to match the actual port being used
             self.redirect_uri = f"{parsed.scheme}://{parsed.hostname}:{redirect_port}{parsed.path}"
-            
+
             if port_was_auto_selected:
                 logger.warning(
                     f"⚠️  OAuth port auto-selected to {redirect_port} (original: {port_from_uri or 8888}). "

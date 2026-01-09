@@ -1,3 +1,14 @@
+---
+status: Active
+created: 12-05-2025 17:19:33 EST
+lastUpdated: 12-29-2025 13:16:21 EST
+version: 2.3
+description: Comprehensive analysis of SDK API endpoint coverage, model implementation status, and endpoint inventory mapping SDK functions to TradeStation API endpoints
+type: Coverage Analysis - Technical reference for developers and AI agents
+applicability: When reviewing SDK completeness, planning new endpoint implementations, or understanding API coverage status
+howtouse: Reference this document to understand which TradeStation API endpoints are implemented in the SDK, which models are used, and what coverage gaps exist
+---
+
 # TradeStation SDK API Coverage Analysis
 
 ## About This Document
@@ -14,27 +25,6 @@ This document provides **comprehensive API coverage analysis** showing which Tra
 - 🗺️ **[ROADMAP.md](ROADMAP.md)** - Future development plans
 - 📖 **[README.md](../README.md)** - SDK documentation
 
-## Metadata
-
-- **Status:** Active
-- **Created:** 12-05-2025
-- **Last Updated:** 12-29-2025 13:16:21 EST
-- **Version:** 2.3
-- **Description:** Comprehensive analysis of SDK API endpoint coverage, model implementation status, and endpoint inventory mapping SDK functions to TradeStation API endpoints
-- **Type:** Coverage Analysis - Technical reference for developers and AI agents
-- **Applicability:** When reviewing SDK completeness, planning new endpoint implementations, or understanding API coverage status
-- **Dependencies:**
-  - [`tradestation-api-v3-openapi.json`](../reference/tradestation-api-v3-openapi.json) - Source OpenAPI specification
-- [`operations/order_executions.py`](../operations/order_executions.py) - Order execution operations
-- [`operations/orders.py`](../operations/orders.py) - Order query operations
-- [`operations/accounts.py`](../operations/accounts.py) - Account operations
-- [`operations/market_data.py`](../operations/market_data.py) - Market data operations
-- [`operations/positions.py`](../operations/positions.py) - Position operations
-- [`operations/streaming.py`](../operations/streaming.py) - Streaming operations
-  - [`session.py`](../session.py) - Session management
-- **How to Use:** Reference this document to understand which TradeStation API endpoints are implemented in the SDK, which models are used, and what coverage gaps exist
-
----
 
 ## Executive Summary
 
@@ -272,11 +262,11 @@ flowchart TB
             POS[PositionOperations]
             STR[StreamingManager]
         end
-        
+
         subgraph Clients["HTTP Clients"]
             HTTP[HTTPClient<br/>REST API]
         end
-        
+
         subgraph Models["Pydantic Models"]
             ORD_MOD[Order Models<br/>orders.py]
             EXEC_MOD[Execution Models<br/>order_executions.py]
@@ -299,7 +289,7 @@ flowchart TB
     ORD --> HTTP
     POS --> HTTP
     STR --> STREAM
-    
+
     HTTP --> REST
     STR --> STREAM
 

@@ -1,18 +1,13 @@
+---
+version: 1.1
+lastUpdated: 12-28-2025 17:18:15 EST
+type: Getting Started Guide
+status: Active
+description: Getting started guides and tutorials for new SDK users
+---
+
 # Getting Started
 
-## Metadata
-
-- **Version:** 1.1
-- **Last Updated:** 12-28-2025 EST
-- **Type:** Getting Started Guide
-- **Status:** Active
-- **Description:** Getting started guides and tutorials for new SDK users
-- **Related Documents:**
-  - [Installation Guide](../INSTALLATION.md) - Detailed installation instructions
-  - [Quick Start Guide](../QUICKSTART.md) - 2-minute quick start
-  - [Main README](../README.md) - Complete SDK documentation
-
----
 
 ## Getting Started Guides
 

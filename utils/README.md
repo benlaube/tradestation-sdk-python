@@ -1,13 +1,12 @@
-# Utils Subpackage
-
-## Metadata
-- **Version:** 1.0.0
-- **Last Updated:** 2025-12-29 16:26:28 EST
-- **Type:** Reference Material
-- **Status:** Active
-- **Description:** Shared utility modules for TradeStation SDK
-
 ---
+version: 1.0.0
+lastUpdated: 12-29-2025 17:18:15 EST
+type: Reference Material
+status: Active
+description: Shared utility modules for TradeStation SDK
+---
+
+# Utils Subpackage
 
 ## Overview
 
@@ -168,7 +167,7 @@ from session import TokenManager
 class MyOperations:
     def __init__(self, client: HTTPClient):
         self.client = client
-    
+
     def my_method(self, mode: str = "PAPER"):
         response = self.client.get("/endpoint", mode=mode)
         return response.json()
@@ -204,7 +203,7 @@ from utils.mappers import normalize_order
 def get_order(order_id: str):
     response = self.client.get(f"/orders/{order_id}")
     order_data = response.json()
-    
+
     # Optional: normalize to snake_case
     normalized = normalize_order(order_data)
     return normalized

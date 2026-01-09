@@ -1,17 +1,13 @@
+---
+version: 1.1
+lastUpdated: 12-29-2025 13:31:00 EST
+type: Reference Material
+status: Active
+description: Quick reference materials, function lists, and technical references
+---
+
 # Reference Materials
 
-## Metadata
-
-- **Version:** 1.1
-- **Last Updated:** 12-29-2025 13:31:00 EST
-- **Type:** Reference Material
-- **Status:** Active
-- **Description:** Quick reference materials, function lists, and technical references
-- **Related Documents:**
-  - [API Reference](../api/reference.md) - Complete API reference
-  - [Usage Examples](../guides/usage-examples.md) - Code examples
-
----
 
 ## Reference Materials
 

@@ -12,12 +12,12 @@ Dependencies: typing, collections.abc.AsyncGenerator
 from collections.abc import AsyncGenerator
 from typing import Any
 
-from .accounts import AccountOperations
-from ..utils.client import HTTPClient
 from ..config import sdk_config
 from ..exceptions import TradeStationAPIError
-from ..utils.logger import setup_logger
 from ..models import OrdersWrapper
+from ..utils.client import HTTPClient
+from ..utils.logger import setup_logger
+from .accounts import AccountOperations
 
 logger = setup_logger(__name__, sdk_config.log_level)
 
@@ -170,7 +170,9 @@ class OrderOperations:
                     logger.debug(f"Response: {str(response)[:500]}")
 
             try:
-                return OrdersWrapper(Orders=orders, NextPageToken=response.get("NextPageToken"), Errors=response.get("Errors", []))
+                return OrdersWrapper(
+                    Orders=orders, NextPageToken=response.get("NextPageToken"), Errors=response.get("Errors", [])
+                )
             except Exception:
                 return orders
 

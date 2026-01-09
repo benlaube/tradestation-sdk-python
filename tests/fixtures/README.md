@@ -1,13 +1,12 @@
-# Test Fixtures
-
-## Metadata
-- **Version:** 1.0.0
-- **Last Updated:** 2025-12-29 16:26:28 EST
-- **Type:** Reference Material
-- **Status:** Active
-- **Description:** Test fixtures and mock data for TradeStation SDK tests
-
 ---
+version: 1.0.0
+lastUpdated: 12-29-2025 17:18:15 EST
+type: Reference Material
+status: Active
+description: Test fixtures and mock data for TradeStation SDK tests
+---
+
+# Test Fixtures
 
 ## Overview
 
@@ -72,7 +71,7 @@ def test_api_call(mocker):
     # Mock API response
     mock_response = mock_get_response(MOCK_ACCOUNTS_LIST)
     mocker.patch('requests.get', return_value=mock_response)
-    
+
     # Test code that makes API call
     result = sdk.get_accounts_list()
     assert result is not None
@@ -163,9 +162,9 @@ def test_order_placement(mocker):
     mock_response = Mock()
     mock_response.json.return_value = MOCK_ORDER_RESPONSE
     mock_response.status_code = 200
-    
+
     mocker.patch('requests.post', return_value=mock_response)
-    
+
     # Test order placement
     result = sdk.place_order(...)
     assert result is not None

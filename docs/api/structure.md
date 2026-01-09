@@ -1,21 +1,14 @@
+---
+version: 1.1
+lastUpdated: 12-28-2025 17:18:15 EST
+type: Architecture Diagram
+status: Active
+description: Visual diagrams showing TradeStation API v3 endpoint structure organized by tag groups (Brokerage, MarketData, Order Execution) with detailed relationships
+applicability: When understanding API structure, planning SDK enhancements, or reviewing endpoint coverage
+---
+
 # TradeStation API v3 Structure
 
-## Metadata
-
-- **Version:** 1.1
-- **Last Updated:** 12-28-2025 EST
-- **Type:** Architecture Diagram
-- **Status:** Active
-- **Description:** Visual diagrams showing TradeStation API v3 endpoint structure organized by tag groups (Brokerage, MarketData, Order Execution) with detailed relationships
-- **Applicability:** When understanding API structure, planning SDK enhancements, or reviewing endpoint coverage
-- **Dependencies:**
-  - [`tradestation-api-v3-openapi.json`](../../reference/tradestation-api-v3-openapi.json) - Source OpenAPI specification
-- **Related Documents:**
-  - [API Reference](reference.md) - Complete API reference
-  - [API Coverage](coverage.md) - Endpoint coverage analysis
-  - [SDK Endpoint Mapping](sdk_endpoints.md) - Endpoint mapping
-
----
 
 ## API Structure Overview
 

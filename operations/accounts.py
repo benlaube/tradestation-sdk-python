@@ -13,15 +13,15 @@ from typing import Any
 
 import requests
 
-from ..utils.client import HTTPClient
 from ..config import sdk_config
 from ..exceptions import TradeStationAPIError
-from ..utils.logger import setup_logger
 from ..models import (
     AccountBalancesResponse,
     AccountsListResponse,
     BODBalancesResponse,
 )
+from ..utils.client import HTTPClient
+from ..utils.logger import setup_logger
 
 logger = setup_logger(__name__, sdk_config.log_level)
 

@@ -1,8 +1,10 @@
+---
+version: 1.0.1
+lastUpdated: 12-29-2025 17:19:25 EST
+---
+
 # TradeStation SDK
 
-**Version:** 1.0.1
-**Status:** Production Ready
-**Python:** 3.10+
 **License:** MIT
 
 ## About This Document

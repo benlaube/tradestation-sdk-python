@@ -20,69 +20,69 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from models import (
-    # Order Models
-    TradeStationOrderRequest,
-    TradeStationOrderGroupRequest,
-    TradeStationOrderResponse,
-    TradeStationOrderGroupResponse,
-    TradeStationOrderLeg,
-    TradeStationConditionalOrder,
-    TradeStationMarketActivationRule,
-    TradeStationTimeActivationRule,
-    TradeStationTrailingStop,
-    # Order Execution Models
-    TradeStationExecutionResponse,
+    AccountBalancesResponse,
+    AccountsListResponse,
+    # Account Models
+    AccountSummary,
+    BalanceDetail,
+    BalanceStream,
     # Bar Models
     BarResponse,
     BarsResponse,
+    BarStream,
+    BODBalance,
+    BODBalancesResponse,
+    CancelOrderResponse,
+    ConfirmGroupOrderResponse,
+    ConfirmOrderResponse,
+    Heartbeat,
+    MarketDepthAggregateStream,
+    MarketDepthQuoteStream,
+    MarketFlags,
+    OptionChainStream,
+    # Option Models
+    OptionExpirationsResponse,
+    OptionQuoteStream,
+    OptionRiskRewardResponse,
+    OptionSpreadType,
+    OptionSpreadTypesResponse,
+    OptionStrikesResponse,
+    OrderStream,
+    # Order Wrappers / Confirm
+    OrdersWrapper,
+    # Position Models
+    PositionResponse,
+    PositionsResponse,
+    PositionStream,
+    # Quote Models
+    QuoteSnapshot,
+    QuotesResponse,
+    # Streaming Models
+    QuoteStream,
+    StreamErrorResponse,
+    StreamStatus,
     # Symbol Models
     SymbolDetail,
     SymbolDetailsResponse,
     SymbolSearchResponse,
-    # Option Models
-    OptionExpirationsResponse,
-    OptionStrikesResponse,
-    OptionRiskRewardResponse,
-    OptionSpreadType,
-    OptionSpreadTypesResponse,
-    # Order Wrappers / Confirm
-    OrdersWrapper,
-    CancelOrderResponse,
-    ConfirmOrderResponse,
-    ConfirmGroupOrderResponse,
-    # Streaming Models
-    QuoteStream,
-    OrderStream,
-    PositionStream,
-    BalanceStream,
-    BarStream,
-    OptionChainStream,
-    OptionQuoteStream,
-    MarketDepthQuoteStream,
-    MarketDepthAggregateStream,
-    StreamStatus,
-    Heartbeat,
-    StreamErrorResponse,
-    MarketFlags,
-    # Account Models
-    AccountSummary,
-    BalanceDetail,
-    AccountBalancesResponse,
-    BODBalance,
-    BODBalancesResponse,
-    AccountsListResponse,
-    # Position Models
-    PositionResponse,
-    PositionsResponse,
-    # Quote Models
-    QuoteSnapshot,
-    QuotesResponse,
+    TradeStationConditionalOrder,
+    # Order Execution Models
+    TradeStationExecutionResponse,
+    TradeStationMarketActivationRule,
+    TradeStationOrderGroupRequest,
+    TradeStationOrderGroupResponse,
+    TradeStationOrderLeg,
+    # Order Models
+    TradeStationOrderRequest,
+    TradeStationOrderResponse,
+    TradeStationTimeActivationRule,
+    TradeStationTrailingStop,
 )
 
 
 def generate_schema_file():
     """Generate JSON schema file for all SDK models."""
-    
+
     # Organize models by category
     schemas = {
         "$schema": "http://json-schema.org/draft-07/schema#",
@@ -94,7 +94,7 @@ def generate_schema_file():
             "how_to_regenerate": "Run the following command from the SDK root directory: python scripts/generate_model_schemas.py",
             "when_to_regenerate": "Regenerate this file whenever Pydantic models in the models/ directory are added, modified, or removed",
             "script_location": "scripts/generate_model_schemas.py",
-            "output_location": "docs/reference/sdk-models-schema.json"
+            "output_location": "docs/reference/sdk-models-schema.json",
         },
         "models": {
             "orders": {
@@ -166,18 +166,18 @@ def generate_schema_file():
             },
         },
     }
-    
+
     # Write to file
     output_path = Path(__file__).parent.parent / "docs" / "reference" / "sdk-models-schema.json"
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    
+
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(schemas, f, indent=2, ensure_ascii=False)
-    
+
     print(f"✅ Generated schema file: {output_path}")
     print(f"   Total models: {sum(len(category) for category in schemas['models'].values())}")
     print(f"   Categories: {len(schemas['models'])}")
-    
+
     return output_path
 
 

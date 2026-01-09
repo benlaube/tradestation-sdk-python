@@ -28,8 +28,8 @@ from ..exceptions import (
     RecoverableError,
     TradeStationAPIError,
 )
-from .logger import log_with_context, setup_logger
 from ..session import TokenManager
+from .logger import log_with_context, setup_logger
 
 logger = setup_logger(__name__, sdk_config.log_level)
 

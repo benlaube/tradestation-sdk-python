@@ -1,3 +1,8 @@
+---
+version: 1.0.0
+lastUpdated: 12-05-2025 17:19:34 EST
+---
+
 # TradeStation SDK - Trailing Stop Variations
 
 ## About This Document
@@ -11,9 +16,6 @@ This document provides a **complete guide to all trailing stop variations** and 
 - 📚 **[API_REFERENCE.md](API_REFERENCE.md)** - Complete API reference
 - ⚠️ **[LIMITATIONS.md](../LIMITATIONS.md)** - Trailing stop limitations (points vs dollars)
 - 💡 **[SDK_USAGE_EXAMPLES.md](SDK_USAGE_EXAMPLES.md)** - Trailing stop usage examples
-
-**Version:** 1.0.0  
-**Last Updated:** 2025-12-05
 
 ---
 

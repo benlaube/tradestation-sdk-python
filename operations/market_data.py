@@ -11,25 +11,26 @@ Dependencies: typing
 from collections.abc import AsyncGenerator
 from typing import Any
 
-from ..utils.client import HTTPClient
 from ..config import sdk_config
 from ..exceptions import TradeStationAPIError
-from ..utils.logger import setup_logger
 from ..models import (
     BarResponse,
     BarsResponse,
-    OptionExpirationsResponse,
-    OptionChainStream,
-    OptionQuoteStream,
-    MarketDepthQuoteStream,
     MarketDepthAggregateStream,
+    MarketDepthQuoteStream,
+    OptionChainStream,
+    OptionExpirationsResponse,
+    OptionQuoteStream,
     OptionRiskRewardResponse,
+    OptionSpreadType,
     OptionSpreadTypesResponse,
     OptionStrikesResponse,
     QuotesResponse,
     SymbolDetailsResponse,
     SymbolSearchResponse,
 )
+from ..utils.client import HTTPClient
+from ..utils.logger import setup_logger
 from .models.streaming import BarStream
 
 logger = setup_logger(__name__, sdk_config.log_level)
@@ -200,7 +201,10 @@ class MarketDataOperations:
 
             logger.debug(f"Found {len(symbols)} symbols matching criteria")
             try:
-                return SymbolSearchResponse(Symbols=[SymbolSearchResponse.__fields__["Symbols"].annotation.__args__[0](**s) for s in symbols], Errors=response.get("Errors", []))  # type: ignore[index]
+                return SymbolSearchResponse(
+                    Symbols=[SymbolSearchResponse.__fields__["Symbols"].annotation.__args__[0](**s) for s in symbols],
+                    Errors=response.get("Errors", []),
+                )  # type: ignore[index]
             except Exception:
                 return symbols
         except TradeStationAPIError as e:
@@ -525,7 +529,12 @@ class MarketDataOperations:
             logger.info(f"Retrieved symbol details for {len(symbol_details)} symbol(s) (mode: {mode})")
 
             try:
-                return SymbolDetailsResponse(Symbols=[SymbolDetailsResponse.__fields__["Symbols"].annotation.__args__[0](**s) for s in symbol_details], Errors=errors)  # type: ignore[index]
+                return SymbolDetailsResponse(
+                    Symbols=[
+                        SymbolDetailsResponse.__fields__["Symbols"].annotation.__args__[0](**s) for s in symbol_details
+                    ],
+                    Errors=errors,
+                )  # type: ignore[index]
             except Exception:
                 return {"Symbols": symbol_details, "Errors": errors}
 
@@ -697,7 +706,8 @@ class MarketDataOperations:
 
             try:
                 return OptionSpreadTypesResponse(
-                    SpreadTypes=[OptionSpreadType(**st) for st in spread_types], Errors=response.get("Errors", [])
+                    SpreadTypes=[OptionSpreadType(**st) for st in spread_types],
+                    Errors=response.get("Errors", []),
                 )
             except Exception:
                 return spread_types

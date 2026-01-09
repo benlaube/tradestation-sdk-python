@@ -1,3 +1,14 @@
+---
+status: Active
+created: 12-05-2025 17:19:33 EST
+lastUpdated: 12-29-2025 13:41:00 EST
+version: 1.1.0
+description: Complete API reference documentation for all SDK classes, methods, models, and exceptions with detailed parameter descriptions and usage patterns
+type: API Reference - Technical reference for developers using the SDK
+applicability: When implementing SDK features, understanding method signatures, or looking up specific class/method documentation
+howtouse: Reference this document when implementing SDK features, understanding method parameters, or looking up class/method documentation
+---
+
 # TradeStation SDK API Reference
 
 ## About This Document
@@ -17,23 +28,6 @@ This is the **complete API reference** for all SDK classes, methods, models, and
 - 🏗️ **[MODELS.md](MODELS.md)** - Pydantic model documentation
 - 📖 **[README.md](../README.md)** - SDK overview and getting started
 
-## Metadata
-
-- **Status:** Active
-- **Created:** 12-05-2025
-- **Last Updated:** 12-29-2025 13:41:00 EST
-- **Version:** 1.1.0
-- **Description:** Complete API reference documentation for all SDK classes, methods, models, and exceptions with detailed parameter descriptions and usage patterns
-- **Type:** API Reference - Technical reference for developers using the SDK
-- **Applicability:** When implementing SDK features, understanding method signatures, or looking up specific class/method documentation
-- **Dependencies:**
-  - [`API_ENDPOINT_MAPPING.md`](./API_ENDPOINT_MAPPING.md) - SDK function to API endpoint mapping
-  - [`ORDER_FUNCTIONS_REFERENCE.md`](./ORDER_FUNCTIONS_REFERENCE.md) - Detailed order function documentation
-  - [`SDK_USAGE_EXAMPLES.md`](./SDK_USAGE_EXAMPLES.md) - Usage examples
-  - [`MODELS.md`](./MODELS.md) - Model documentation
-- **How to Use:** Reference this document when implementing SDK features, understanding method parameters, or looking up class/method documentation
-
----
 
 ---
 
@@ -1484,7 +1478,7 @@ try:
 except TradeStationAPIError as e:
     # Human-readable message
     print(f"Error: {e}")
-    
+
     # Structured details
     details = e.to_dict()
     print(f"API Error: {details['api_error_code']}")
@@ -1683,4 +1677,3 @@ The SDK also provides these optional mapper utilities:
 ---
 
 **Last Updated:** 12-29-2025 13:41:00 EST
-

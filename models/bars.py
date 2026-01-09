@@ -2,8 +2,6 @@
 Bar response models for REST barchart endpoints.
 """
 
-from typing import List
-
 from pydantic import BaseModel, Field
 
 
@@ -33,4 +31,4 @@ class BarResponse(BaseModel):
 class BarsResponse(BaseModel):
     """Wrapper for list of bars returned by /v3/marketdata/barcharts/{symbol}."""
 
-    Bars: List[BarResponse] = Field(default_factory=list, description="List of bars")
+    Bars: list[BarResponse] = Field(default_factory=list, description="List of bars")

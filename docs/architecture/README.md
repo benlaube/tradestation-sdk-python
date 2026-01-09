@@ -1,17 +1,13 @@
+---
+version: 1.1
+lastUpdated: 12-28-2025 17:18:15 EST
+type: Architecture Documentation
+status: Active
+description: System architecture, design decisions, and feature comparisons
+---
+
 # Architecture Documentation
 
-## Metadata
-
-- **Version:** 1.1
-- **Last Updated:** 12-28-2025 EST
-- **Type:** Architecture Documentation
-- **Status:** Active
-- **Description:** System architecture, design decisions, and feature comparisons
-- **Related Documents:**
-  - [API Structure](../api/structure.md) - API endpoint structure
-  - [Models Documentation](../models/README.md) - Data model architecture
-
----
 
 ## Architecture Documentation
 

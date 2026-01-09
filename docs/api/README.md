@@ -1,17 +1,13 @@
+---
+version: 1.1
+lastUpdated: 12-28-2025 17:18:15 EST
+type: API Reference
+status: Active
+description: Complete API documentation including reference, endpoints, coverage, and structure
+---
+
 # API Documentation
 
-## Metadata
-
-- **Version:** 1.1
-- **Last Updated:** 12-28-2025 EST
-- **Type:** API Reference
-- **Status:** Active
-- **Description:** Complete API documentation including reference, endpoints, coverage, and structure
-- **Related Documents:**
-  - [Models Documentation](../models/README.md) - Pydantic model documentation
-  - [Usage Examples](../guides/usage-examples.md) - Code examples using the API
-
----
 
 ## API Documentation
 

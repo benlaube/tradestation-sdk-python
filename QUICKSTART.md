@@ -1,3 +1,10 @@
+---
+version: 1.0.0
+lastUpdated: 12-29-2025 17:19:25 EST
+type: Documentation
+description: Documentation file
+---
+
 # TradeStation SDK - Quick Start (2 Minutes)
 
 ## About This Document
@@ -99,7 +106,7 @@ lsof -ti:8888 | xargs kill -9
 ```
 
 ### "redirect_uri_mismatch"
-**Cause:** Selected port not registered in TradeStation Developer Portal  
+**Cause:** Selected port not registered in TradeStation Developer Portal
 **Solution:** Register the port shown in SDK logs (or register all ports 8888-8898)
 
 ### "Module not found"

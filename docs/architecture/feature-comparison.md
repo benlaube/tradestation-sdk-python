@@ -1,3 +1,10 @@
+---
+version: 1.0.0
+lastUpdated: 12-29-2025 17:19:33 EST
+type: Documentation
+description: Documentation file
+---
+
 # TradeStation SDK - Feature Comparison
 
 ## About This Document
@@ -144,22 +151,22 @@ How this SDK compares to other trading SDKs and libraries.
 
 ### Strengths
 
-✅ **Full futures support** - Complete futures trading (unlike Alpaca)  
-✅ **Automatic token refresh** - No manual token management  
-✅ **Dual-mode support** - Seamless PAPER ↔ LIVE switching  
-✅ **Type safety** - Pydantic models for all data  
-✅ **Error handling** - Detailed error context and categorization  
-✅ **Convenience functions** - Simple interfaces for common tasks  
-✅ **Comprehensive docs** - Jupyter notebooks, CLI tools, examples  
-✅ **Auto-reconnection** - Streaming reliability with fallback  
-✅ **Test suite** - 90%+ coverage with mocked tests  
+✅ **Full futures support** - Complete futures trading (unlike Alpaca)
+✅ **Automatic token refresh** - No manual token management
+✅ **Dual-mode support** - Seamless PAPER ↔ LIVE switching
+✅ **Type safety** - Pydantic models for all data
+✅ **Error handling** - Detailed error context and categorization
+✅ **Convenience functions** - Simple interfaces for common tasks
+✅ **Comprehensive docs** - Jupyter notebooks, CLI tools, examples
+✅ **Auto-reconnection** - Streaming reliability with fallback
+✅ **Test suite** - 90%+ coverage with mocked tests
 
 ### Trade-offs
 
-⚠️ **HTTP Streaming** - Slightly higher latency than WebSocket  
-⚠️ **Python 3.10+** - Newer Python required  
-⚠️ **Synchronous client** - Blocking I/O (async planned for v2.0)  
-⚠️ **Token storage** - Plain JSON (encryption planned for v1.1)  
+⚠️ **HTTP Streaming** - Slightly higher latency than WebSocket
+⚠️ **Python 3.10+** - Newer Python required
+⚠️ **Synchronous client** - Blocking I/O (async planned for v2.0)
+⚠️ **Token storage** - Plain JSON (encryption planned for v1.1)
 
 ---
 
@@ -167,11 +174,11 @@ How this SDK compares to other trading SDKs and libraries.
 
 ### When to Use This SDK
 
-✅ **Algorithmic futures trading** - Full futures support  
-✅ **Multi-strategy systems** - PAPER/LIVE mode switching  
-✅ **Production trading bots** - Reliable, well-tested  
-✅ **Paper trading & backtesting** - Full PAPER mode support  
-✅ **Educational projects** - Comprehensive examples  
+✅ **Algorithmic futures trading** - Full futures support
+✅ **Multi-strategy systems** - PAPER/LIVE mode switching
+✅ **Production trading bots** - Reliable, well-tested
+✅ **Paper trading & backtesting** - Full PAPER mode support
+✅ **Educational projects** - Comprehensive examples
 
 ### When to Consider Alternatives
 

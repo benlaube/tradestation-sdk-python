@@ -1,18 +1,13 @@
+---
+version: 1.2
+lastUpdated: 12-29-2025 12:52:55 EST
+type: Model Reference
+status: Active
+description: Complete documentation for all Pydantic models used in the SDK
+---
+
 # Models Documentation
 
-## Metadata
-
-- **Version:** 1.2
-- **Last Updated:** 12-29-2025 12:52:55 EST
-- **Type:** Model Reference
-- **Status:** Active
-- **Description:** Complete documentation for all Pydantic models used in the SDK
-- **Related Documents:**
-  - [Models Source Code](../../models/) - Model implementations
-  - [API Reference](../api/reference.md) - API methods that use these models
-  - [Models README](../../models/README.md) - Models directory overview
-
----
 
 ## Model Documentation
 

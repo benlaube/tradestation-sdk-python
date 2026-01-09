@@ -1,3 +1,10 @@
+---
+version: 1.0.0
+lastUpdated: 12-29-2025 17:19:25 EST
+type: Documentation
+description: Documentation file
+---
+
 # TradeStation SDK Changelog
 
 ## About This Document

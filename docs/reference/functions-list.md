@@ -1,3 +1,14 @@
+---
+status: Active
+created: 12-05-2025 17:19:33 EST
+lastUpdated: 12-29-2025 13:41:00 EST
+version: 1.2.1
+description: Quick reference list of all functions available in the TradeStation SDK across all modules and endpoints, organized by category for quick lookup
+type: Function Index - Quick reference for developers looking up SDK functions
+applicability: When quickly looking up available SDK functions, understanding function organization, or finding functions by category
+howtouse: Use this document as a quick index to find available SDK functions by category, then reference detailed documentation for specific functions
+---
+
 # TradeStation SDK - Complete Functions List
 
 ## About This Document
@@ -13,22 +24,6 @@ This is a **quick reference index** of all functions available in the SDK, organ
 - 📋 **[CHEATSHEET.md](../CHEATSHEET.md)** - Quick code snippets
 - 🎯 **[FEATURES.md](../FEATURES.md)** - Feature overview
 
-## Metadata
-
-- **Status:** Active
-- **Created:** 12-05-2025
-- **Last Updated:** 12-29-2025 13:41:00 EST
-- **Version:** 1.2.1
-- **Description:** Quick reference list of all functions available in the TradeStation SDK across all modules and endpoints, organized by category for quick lookup
-- **Type:** Function Index - Quick reference for developers looking up SDK functions
-- **Applicability:** When quickly looking up available SDK functions, understanding function organization, or finding functions by category
-- **Dependencies:**
-  - [`ORDER_FUNCTIONS_REFERENCE.md`](./ORDER_FUNCTIONS_REFERENCE.md) - Comprehensive order function documentation
-  - [`SDK_USAGE_EXAMPLES.md`](./SDK_USAGE_EXAMPLES.md) - Usage examples for all functions
-  - [`API_REFERENCE.md`](./API_REFERENCE.md) - Complete API endpoint documentation
-- **How to Use:** Use this document as a quick index to find available SDK functions by category, then reference detailed documentation for specific functions
-
----
 
 ## Table of Contents
 

@@ -2,7 +2,7 @@
 """
 Pre-commit hook to validate markdown metadata.
 
-Validates that all .md files have proper metadata structure according to
+Validates that all .md files have proper YAML frontmatter metadata structure according to
 .cursor/rules/markdown-metadata.mdc requirements.
 
 Usage:
@@ -15,75 +15,73 @@ Or as pre-commit hook:
 import re
 import sys
 from pathlib import Path
-from typing import Optional
 
-# Required metadata fields (from markdown-metadata.mdc)
-REQUIRED_FIELDS = {
-    "Version": r"\*\*Version:\*\*\s*[\d.]+",
-    "Last Updated": r"\*\*Last Updated:\*\*\s*[\d-]+\s+[\d:]+\s+EST",
-}
+try:
+    import yaml
+except ImportError:
+    print("Error: PyYAML is required. Install with: pip install pyyaml")
+    sys.exit(1)
 
-# Optional but recommended fields
-OPTIONAL_FIELDS = {
-    "Type": r"\*\*Type:\*\*\s*.+",
-    "Description": r"\*\*Description:\*\*\s*.+",
-}
+# Required metadata fields
+REQUIRED_FIELDS = ["version", "lastUpdated"]
 
-# Patterns to identify metadata section
-METADATA_SECTION_PATTERN = r"^##\s+Metadata\s*$"
-METADATA_FIELD_PATTERN = r"^-\s+\*\*([^*]+):\*\*\s*(.+)$"
+# Date format pattern: MM-DD-YYYY HH:MM:SS EST
+DATE_PATTERN = r"^\d{2}-\d{2}-\d{4}\s+\d{2}:\d{2}:\d{2}\s+EST$"
 
 
-def extract_metadata_section(content: str) -> Optional[str]:
-    """Extract the metadata section from markdown content."""
+def extract_yaml_frontmatter(content: str) -> tuple[dict | None, str]:
+    """Extract YAML frontmatter from markdown content."""
     lines = content.split("\n")
-    metadata_start = None
-    metadata_end = None
-    
-    for i, line in enumerate(lines):
-        if re.match(METADATA_SECTION_PATTERN, line):
-            metadata_start = i
-        elif metadata_start is not None and line.startswith("## ") and i > metadata_start:
-            metadata_end = i
+
+    # Check if file starts with YAML frontmatter
+    if not lines or lines[0].strip() != "---":
+        return None, content
+
+    # Find closing ---
+    frontmatter_end = None
+    for i in range(1, len(lines)):
+        if lines[i].strip() == "---":
+            frontmatter_end = i
             break
-    
-    if metadata_start is None:
-        return None
-    
-    if metadata_end is None:
-        metadata_end = len(lines)
-    
-    return "\n".join(lines[metadata_start:metadata_end])
+
+    if frontmatter_end is None:
+        return None, content
+
+    # Extract YAML content
+    yaml_content = "\n".join(lines[1:frontmatter_end])
+    remaining_content = "\n".join(lines[frontmatter_end + 1 :])
+
+    try:
+        metadata = yaml.safe_load(yaml_content)
+        return metadata if metadata else {}, remaining_content
+    except yaml.YAMLError:
+        return None, content
 
 
-def validate_metadata(metadata_section: str, file_path: Path) -> tuple[bool, list[str]]:
-    """Validate metadata section against requirements."""
+def validate_metadata(metadata: dict, file_path: Path) -> tuple[bool, list[str]]:
+    """Validate metadata dictionary against requirements."""
     errors = []
-    
+
     # Check required fields
-    for field_name, pattern in REQUIRED_FIELDS.items():
-        if not re.search(pattern, metadata_section, re.MULTILINE | re.IGNORECASE):
-            errors.append(f"Missing required field: {field_name}")
-    
+    for field in REQUIRED_FIELDS:
+        if field not in metadata or not metadata[field]:
+            errors.append(f"Missing required field: {field}")
+
     # Check version format
-    version_match = re.search(r"\*\*Version:\*\*\s*([\d.]+)", metadata_section, re.IGNORECASE)
-    if version_match:
-        version = version_match.group(1)
+    if "version" in metadata:
+        version = str(metadata["version"])
         parts = version.split(".")
         if len(parts) not in [2, 3]:
             errors.append(f"Invalid version format: {version} (expected X.Y or X.Y.Z)")
         elif not all(part.isdigit() for part in parts):
             errors.append(f"Invalid version format: {version} (must be numeric)")
-    
-    # Check last updated format
-    last_updated_match = re.search(
-        r"\*\*Last Updated:\*\*\s*(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2}:\d{2})\s+(EST|PST|UTC)",
-        metadata_section,
-        re.IGNORECASE
-    )
-    if not last_updated_match:
-        errors.append("Invalid 'Last Updated' format (expected: YYYY-MM-DD HH:MM:SS EST)")
-    
+
+    # Check lastUpdated format (MM-DD-YYYY HH:MM:SS EST)
+    if "lastUpdated" in metadata:
+        last_updated = str(metadata["lastUpdated"])
+        if not re.match(DATE_PATTERN, last_updated):
+            errors.append(f"Invalid 'lastUpdated' format: {last_updated} (expected: MM-DD-YYYY HH:MM:SS EST)")
+
     return len(errors) == 0, errors
 
 
@@ -93,16 +91,16 @@ def validate_file(file_path: Path) -> tuple[bool, list[str]]:
         content = file_path.read_text(encoding="utf-8")
     except Exception as e:
         return False, [f"Error reading file: {e}"]
-    
-    # Extract metadata section
-    metadata_section = extract_metadata_section(content)
-    
-    if metadata_section is None:
-        return False, ["Missing '## Metadata' section"]
-    
+
+    # Extract YAML frontmatter
+    metadata, _ = extract_yaml_frontmatter(content)
+
+    if metadata is None:
+        return False, ["Missing YAML frontmatter (must start with '---')"]
+
     # Validate metadata
-    is_valid, errors = validate_metadata(metadata_section, file_path)
-    
+    is_valid, errors = validate_metadata(metadata, file_path)
+
     return is_valid, errors
 
 
@@ -114,33 +112,31 @@ def main():
     else:
         # Get staged .md files from git
         import subprocess
+
         try:
             result = subprocess.run(
                 ["git", "diff", "--cached", "--name-only", "--diff-filter=ACM"],
                 capture_output=True,
                 text=True,
-                check=True
+                check=True,
             )
-            files = [
-                Path(f) for f in result.stdout.strip().split("\n")
-                if f.endswith(".md") and Path(f).exists()
-            ]
+            files = [Path(f) for f in result.stdout.strip().split("\n") if f.endswith(".md") and Path(f).exists()]
         except subprocess.CalledProcessError:
             print("Warning: Could not get staged files from git. Pass files as arguments.")
             return 0
-    
+
     if not files:
         print("No markdown files to validate.")
         return 0
-    
+
     # Validate each file
     all_valid = True
     for file_path in files:
         if not file_path.exists():
             continue
-        
+
         is_valid, errors = validate_file(file_path)
-        
+
         if not is_valid:
             all_valid = False
             print(f"❌ {file_path}:")
@@ -148,17 +144,16 @@ def main():
                 print(f"   - {error}")
         else:
             print(f"✅ {file_path}: Metadata valid")
-    
+
     if not all_valid:
         print("\n❌ Metadata validation failed. Please fix the errors above.")
-        print("\nRequired metadata format:")
-        print("## Metadata")
-        print("- **Version:** X.Y or X.Y.Z")
-        print("- **Last Updated:** YYYY-MM-DD HH:MM:SS EST")
-        print("- **Type:** [Documentation Type]")
-        print("- **Description:** [Brief description]")
+        print("\nRequired YAML frontmatter format:")
+        print("---")
+        print("version: X.Y or X.Y.Z")
+        print("lastUpdated: MM-DD-YYYY HH:MM:SS EST")
+        print("---")
         return 1
-    
+
     return 0
 
 

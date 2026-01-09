@@ -2,7 +2,7 @@
 Wrapper and confirm/cancel response models for order queries.
 """
 
-from typing import List, Any
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -12,9 +12,9 @@ from .orders import TradeStationOrderResponse
 class OrdersWrapper(BaseModel):
     """Wrapper for current/historical orders list responses."""
 
-    Orders: List[TradeStationOrderResponse] = Field(default_factory=list, description="Order list")
+    Orders: list[TradeStationOrderResponse] = Field(default_factory=list, description="Order list")
     NextPageToken: str | None = Field(None, description="Pagination token, if provided")
-    Errors: List[Any] = Field(default_factory=list, description="Errors, if any")
+    Errors: list[Any] = Field(default_factory=list, description="Errors, if any")
 
 
 class CancelOrderResponse(BaseModel):
