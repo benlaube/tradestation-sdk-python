@@ -16,9 +16,9 @@ This document outlines the **future development plans and roadmap** for the SDK.
 **Related Documents:**
 
 - 📝 **[CHANGELOG.md](../CHANGELOG.md)** - What's been released (past)
-- ⚠️ **[LIMITATIONS.md](../LIMITATIONS.md)** - Known issues and planned fixes
+- ⚠️ **[LIMITATIONS.md](../architecture/limitations.md)** - Known issues and planned fixes
 - 📖 **[README.md](../README.md)** - Current SDK features
-- 🎯 **[FEATURES.md](../FEATURES.md)** - Complete feature overview
+- 🎯 **[FEATURES.md](../architecture/features.md)** - Complete feature overviews
 - 🤝 **[CONTRIBUTING.md](../CONTRIBUTING.md)** - How to contribute to roadmap items
 
 ---
@@ -56,7 +56,7 @@ We follow [Semantic Versioning](https://semver.org/):
 - HTTP Streaming with auto-reconnection
 - Type-safe Pydantic models
 
-**Known Limitations:** See [LIMITATIONS.md](LIMITATIONS.md)
+**Known Limitations:** See [LIMITATIONS.md](../architecture/limitations.md)
 
 ---
 

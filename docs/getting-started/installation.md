@@ -14,9 +14,10 @@ This is a **comprehensive installation guide** covering all installation methods
 **Use this if:** You need to install from source, set up development environment, or install on specific platforms.
 
 **Related Documents:**
-- 🚀 **[QUICKSTART.md](QUICKSTART.md)** - Fast 2-minute setup (most users)
+
+- 🚀 **[QUICKSTART.md](quickstart.md)** - Fast 2-minute setup (most users)
 - 📖 **[README.md](README.md)** - Complete SDK documentation
-- 🔄 **[MIGRATION.md](MIGRATION.md)** - Migrating from other SDKs
+- 🔄 **[MIGRATION.md](../guides/migration.md)** - Migrating from other SDKs documentation
 - 🔒 **[SECURITY.md](SECURITY.md)** - Security considerations for credentials
 - 🤝 **[CONTRIBUTING.md](CONTRIBUTING.md)** - Development setup for contributors
 
@@ -80,6 +81,7 @@ pip install -e ".[dev]"
 ```
 
 This includes:
+
 - pytest, pytest-asyncio, pytest-cov
 - black, ruff, mypy
 - All core dependencies
@@ -189,11 +191,13 @@ pip install tradestation-python-sdk
 **Common Windows Issues:**
 
 1. **"pip not found"** - Python not in PATH
+
    ```powershell
    python -m pip install tradestation-python-sdk
    ```
 
 2. **"Access denied"** - Run as administrator or use `--user` flag
+
    ```powershell
    pip install --user tradestation-sdk
    ```
@@ -225,11 +229,13 @@ pip3 install tradestation-sdk
 **Common macOS Issues:**
 
 1. **"SSL certificate verify failed"** - Trust certificates
+
    ```bash
    /Applications/Python\ 3.10/Install\ Certificates.command
    ```
 
 2. **Permission errors** - Use `--user` flag
+
    ```bash
    pip3 install --user tradestation-sdk
    ```
@@ -286,6 +292,7 @@ pip list | grep -E "tradestation|httpx|pydantic|PyJWT"
 ```
 
 Expected:
+
 ```
 httpx               0.27.2
 pydantic            2.12.5
@@ -327,7 +334,7 @@ TRADING_MODE=PAPER
 
 ### Step 3: Get Credentials
 
-1. Go to https://developer.tradestation.com
+1. Go to <https://developer.tradestation.com>
 2. Sign in with your TradeStation account
 3. Create a new application
 4. Copy Client ID and Client Secret
@@ -363,6 +370,7 @@ print(tradestation_sdk.__version__)
 See [CHANGELOG.md](CHANGELOG.md) for version-specific upgrade notes.
 
 **From v0.x to v1.0:**
+
 - No breaking changes (v1.0 is first public release)
 - New features: auto-reconnection, convenience functions, enhanced errors
 
@@ -383,6 +391,7 @@ pip uninstall tradestation-sdk
 **Cause:** SDK not installed or wrong environment.
 
 **Solution:**
+
 ```bash
 # Verify pip is from correct environment
 which pip  # macOS/Linux
@@ -402,6 +411,7 @@ pip list | grep tradestation
 **Cause:** PyPI index issues or SDK not yet published.
 
 **Solution:**
+
 ```bash
 # Install from source
 git clone https://github.com/benlaube/tradestation-python-sdk.git
@@ -418,6 +428,7 @@ pip install -e .
 **Solution:**
 
 **Option 1:** Upgrade Python
+
 ```bash
 # macOS (Homebrew)
 brew install python@3.10
@@ -429,6 +440,7 @@ sudo apt install python3.10
 ```
 
 **Option 2:** Use Docker
+
 ```dockerfile
 FROM python:3.10-slim
 RUN pip install tradestation-python-sdk
@@ -443,6 +455,7 @@ RUN pip install tradestation-python-sdk
 **Solution:**
 
 **Option 1:** Use fresh virtual environment
+
 ```bash
 python -m venv fresh_env
 source fresh_env/bin/activate
@@ -450,11 +463,13 @@ pip install tradestation-python-sdk
 ```
 
 **Option 2:** Check conflicting packages
+
 ```bash
 pip check
 ```
 
 **Option 3:** Install with force-reinstall
+
 ```bash
 pip install --force-reinstall tradestation-sdk
 ```
@@ -466,6 +481,7 @@ pip install --force-reinstall tradestation-sdk
 ### macOS: "SSL: CERTIFICATE_VERIFY_FAILED"
 
 **Solution:**
+
 ```bash
 /Applications/Python\ 3.10/Install\ Certificates.command
 ```
@@ -473,6 +489,7 @@ pip install --force-reinstall tradestation-sdk
 ### Windows: "Error: Microsoft Visual C++ 14.0 required"
 
 **Solution:**
+
 1. Install [Microsoft C++ Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/)
 2. Or use pre-built wheels: `pip install --only-binary :all: tradestation-sdk`
 
@@ -483,6 +500,7 @@ pip install --force-reinstall tradestation-sdk
 **Solution:**
 
 **Option 1:** Use virtual environment (recommended)
+
 ```bash
 python -m venv .venv
 source .venv/bin/activate
@@ -490,11 +508,13 @@ pip install tradestation-python-sdk
 ```
 
 **Option 2:** Use pipx (for CLI tools)
+
 ```bash
 pipx install tradestation-sdk
 ```
 
 **Option 3:** Override (not recommended)
+
 ```bash
 pip install --break-system-packages tradestation-sdk
 ```
@@ -506,7 +526,7 @@ pip install --break-system-packages tradestation-sdk
 1. ✅ **Verify installation:** `python -c "import tradestation_sdk; print(tradestation_sdk.__version__)"`
 2. ✅ **Configure credentials:** Create `.env` file
 3. ✅ **Test connection:** Run `python cli/test_connection.py`
-4. ✅ **Follow Quick Start:** See [QUICKSTART.md](QUICKSTART.md)
+4. ✅ **Follow Quick Start:** See [QUICKSTART.md](quickstart.md)
 
 ---
 

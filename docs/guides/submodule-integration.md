@@ -8,7 +8,7 @@ version: 1.0.0
 ## About This Document
 
 - **Status:** Active
-- **Related docs:** [INSTALLATION.md](../INSTALLATION.md), [DEPLOYMENT.md](../DEPLOYMENT.md), [SECURITY.md](../SECURITY.md)
+- **Related docs:** [INSTALLATION.md](../getting-started/installation.md), [DEPLOYMENT.md](deployment.md), [SECURITY.md](../../SECURITY.md)
 
 ---
 
@@ -43,7 +43,7 @@ git commit -m \"chore: bump tradestation-sdk submodule\"
 - Python **3.10+**
 - `git` access to the SDK repository (SSH or HTTPS)
 - Ability to run `pip install -e`
-- Environment variables for TradeStation credentials (see [INSTALLATION.md](../INSTALLATION.md#configuration) and [SECURITY.md](../SECURITY.md))
+- Environment variables for TradeStation credentials (see [INSTALLATION.md](../getting-started/installation.md#configuration) and [SECURITY.md](../../SECURITY.md))
 
 ---
 
@@ -59,6 +59,7 @@ your-app/
 ```
 
 Imports stay the same because the SDK is packaged:
+
 ```python
 from tradestation import TradeStationSDK
 ```
@@ -68,28 +69,33 @@ from tradestation import TradeStationSDK
 ## Installation Steps (Detailed)
 
 1) **Add the submodule**
+
 ```bash
 git submodule add -b main git@github.com:<your-org>/tradestation-python-sdk.git libs/tradestation-sdk
 git submodule update --init --recursive
 ```
 
-2) **Install the SDK from the submodule path**
+1) **Install the SDK from the submodule path**
+
 ```bash
 pip install -e ./libs/tradestation-sdk           # for development
 # or
 pip install ./libs/tradestation-sdk              # for a locked install
 ```
 
-3) **Track it in your dependency file**
+1) **Track it in your dependency file**
+
 ```bash
 echo \"-e ./libs/tradestation-sdk\" >> requirements.txt
 ```
 
-4) **Configure environment**
+1) **Configure environment**
+
 - Set `TRADESTATION_CLIENT_ID`, `TRADESTATION_CLIENT_SECRET`, `TRADESTATION_REDIRECT_URI`, `TRADING_MODE`, `TRADESTATION_ACCOUNT_ID` as needed.
 - Keep tokens out of source control; they are stored under `logs/` by default.
 
-5) **Verify**
+1) **Verify**
+
 ```bash
 cd libs/tradestation-sdk
 pytest src/lib/tradestation/tests   # optional sanity check
@@ -100,15 +106,19 @@ pytest src/lib/tradestation/tests   # optional sanity check
 ## Updating, Pinning, and Rolling Back
 
 - **Track latest `main`:**
+
   ```bash
   git submodule update --remote --merge libs/tradestation-sdk
   ```
+
 - **Pin to a release tag/commit:**
+
   ```bash
   (cd libs/tradestation-sdk && git checkout v1.0.0)
   git add libs/tradestation-sdk
   git commit -m \"chore: pin tradestation-sdk to v1.0.0\"
   ```
+
 - **Rollback:** checkout the previous known-good commit inside the submodule, then commit the pointer change in the parent repo.
 
 **CI tip:** ensure your pipeline runs `git submodule update --init --recursive` before installing requirements.
@@ -126,6 +136,6 @@ pytest src/lib/tradestation/tests   # optional sanity check
 
 ## What to Do Next
 
-- Read [INSTALLATION.md](../INSTALLATION.md) for platform-specific steps.
+- Read [INSTALLATION.md](../getting-started/installation.md) for platform-specific steps.
 - Review [SECURITY.md](../SECURITY.md) before enabling **LIVE** mode.
 - Run the CLI smoke tests from `cli/` to confirm connectivity after submodule install.

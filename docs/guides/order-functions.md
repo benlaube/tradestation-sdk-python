@@ -18,12 +18,12 @@ This is a **detailed reference guide** for all order-related functions in the SD
 **Use this if:** You're working with orders, need detailed parameter information, or want to understand order execution patterns.
 
 **Related Documents:**
+
 - 📚 **[API_REFERENCE.md](API_REFERENCE.md)** - Complete API reference (includes orders)
 - 💡 **[SDK_USAGE_EXAMPLES.md](SDK_USAGE_EXAMPLES.md)** - Order usage examples
 - 📊 **[API_ENDPOINT_MAPPING.md](API_ENDPOINT_MAPPING.md)** - Order endpoint mappings
-- 📋 **[CHEATSHEET.md](../CHEATSHEET.md)** - Quick order code snippets
-- ⚠️ **[LIMITATIONS.md](../LIMITATIONS.md)** - Order-related limitations (trailing stops, etc.)
-
+- 📋 **[CHEATSHEET.md](cheatsheet.md)** - Quick order code snippets
+- ⚠️ **[LIMITATIONS.md](../architecture/limitations.md)** - Order-related limitations (trailing stops, etc.)
 
 ---
 
@@ -132,6 +132,7 @@ These functions handle order placement, modification, cancellation, and executio
 **Location:** `OrderExecutionOperations.place_order()` / `TradeStationSDK.place_order()`
 
 **Parameters:**
+
 - `symbol` (str): Trading symbol (e.g., "MNQZ25")
 - `side` (str): "BUY" or "SELL"
 - `quantity` (int): Number of contracts
@@ -148,6 +149,7 @@ These functions handle order placement, modification, cancellation, and executio
 **API Endpoint:** `POST /v3/orderexecution/orders`
 
 **Example:**
+
 ```python
 order_id, status = sdk.place_order(
     symbol="MNQZ25",
@@ -167,6 +169,7 @@ order_id, status = sdk.place_order(
 **Location:** `OrderExecutionOperations.cancel_order()` / `TradeStationSDK.cancel_order()`
 
 **Parameters:**
+
 - `order_id` (str): TradeStation order ID to cancel
 - `mode` (str | None): "PAPER" or "LIVE" (optional)
 
@@ -175,6 +178,7 @@ order_id, status = sdk.place_order(
 **API Endpoint:** `DELETE /v3/orderexecution/orders/{orderID}`
 
 **Example:**
+
 ```python
 success, message = sdk.cancel_order("924243071", mode="PAPER")
 ```
@@ -188,6 +192,7 @@ success, message = sdk.cancel_order("924243071", mode="PAPER")
 **Location:** `OrderExecutionOperations.modify_order()` / `TradeStationSDK.modify_order()`
 
 **Parameters:**
+
 - `order_id` (str): TradeStation order ID to modify
 - `quantity` (int | None): New quantity (optional)
 - `limit_price` (float | None): New limit price (optional, for limit orders)
@@ -199,6 +204,7 @@ success, message = sdk.cancel_order("924243071", mode="PAPER")
 **API Endpoint:** `PUT /v3/orderexecution/orders/{orderID}`
 
 **Example:**
+
 ```python
 success, message = sdk.modify_order(
     order_id="924243071",
@@ -217,6 +223,7 @@ success, message = sdk.modify_order(
 **Location:** `OrderExecutionOperations.is_order_filled()` / `TradeStationSDK.is_order_filled()`
 
 **Parameters:**
+
 - `order_id` (str): TradeStation order ID
 - `mode` (str | None): "PAPER" or "LIVE" (optional)
 
@@ -225,6 +232,7 @@ success, message = sdk.modify_order(
 **API Endpoint:** `GET /v3/brokerage/accounts/{accounts}/orders/{orderIds}`
 
 **Example:**
+
 ```python
 if sdk.is_order_filled("924243071", mode="PAPER"):
     print("Order is filled!")
@@ -243,10 +251,12 @@ if sdk.is_order_filled("924243071", mode="PAPER"):
 **Location:** `OrderExecutionOperations.get_order_executions()` / `TradeStationSDK.get_order_executions()`
 
 **Parameters:**
+
 - `order_id` (str): TradeStation order ID
 - `mode` (str | None): "PAPER" or "LIVE" (optional)
 
 **Returns:** `list[dict[str, Any]]` - List of execution dictionaries with:
+
 - `ExecutionID`: TradeStation execution ID
 - `Symbol`: Trading symbol
 - `TradeAction`: BUY or SELL
@@ -260,6 +270,7 @@ if sdk.is_order_filled("924243071", mode="PAPER"):
 **API Endpoint:** `GET /v3/orderexecution/orders/{orderID}/executions`
 
 **Example:**
+
 ```python
 executions = sdk.get_order_executions("924243071", mode="PAPER")
 for exec in executions:
@@ -275,6 +286,7 @@ for exec in executions:
 **Location:** `OrderExecutionOperations.confirm_order()` / `TradeStationSDK.confirm_order()`
 
 **Parameters:**
+
 - `symbol` (str): Trading symbol
 - `side` (str): "BUY" or "SELL"
 - `quantity` (int): Number of contracts
@@ -289,6 +301,7 @@ for exec in executions:
 **API Endpoint:** `POST /v3/orderexecution/orderconfirm`
 
 **Example:**
+
 ```python
 confirmation = sdk.confirm_order(
     symbol="MNQZ25",
@@ -310,6 +323,7 @@ print(f"Estimated Cost: ${confirmation.get('EstimatedCost', 0):.2f}")
 **Location:** `OrderExecutionOperations.confirm_group_order()` / `TradeStationSDK.confirm_group_order()`
 
 **Parameters:**
+
 - `group_type` (str): Group type ("OCO", "BRK", or "NORMAL")
 - `orders` (list[dict[str, Any]]): List of order dictionaries (same format as `place_order()`)
 - `mode` (str | None): "PAPER" or "LIVE" (optional)
@@ -319,6 +333,7 @@ print(f"Estimated Cost: ${confirmation.get('EstimatedCost', 0):.2f}")
 **API Endpoint:** `POST /v3/orderexecution/ordergroupconfirm`
 
 **Example:**
+
 ```python
 group_orders = [
     {"AccountID": "SIM123456", "Symbol": "MNQZ25", "TradeAction": "Buy", ...},
@@ -336,11 +351,13 @@ confirmation = sdk.confirm_group_order("OCO", group_orders, mode="PAPER")
 **Location:** `OrderExecutionOperations.place_group_order()` / `TradeStationSDK.place_group_order()`
 
 **Parameters:**
+
 - `group_type` (str): Group type ("OCO", "BRK", or "NORMAL")
 - `orders` (list[dict[str, Any]]): List of order dictionaries (same format as `place_order()`)
 - `mode` (str | None): "PAPER" or "LIVE" (optional)
 
 **Returns:** `dict[str, Any]` - GroupOrderResponse including:
+
 - `GroupID`: Group order ID
 - `GroupName`: Group order name
 - `Type`: Group type
@@ -349,6 +366,7 @@ confirmation = sdk.confirm_group_order("OCO", group_orders, mode="PAPER")
 **API Endpoint:** `POST /v3/orderexecution/ordergroups`
 
 **Example:**
+
 ```python
 result = sdk.place_group_order("BRK", orders, mode="PAPER")
 print(f"Group ID: {result.get('GroupID')}")
@@ -365,9 +383,11 @@ for order in result.get('Orders', []):
 **Location:** `OrderExecutionOperations.get_activation_triggers()` / `TradeStationSDK.get_activation_triggers()`
 
 **Parameters:**
+
 - `mode` (str | None): "PAPER" or "LIVE" (optional)
 
 **Returns:** `list[dict[str, Any]]` - List of trigger dictionaries with:
+
 - `Key`: Trigger key (e.g., "STT", "STTN", "SBA")
 - `Name`: Human-readable trigger name
 - `Description`: Description of the trigger method
@@ -375,6 +395,7 @@ for order in result.get('Orders', []):
 **API Endpoint:** `GET /v3/orderexecution/activationtriggers`
 
 **Example:**
+
 ```python
 triggers = sdk.get_activation_triggers(mode="PAPER")
 for trigger in triggers:
@@ -394,11 +415,13 @@ for trigger in triggers:
 **Location:** `OrderExecutionOperations.cancel_all_orders_for_symbol()` / `TradeStationSDK.cancel_all_orders_for_symbol()`
 
 **Parameters:**
+
 - `symbol` (str): Trading symbol to cancel orders for
 - `account_ids` (str | None): Comma-separated account IDs (optional, uses default if None)
 - `mode` (str | None): "PAPER" or "LIVE" (optional)
 
 **Returns:** `list[dict[str, Any]]` - List of dictionaries with cancellation results:
+
 - `order_id`: Order ID that was cancelled
 - `symbol`: Trading symbol
 - `success`: Whether cancellation succeeded
@@ -407,6 +430,7 @@ for trigger in triggers:
 **Dependencies:** HTTPClient.make_request, OrderExecutionOperations.cancel_order
 
 **Example:**
+
 ```python
 results = sdk.cancel_all_orders_for_symbol("MNQZ25", mode="PAPER")
 for result in results:
@@ -425,10 +449,12 @@ for result in results:
 **Location:** `OrderExecutionOperations.cancel_all_orders()` / `TradeStationSDK.cancel_all_orders()`
 
 **Parameters:**
+
 - `account_ids` (str | None): Comma-separated account IDs (optional, uses default if None)
 - `mode` (str | None): "PAPER" or "LIVE" (optional)
 
 **Returns:** `list[dict[str, Any]]` - List of dictionaries with cancellation results:
+
 - `order_id`: Order ID that was cancelled
 - `symbol`: Trading symbol
 - `success`: Whether cancellation succeeded
@@ -437,6 +463,7 @@ for result in results:
 **Dependencies:** HTTPClient.make_request, OrderExecutionOperations.cancel_order
 
 **Example:**
+
 ```python
 results = sdk.cancel_all_orders(mode="PAPER")
 successful = sum(1 for r in results if r['success'])
@@ -452,6 +479,7 @@ print(f"Cancelled {successful} of {len(results)} orders")
 **Location:** `OrderExecutionOperations.replace_order()` / `TradeStationSDK.replace_order()`
 
 **Parameters:**
+
 - `old_order_id` (str): Order ID to cancel
 - `symbol` (str): New trading symbol
 - `side` (str): "BUY" or "SELL" for new order
@@ -469,6 +497,7 @@ print(f"Cancelled {successful} of {len(results)} orders")
 **Dependencies:** OrderExecutionOperations.cancel_order, OrderExecutionOperations.place_order
 
 **Example:**
+
 ```python
 # Replace a limit order with a market order
 new_order_id, status = sdk.replace_order(
@@ -501,6 +530,7 @@ new_order_id, status = sdk.replace_order(
 **Location:** `OrderExecutionOperations.get_routes()` / `TradeStationSDK.get_routes()`
 
 **Parameters:**
+
 - `mode` (str | None): "PAPER" or "LIVE" (optional)
 
 **Returns:** `list[dict[str, Any]]` - List of route dictionaries with routing options
@@ -508,6 +538,7 @@ new_order_id, status = sdk.replace_order(
 **API Endpoint:** `GET /v3/orderexecution/routes`
 
 **Example:**
+
 ```python
 routes = sdk.get_routes(mode="PAPER")
 for route in routes:
@@ -527,6 +558,7 @@ These convenience functions wrap the low-level `place_order()` and `place_group_
 **Location:** `OrderExecutionOperations.place_limit_order()` / `TradeStationSDK.place_limit_order()`
 
 **Parameters:**
+
 - `symbol` (str): Trading symbol
 - `side` (str): "BUY" or "SELL"
 - `quantity` (int): Number of contracts
@@ -537,6 +569,7 @@ These convenience functions wrap the low-level `place_order()` and `place_group_
 **Returns:** `tuple[str | None, str]` - (order_id, status_message)
 
 **Example:**
+
 ```python
 order_id, status = sdk.place_limit_order(
     symbol="MNQZ25",
@@ -556,6 +589,7 @@ order_id, status = sdk.place_limit_order(
 **Location:** `OrderExecutionOperations.place_stop_order()` / `TradeStationSDK.place_stop_order()`
 
 **Parameters:**
+
 - `symbol` (str): Trading symbol
 - `side` (str): "BUY" or "SELL"
 - `quantity` (int): Number of contracts
@@ -566,6 +600,7 @@ order_id, status = sdk.place_limit_order(
 **Returns:** `tuple[str | None, str]` - (order_id, status_message)
 
 **Example:**
+
 ```python
 order_id, status = sdk.place_stop_order(
     symbol="MNQZ25",
@@ -585,6 +620,7 @@ order_id, status = sdk.place_stop_order(
 **Location:** `OrderExecutionOperations.place_stop_limit_order()` / `TradeStationSDK.place_stop_limit_order()`
 
 **Parameters:**
+
 - `symbol` (str): Trading symbol
 - `side` (str): "BUY" or "SELL"
 - `quantity` (int): Number of contracts
@@ -596,6 +632,7 @@ order_id, status = sdk.place_stop_order(
 **Returns:** `tuple[str | None, str]` - (order_id, status_message)
 
 **Example:**
+
 ```python
 order_id, status = sdk.place_stop_limit_order(
     symbol="MNQZ25",
@@ -616,6 +653,7 @@ order_id, status = sdk.place_stop_limit_order(
 **Location:** `OrderExecutionOperations.place_trailing_stop_order()` / `TradeStationSDK.place_trailing_stop_order()`
 
 **Parameters:**
+
 - `symbol` (str): Trading symbol
 - `side` (str): "BUY" or "SELL"
 - `quantity` (int): Number of contracts
@@ -631,6 +669,7 @@ order_id, status = sdk.place_stop_limit_order(
 **Note:** Requires either `trail_amount` or `trail_percent` (not both)
 
 **Example:**
+
 ```python
 # Using trail amount (points)
 order_id, status = sdk.place_trailing_stop_order(
@@ -660,11 +699,13 @@ order_id, status = sdk.place_trailing_stop_order(
 **Location:** `OrderExecutionOperations.place_oco_order()` / `TradeStationSDK.place_oco_order()`
 
 **Parameters:**
+
 - `orders` (list[dict[str, Any]]): List of 2+ order dictionaries (same format as `place_order()`)
   - Each order dict should have: AccountID, Symbol, TradeAction, OrderType, Quantity, etc.
 - `mode` (str | None): "PAPER" or "LIVE" (optional)
 
 **Returns:** `dict[str, Any]` - GroupOrderResponse including:
+
 - `GroupID`: Group order ID
 - `GroupName`: Group order name
 - `Type`: "OCO"
@@ -673,6 +714,7 @@ order_id, status = sdk.place_trailing_stop_order(
 **Note:** Requires at least 2 orders
 
 **Example:**
+
 ```python
 # OCO order: Buy if price breaks above 25010, or sell short if price breaks below 24990
 oco_orders = [
@@ -707,6 +749,7 @@ result = sdk.place_oco_order(oco_orders, mode="PAPER")
 **Location:** `OrderExecutionOperations.place_bracket_order()` / `TradeStationSDK.place_bracket_order()`
 
 **Parameters:**
+
 - `symbol` (str): Trading symbol
 - `entry_side` (str): "BUY" or "SELL" for entry
 - `quantity` (int): Number of contracts
@@ -723,17 +766,20 @@ result = sdk.place_oco_order(oco_orders, mode="PAPER")
 - `mode` (str | None): "PAPER" or "LIVE" (optional)
 
 **Returns:** `dict[str, Any]` - GroupOrderResponse including:
+
 - `GroupID`: Group order ID
 - `GroupName`: Group order name
 - `Type`: "BRK"
 - `Orders`: List of 3 order responses (entry, profit target, stop-loss) with OrderIDs
 
 **For bracket orders:**
+
 - Entry order: Opens the position (Market or Limit)
 - Profit target: Limit order to take profit (opposite side of entry)
 - Stop-loss: Stop order to limit loss (opposite side of entry) OR TrailingStop order
 
 **Example:**
+
 ```python
 # Bracket order with fixed stop-loss
 result = sdk.place_bracket_order(
@@ -790,12 +836,14 @@ These functions handle order queries and history using the `/brokerage/accounts/
 **Location:** `OrderOperations.get_order_history()` / `TradeStationSDK.get_order_history()`
 
 **Parameters:**
+
 - `start_date` (str | None): Start date in ISO format (YYYY-MM-DD) or None for all history
 - `end_date` (str | None): End date in ISO format (YYYY-MM-DD) or None for today
 - `limit` (int): Maximum number of orders to return (default: 100, max: 1000)
 - `mode` (str | None): "PAPER" or "LIVE" (optional)
 
 **Returns:** `list[dict[str, Any]]` - List of order dictionaries with:
+
 - `OrderID`: TradeStation order ID
 - `Symbol`: Trading symbol
 - `TradeAction`: BUY or SELL
@@ -812,6 +860,7 @@ These functions handle order queries and history using the `/brokerage/accounts/
 **Note:** Defaults to last 7 days if no start_date provided. TradeStation API requires `startDate` parameter.
 
 **Example:**
+
 ```python
 history = sdk.get_order_history(
     start_date="2025-12-01",
@@ -835,12 +884,14 @@ for order in history:
 **Location:** `OrderOperations.get_current_orders()` / `TradeStationSDK.get_current_orders()`
 
 **Parameters:**
+
 - `account_ids` (str | None): Comma-separated account IDs (e.g., "123456782,123456789") or None.
   - If None, uses the default account_id or gets from account info.
 - `next_token` (str | None): Optional pagination token for retrieving next page
 - `mode` (str | None): "PAPER" or "LIVE" (optional)
 
 **Returns:** `dict[str, Any]` - Dictionary with:
+
 - `Orders`: List of order dictionaries with detailed information
 - `Errors`: List of error dictionaries (if any)
 - `NextToken`: Pagination token for next page (if available)
@@ -848,6 +899,7 @@ for order in history:
 **API Endpoint:** `GET /v3/brokerage/accounts/{accounts}/orders`
 
 **Example:**
+
 ```python
 current_orders = sdk.get_current_orders(mode="PAPER")
 
@@ -871,18 +923,21 @@ if "NextToken" in current_orders:
 **Location:** `OrderOperations.get_orders_by_ids()` / `TradeStationSDK.get_orders_by_ids()`
 
 **Parameters:**
+
 - `order_ids` (str): Comma-separated order IDs (e.g., "286234131,286179863")
 - `account_ids` (str | None): Comma-separated account IDs (e.g., "123456782,123456789") or None.
   - If None, uses the default account_id or gets from account info.
 - `mode` (str | None): "PAPER" or "LIVE" (optional)
 
 **Returns:** `dict[str, Any]` - Dictionary with:
+
 - `Orders`: List of order dictionaries with detailed information
 - `Errors`: List of error dictionaries (if any)
 
 **API Endpoint:** `GET /v3/brokerage/accounts/{accounts}/orders/{orderIds}`
 
 **Example:**
+
 ```python
 orders = sdk.get_orders_by_ids(
     order_ids="286234131,286179863",
@@ -902,6 +957,7 @@ for order in orders.get("Orders", []):
 **Location:** `OrderOperations.get_historical_orders_by_ids()` / `TradeStationSDK.get_historical_orders_by_ids()`
 
 **Parameters:**
+
 - `order_ids` (str): Comma-separated order IDs (e.g., "286234131,286179863")
 - `account_ids` (str | None): Comma-separated account IDs (e.g., "123456782,123456789") or None.
   - If None, uses the default account_id or gets from account info.
@@ -910,12 +966,14 @@ for order in orders.get("Orders", []):
 - `mode` (str | None): "PAPER" or "LIVE" (optional)
 
 **Returns:** `dict[str, Any]` - Dictionary with:
+
 - `Orders`: List of order dictionaries with detailed information
 - `Errors`: List of error dictionaries (if any)
 
 **API Endpoint:** `GET /v3/brokerage/accounts/{accounts}/historicalorders/{orderIds}`
 
 **Example:**
+
 ```python
 orders = sdk.get_historical_orders_by_ids(
     order_ids="286234131,286179863",
@@ -941,6 +999,7 @@ These functions provide real-time order updates via HTTP Streaming.
 **Location:** `OrderOperations.stream_orders()`
 
 **Parameters:**
+
 - `account_id` (str | None): TradeStation account ID (optional, defaults to initialized)
 - `mode` (str | None): "PAPER" or "LIVE"
 
@@ -949,6 +1008,7 @@ These functions provide real-time order updates via HTTP Streaming.
 **API Endpoint:** `GET /v3/brokerage/stream/accounts/{accountIds}/orders`
 
 **Example:**
+
 ```python
 import asyncio
 
@@ -970,6 +1030,7 @@ asyncio.run(stream_orders_example())
 **Location:** `StreamingManager.stream_orders()`
 
 **Parameters:**
+
 - `account_id` (str): TradeStation account ID
 - `mode` (str | None): "PAPER" or "LIVE" (optional)
 
@@ -978,6 +1039,7 @@ asyncio.run(stream_orders_example())
 **API Endpoint:** `GET /v3/brokerage/stream/accounts/{accountIds}/orders`
 
 **Example:**
+
 ```python
 import asyncio
 from src.lib.tradestation import OrderStream
@@ -1009,6 +1071,7 @@ asyncio.run(stream_orders_example())
 **Location:** `StreamingManager.stream_orders_by_ids()`
 
 **Parameters:**
+
 - `account_ids` (str): Comma-separated account IDs (e.g., "123456782,123456789")
 - `order_ids` (str): Comma-separated order IDs (e.g., "812767578,812941051")
 - `mode` (str | None): "PAPER" or "LIVE" (optional)
@@ -1018,6 +1081,7 @@ asyncio.run(stream_orders_example())
 **API Endpoint:** `GET /v3/brokerage/stream/accounts/{accounts}/orders/{ordersIds}`
 
 **Example:**
+
 ```python
 import asyncio
 
@@ -1046,17 +1110,20 @@ asyncio.run(stream_specific_orders())
 **Location:** `mappers.normalize_order()`
 
 **Parameters:**
+
 - `order` (Any): Order object from TradeStation API (dict or object)
 
 **Returns:** `dict[str, Any] | None` - Normalized order dictionary or None if invalid
 
 **Normalized Fields:**
+
 - `order_id`, `symbol`, `status`, `filled_quantity`, `remaining_quantity`
 - `average_fill_price`, `reject_reason`, `action`, `quantity`, `order_type`
 - `group_id`, `group_type`, `conditional_orders`, `market_activation_rules`
 - `time_activation_rules`, `trailing_stop`, `commission_fee`, etc.
 
 **Example:**
+
 ```python
 from src.lib.tradestation.mappers import normalize_order
 
@@ -1185,6 +1252,7 @@ asyncio.run(monitor_orders())
 ### Dual-Mode Support
 
 All functions support dual-mode operation (PAPER/LIVE) via the `mode` parameter:
+
 - If `mode=None`, uses `secrets.trading_mode` (default from environment)
 - If `mode="PAPER"`, uses paper trading API (`sim-api.tradestation.com`)
 - If `mode="LIVE"`, uses live trading API (`api.tradestation.com`)

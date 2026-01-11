@@ -13,12 +13,14 @@ This is a **step-by-step production deployment guide** for deploying trading bot
 
 **Use this if:** You're ready to deploy to production, need cloud deployment instructions, or want deployment best practices.
 
-**⚠️ Critical:** Read **[LIMITATIONS.md](LIMITATIONS.md)** and **[SECURITY.md](SECURITY.md)** before deploying to production.
+**⚠️ Critical:** Read **[LIMITATIONS.md](../architecture/limitations.md)** and **[SECURITY.md](../../SECURITY.md)** before deploying to production.
 
 **Related Documents:**
+
 - 🔒 **[SECURITY.md](SECURITY.md)** - Security best practices (essential before deployment)
-- ⚠️ **[LIMITATIONS.md](LIMITATIONS.md)** - Known constraints (review before production)
+- ⚠️ **[LIMITATIONS.md](../architecture/limitations.md)** - Known constraints (review before production)
 - 📖 **[README.md](README.md)** - Complete SDK documentation
+- 🚀 **[QUICKSTART.md](../getting-started/quickstart.md)** - Development setupe SDK documentation
 - 🚀 **[QUICKSTART.md](QUICKSTART.md)** - Development setup
 - 📝 **[CHANGELOG.md](CHANGELOG.md)** - Version history and breaking changes
 
@@ -39,10 +41,11 @@ Step-by-step guide for deploying trading bots using this SDK to production envir
 5. ⚠️ **Have a rollback plan** - Be ready to shut down immediately
 
 **Never deploy:**
+
 - Untested code
 - Without stop-losses
 - Without monitoring
-- Without understanding LIMITATIONS.md
+- Without understanding [LIMITATIONS.md](../architecture/limitations.md)
 - On Friday (can't monitor over weekend)
 
 ---
@@ -86,6 +89,7 @@ Step-by-step guide for deploying trading bots using this SDK to production envir
 ### Option 1: Linux Server (Recommended)
 
 **Pros:**
+
 - Stable, reliable
 - Easy automation (systemd, cron)
 - Good for 24/7 bots
@@ -123,6 +127,7 @@ sudo chown tradingbot:tradingbot /home/tradingbot/bot/my_bot.py
 ### Option 2: Docker Container
 
 **Pros:**
+
 - Portable, consistent
 - Easy to version and rollback
 - Isolated from host system
@@ -249,6 +254,7 @@ az keyvault secret set \
 ### Don't Use .env Files in Production
 
 **❌ Bad (Development only):**
+
 ```bash
 # .env file
 TRADESTATION_CLIENT_ID=abc123
@@ -436,6 +442,7 @@ if __name__ == "__main__":
 ```
 
 **Monitor with uptime service:**
+
 - UptimeRobot
 - Pingdom
 - AWS CloudWatch
@@ -472,6 +479,7 @@ except TradeStationAPIError as e:
 ```
 
 **Alerting services:**
+
 - PagerDuty
 - Twilio (SMS)
 - Slack webhooks
@@ -553,6 +561,7 @@ print(f"Final balance: ${balances['equity']:,.2f}")
 ### Connection Reuse
 
 **Current (v1.x):**
+
 ```python
 # Each request creates new connection
 for symbol in symbols:
@@ -560,6 +569,7 @@ for symbol in symbols:
 ```
 
 **Optimized (batch requests):**
+
 ```python
 # Single request for multiple symbols
 symbols_str = ",".join(symbols)
@@ -618,6 +628,7 @@ Strategy C → Server 3 → Account 3
 ```
 
 **Benefits:**
+
 - Isolation (one strategy failure doesn't affect others)
 - Better resource utilization
 - Can use different accounts/brokers
@@ -678,6 +689,7 @@ async for quote in sdk.streaming.stream_quotes(["AAPL"], mode="LIVE"):
 | High-frequency | 4+ vCPU | 8GB+ | High | $100+ |
 
 **Recommendations:**
+
 - Start small (t3.micro on AWS)
 - Monitor resource usage
 - Scale up only if needed
@@ -722,12 +734,14 @@ def place_order_audited(symbol, side, quantity, **kwargs):
 ```
 
 **Keep logs for:**
+
 - At least 7 years (SEC requirement for some traders)
 - Include: timestamp, symbol, side, quantity, price, order ID, status
 
 ### Pattern Day Trader Rules
 
 **If trading stocks:**
+
 - Must maintain $25,000 minimum equity
 - Limited to 3 day trades per 5 days (if below $25k)
 - SDK doesn't enforce PDT rules - you must implement
@@ -823,11 +837,13 @@ def can_day_trade(sdk):
 **Severity Levels:**
 
 **P0 - Critical (Immediate Action):**
+
 - Bot placing orders incorrectly
 - Positions not closing
 - Security breach
 
 **Actions:**
+
 1. Run emergency shutdown script
 2. Investigate logs
 3. Fix issue
@@ -835,21 +851,25 @@ def can_day_trade(sdk):
 5. Redeploy
 
 **P1 - High (1-hour response):**
+
 - Bot stopped working
 - Orders not filling
 - Streaming disconnected
 
 **Actions:**
+
 1. Check logs
 2. Restart bot
 3. Monitor for recurrence
 
 **P2 - Medium (Same day):**
+
 - Performance degradation
 - Non-critical errors
 - Warning messages
 
 **P3 - Low (Next week):**
+
 - Feature requests
 - Documentation improvements
 - Optimization opportunities
@@ -860,7 +880,7 @@ def can_day_trade(sdk):
 
 - [ ] Read this entire document
 - [ ] Read [SECURITY.md](SECURITY.md)
-- [ ] Read [LIMITATIONS.md](LIMITATIONS.md)
+- [ ] Read [LIMITATIONS.md](../architecture/limitations.md)
 - [ ] Tested in PAPER mode (1+ weeks)
 - [ ] Implemented all error handling
 - [ ] Set up monitoring and alerts
@@ -880,7 +900,7 @@ def can_day_trade(sdk):
 ## Resources
 
 - 🔒 [SECURITY.md](SECURITY.md) - Security best practices
-- ⚠️ [LIMITATIONS.md](LIMITATIONS.md) - Known constraints
+- ⚠️ [LIMITATIONS.md](../architecture/limitations.md) - Known constraints
 - 📖 [README.md](README.md) - Main documentation
 - 💬 [Get Help](https://github.com/benlaube/tradestation-python-sdk/discussions)
 

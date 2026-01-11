@@ -18,12 +18,12 @@ This document provides **comprehensive gap analysis** identifying missing endpoi
 **Use this if:** You're planning SDK enhancements, want to identify missing features, or reviewing code quality improvements.
 
 **Related Documents:**
+
 - 📊 **[API_COVERAGE.md](API_COVERAGE.md)** - Current API coverage status
 - 🗺️ **[ROADMAP.md](ROADMAP.md)** - Planned improvements and timeline
-- 🎯 **[FEATURES.md](../FEATURES.md)** - Current feature overview
+- 🎯 **[FEATURES.md](features.md)** - Current feature overview
 - 📖 **[README.md](../README.md)** - SDK documentation
-- ⚠️ **[LIMITATIONS.md](../LIMITATIONS.md)** - Known limitations
-
+- ⚠️ **[LIMITATIONS.md](limitations.md)** - Known limitations
 
 ---
 
@@ -43,11 +43,13 @@ This document provides **comprehensive gap analysis** identifying missing endpoi
 ## Overview
 
 This document identifies gaps between:
+
 1. **TradeStation API v3 Capabilities** (from [`tradestation-api-v3-openapi.json`](../reference/tradestation-api-v3-openapi.json))
 2. **Current SDK Implementation** (from `src/lib/tradestation/`)
 3. **Code Quality Standards** (commenting, error handling, etc.)
 
 **Note:** The OpenAPI specification contains **33 v3 endpoints** organized into 3 main tags:
+
 - **Brokerage** (11 endpoints) - Account, position, and order management
 - **MarketData** (14 endpoints) - Market data, quotes, symbols, streaming
 - **Order Execution** (8 endpoints) - Order placement, modification, cancellation
@@ -65,7 +67,7 @@ The OpenAPI specification defines **33 v3 endpoints** across 3 main categories:
 #### Brokerage (11 endpoints)
 
 | Method | Path | Operation ID | SDK Implementation |
-|--------|------|--------------|-------------------|
+| :--- | :--- | :--- | :--- |
 | GET | `/v3/brokerage/accounts` | `GetAccounts` | ✅ `operations/accounts.py#get_account_info` |
 | GET | `/v3/brokerage/accounts/{accounts}/balances` | `GetBalances` | ✅ `accounts.py#get_detailed_balances` |
 | GET | `/v3/brokerage/accounts/{accounts}/bodbalances` | `GetBalancesBOD` | ✅ `accounts.py#get_account_balances_bod` |
@@ -83,7 +85,7 @@ The OpenAPI specification defines **33 v3 endpoints** across 3 main categories:
 #### MarketData (14 endpoints)
 
 | Method | Path | Operation ID | SDK Implementation |
-|--------|------|--------------|-------------------|
+| :--- | :--- | :--- | :--- |
 | GET | `/v3/marketdata/barcharts/{symbol}` | `GetBars` | ✅ `operations/market_data.py#get_bars` |
 | GET | `/v3/marketdata/options/expirations/{underlying}` | `GetOptionExpirations` | ✅ `operations/market_data.py#get_option_expirations` |
 | POST | `/v3/marketdata/options/riskreward` | `GetOptionRiskReward` | ✅ `operations/market_data.py#get_option_risk_reward` |
@@ -104,7 +106,7 @@ The OpenAPI specification defines **33 v3 endpoints** across 3 main categories:
 #### Order Execution (8 endpoints)
 
 | Method | Path | Operation ID | SDK Implementation |
-|--------|------|--------------|-------------------|
+| :--- | :--- | :--- | :--- |
 | GET | `/v3/orderexecution/activationtriggers` | `GetActivationTriggers` | ✅ `operations/orders.py#get_activation_triggers` |
 | POST | `/v3/orderexecution/orderconfirm` | `ConfirmOrder` | ✅ `operations/orders.py#confirm_order` |
 | POST | `/v3/orderexecution/ordergroupconfirm` | `ConfirmGroupOrder` | ✅ `operations/orders.py#confirm_group_order` |
@@ -126,6 +128,7 @@ The OpenAPI specification defines **33 v3 endpoints** across 3 main categories:
 ### Code Examples
 
 The OpenAPI specification contains **190 code examples** across multiple languages:
+
 - **Shell (curl)** - 33 examples
 - **Node.js** - 33 examples
 - **Python** - 33 examples
@@ -137,10 +140,12 @@ See [`OPENAPI_CODE_EXAMPLES.md`](./OPENAPI_CODE_EXAMPLES.md) for complete list.
 ### Mermaid Diagrams
 
 Visual representations of the API structure:
+
 - [`API_STRUCTURE.md`](./API_STRUCTURE.md) - High-level structure diagram (embedded Mermaid)
 - [`API_STRUCTURE_DETAILED.md`](./API_STRUCTURE_DETAILED.md) - Detailed endpoint diagram (embedded Mermaid)
 
 **How to View:** These diagrams render automatically in:
+
 - **Cursor/VS Code:** Open the `.md` file and use markdown preview (Cmd+Shift+V / Ctrl+Shift+V)
 - **GitHub:** Navigate to the file - diagrams render automatically
 - **Online:** Copy the Mermaid code block to [Mermaid Live Editor](https://mermaid.live)
@@ -152,12 +157,14 @@ Visual representations of the API structure:
 ### ✅ Fully Implemented
 
 **Authentication:**
+
 - ✅ OAuth2 Authorization Code flow
 - ✅ Token refresh (automatic)
 - ✅ Token storage (PAPER and LIVE separate)
 - ✅ Token revocation
 
 **Accounts:**
+
 - ✅ List accounts (`brokerage/accounts`)
 - ✅ Get account details (`brokerage/accounts/{accountId}`)
 - ✅ Get account balances (basic via account details)
@@ -165,6 +172,7 @@ Visual representations of the API structure:
 - ✅ Get BOD balances (`brokerage/accounts/{accounts}/bodbalances`)
 
 **Market Data - REST:**
+
 - ✅ Historical bars (`marketdata/barcharts/{symbol}`)
 - ✅ Symbol search (`marketdata/symbols/search`)
 - ✅ Quote snapshots (`marketdata/quotes/{symbols}`)
@@ -177,6 +185,7 @@ Visual representations of the API structure:
 - ✅ Option strikes (`marketdata/options/strikes/{underlying}`)
 
 **Market Data - Streaming:**
+
 - ✅ Real-time quotes (`marketdata/stream/quotes/{symbols}`)
 - ✅ Real-time bars (`marketdata/stream/barcharts/{symbol}`) - Available but not used
 - ✅ Option chains streaming (`marketdata/stream/options/chains/{underlying}`) - Available but not used
@@ -185,6 +194,7 @@ Visual representations of the API structure:
 - ✅ Market depth aggregates (`marketdata/stream/marketdepth/aggregates/{symbol}`) - Available but not used
 
 **Orders - REST:**
+
 - ✅ Place order (`orderexecution/orders`)
 - ✅ Cancel order (`orderexecution/orders/{orderId}`)
 - ✅ Modify order (`orderexecution/orders/{orderId}`)
@@ -200,13 +210,16 @@ Visual representations of the API structure:
 - ✅ Routing options (`orderexecution/routes`)
 
 **Orders - Streaming:**
+
 - ✅ Order updates (`brokerage/stream/accounts/{accountId}/orders`)
 - ✅ Orders by IDs streaming (`brokerage/stream/accounts/{accounts}/orders/{ordersIds}`)
 
 **Positions - REST:**
+
 - ✅ Get positions (`brokerage/accounts/{accountId}/positions`)
 
 **Positions - Streaming:**
+
 - ✅ Position updates (`brokerage/stream/accounts/{accountId}/positions`)
 
 ---
@@ -216,18 +229,21 @@ Visual representations of the API structure:
 ### ❌ Not Implemented
 
 **Account Streaming:**
+
 - ✅ `brokerage/stream/accounts/{accountId}/balances` - Real-time balance updates
   - **Status:** ✅ **COMPLETE** - Implemented in `streaming.py` as `stream_balances()` and returns `BalanceStream` models
   - **Priority:** ✅ Resolved
   - **Complexity:** ✅ Complete
 
 **Market Data - REST:**
+
 - ❌ `marketdata/symbollists/*` - Other symbol list endpoints (beyond crypto)
   - **Impact:** Limited symbol discovery
   - **Priority:** Low
   - **Complexity:** Low
 
 **Market Data - Streaming:**
+
 - ⚠️ All streaming endpoints are implemented but some are not actively used
   - `stream_bars()` - Implemented but not used
   - `stream_option_chains()` - Implemented but not used
@@ -236,6 +252,7 @@ Visual representations of the API structure:
   - `stream_market_depth_aggregates()` - Implemented but not used
 
 **Orders - REST:**
+
 - ⚠️ Several endpoints implemented but not actively used:
   - `get_current_orders()` - Implemented but not used
   - `get_orders_by_ids()` - Implemented but not used
@@ -249,6 +266,7 @@ Visual representations of the API structure:
 ### Commenting Gaps
 
 **Issues Found:**
+
 1. **Inconsistent Dependencies Documentation:**
    - Some functions reference `BaseAPIClient` instead of `HTTPClient` in docstrings
    - **Files Affected:** None found in current codebase (previously `orders.py`)
@@ -270,6 +288,7 @@ Visual representations of the API structure:
 ### Error Handling Gaps
 
 **Issues Found:**
+
 1. **Inconsistent Error Handling:**
    - Some methods return tuples `(success, message)`
    - Some methods raise exceptions
@@ -289,6 +308,7 @@ Visual representations of the API structure:
 ### Type Safety Gaps
 
 **Issues Found:**
+
 1. **Streaming Responses Not Validated:**
    - Streaming methods return `dict[str, Any]` instead of Pydantic models
    - **Recommendation:** Use `QuoteStream`, `OrderStream`, `PositionStream` models
@@ -385,16 +405,19 @@ Visual representations of the API structure:
 ### Model Completeness
 
 **QuoteStream Model:**
+
 - ✅ All major fields from API v3 spec
 - ✅ MarketFlags nested model
 - ⚠️ Some optional fields may be missing (need to verify against API spec)
 
 **OrderStream Model:**
+
 - ✅ Same structure as REST order response
 - ✅ All fields captured
 - ✅ Conditional orders, activation rules, trailing stops
 
 **PositionStream Model:**
+
 - ✅ All fields from API v3 spec
 - ✅ Deleted flag for position closures
 - ✅ P&L fields (TodaysProfitLoss, UnrealizedProfitLoss, etc.)
@@ -539,6 +562,7 @@ Visual representations of the API structure:
 ---
 
 **Next Steps:**
+
 1. ✅ Fix docstring references - **RESOLVED**
 2. ✅ Use streaming models in streaming methods - **RESOLVED**
 3. ✅ Add account balance streaming - **RESOLVED**
@@ -546,6 +570,7 @@ Visual representations of the API structure:
 5. ✅ Create detailed API reference - **RESOLVED**
 
 **Remaining Low Priority Items:**
+
 - Add connection pooling for HTTP requests (performance optimization)
 - Add request caching for read-only requests (performance optimization)
 - Add sequence diagrams for common operations (documentation enhancement)

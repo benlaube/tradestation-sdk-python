@@ -18,12 +18,12 @@ This is a **quick reference index** of all functions available in the SDK, organ
 **Use this if:** You want to see all available functions at a glance, find functions by category, or quickly look up function names.
 
 **Related Documents:**
+
 - 📚 **[API_REFERENCE.md](API_REFERENCE.md)** - Detailed function documentation with parameters
 - 📝 **[ORDER_FUNCTIONS_REFERENCE.md](ORDER_FUNCTIONS_REFERENCE.md)** - Detailed order function documentation
 - 💡 **[SDK_USAGE_EXAMPLES.md](SDK_USAGE_EXAMPLES.md)** - Usage examples for all functions
-- 📋 **[CHEATSHEET.md](../CHEATSHEET.md)** - Quick code snippets
-- 🎯 **[FEATURES.md](../FEATURES.md)** - Feature overview
-
+- 📋 **[CHEATSHEET.md](../guides/cheatsheet.md)** - Quick code snippets
+- 🎯 **[FEATURES.md](../architecture/features.md)** - Feature overview
 
 ## Table of Contents
 
@@ -56,6 +56,7 @@ The following functions were recently added to ensure all required trading opera
 **Returns:** `bool` - True if order status is "FLL" (Filled) or "FLP" (Partial Fill)
 
 **Example:**
+
 ```python
 if sdk.is_order_filled("924243071", mode="PAPER"):
     print("Order is filled!")
@@ -70,6 +71,7 @@ if sdk.is_order_filled("924243071", mode="PAPER"):
 **Returns:** `list[dict[str, Any]]` - List of cancellation results with order_id, symbol, success, message
 
 **Example:**
+
 ```python
 results = sdk.cancel_all_orders_for_symbol("MNQZ25", mode="PAPER")
 for result in results:
@@ -85,6 +87,7 @@ for result in results:
 **Returns:** `list[dict[str, Any]]` - List of cancellation results with order_id, symbol, success, message
 
 **Example:**
+
 ```python
 results = sdk.cancel_all_orders(mode="PAPER")
 print(f"Cancelled {len(results)} orders")
@@ -99,6 +102,7 @@ print(f"Cancelled {len(results)} orders")
 **Returns:** `tuple[str | None, str]` - (new_order_id, status_message)
 
 **Example:**
+
 ```python
 new_order_id, status = sdk.replace_order(
     old_order_id="924243071",
@@ -116,12 +120,14 @@ new_order_id, status = sdk.replace_order(
 **Location:** `OrderExecutionOperations.place_bracket_order()` / `TradeStationSDK.place_bracket_order()`
 
 **New Parameters:**
+
 - `stop_loss` (float | None): Now optional when using trailing stop
 - `trail_amount` (float | None): Trail amount in price units (points)
 - `trail_percent` (float | None): Trail percentage
 - `use_trailing_stop` (bool): If True, use trailing stop instead of fixed stop-loss
 
 **Example:**
+
 ```python
 # Bracket order with trailing stop (NEW)
 result = sdk.place_bracket_order(
@@ -142,7 +148,7 @@ result = sdk.place_bracket_order(
 **Module:** `TokenManager` / `TradeStationSDK`
 
 | Function | Description | Returns | API Endpoint / Dependency |
-|----------|-------------|---------|--------------------------|
+| :--- | :--- | :--- | :--- |
 | `authenticate(mode)` | Perform OAuth2 authentication | None | OAuth2 flow (browser-based) |
 | `refresh_access_token(mode)` | Refresh access token | None | `POST /v3/security/authorize` |
 | `ensure_authenticated(mode)` | Ensure authenticated (auto-refresh if needed) | None | Depends on `refresh_access_token()` |
@@ -155,7 +161,7 @@ result = sdk.place_bracket_order(
 **Module:** `AccountOperations` / `TradeStationSDK`
 
 | Function | Description | Returns | API Endpoint / Dependency |
-|----------|-------------|---------|--------------------------|
+| :--- | :--- | :--- | :--- |
 | `get_account_info(mode)` | Get account information including account ID | dict | `GET /v3/brokerage/accounts` |
 | `get_account_balances(mode, account_id)` | Get account balances (equity, buying power, margin, P&L) | dict[str, Any] | `GET /v3/brokerage/accounts/{accountId}` |
 | `get_account_balances_detailed(account_ids, mode)` | Get detailed account balances with BalanceDetail | dict[str, Any] | `GET /v3/brokerage/accounts/{accounts}/balances` |
@@ -193,7 +199,7 @@ result = sdk.place_bracket_order(
 **Module:** `PositionOperations` / `TradeStationSDK`
 
 | Function | Description | Returns | API Endpoint / Dependency |
-|----------|-------------|---------|--------------------------|
+| :--- | :--- | :--- | :--- |
 | `get_position(symbol, mode)` | Get current position quantity for a symbol | int | `GET /v3/brokerage/accounts/{accountId}/positions` |
 | `get_all_positions(mode)` | Get all current positions across all symbols | list[dict[str, Any]] | `GET /v3/brokerage/accounts/{accountId}/positions` |
 | `flatten_position(symbol, mode)` | Close all positions (or specific symbol) | list[dict[str, Any]] | Depends on `place_order()` |
@@ -341,6 +347,7 @@ All 9 required trading operations are now fully covered:
 All functions are accessible via:
 
 1. **Main SDK Class (Recommended):**
+
    ```python
    sdk = TradeStationSDK()
    sdk.ensure_authenticated(mode="PAPER")
@@ -348,6 +355,7 @@ All functions are accessible via:
    ```
 
 2. **Operation Classes (Direct Access):**
+
    ```python
    sdk = TradeStationSDK()
    result = sdk.accounts.get_account_info(mode="PAPER")
@@ -356,6 +364,7 @@ All functions are accessible via:
    ```
 
 3. **Streaming Manager:**
+
    ```python
    sdk = TradeStationSDK()
    async for quote in sdk.streaming.stream_quotes(["MNQZ25"], mode="PAPER"):
@@ -365,6 +374,7 @@ All functions are accessible via:
 ### Dual-Mode Support
 
 All functions support dual-mode operation (PAPER/LIVE) via the `mode` parameter:
+
 - If `mode=None`, uses `secrets.trading_mode` (default from environment)
 - If `mode="PAPER"`, uses paper trading API (`sim-api.tradestation.com`)
 - If `mode="LIVE"`, uses live trading API (`api.tradestation.com`)

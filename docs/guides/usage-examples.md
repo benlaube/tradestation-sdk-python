@@ -18,12 +18,12 @@ This document provides **comprehensive usage examples** demonstrating SDK usage 
 **Use this if:** You want to see real-world code examples, learn best practices, or understand how to implement specific features.
 
 **Related Documents:**
-- 📚 **[API_REFERENCE.md](API_REFERENCE.md)** - Complete API reference (function signatures)
-- 📋 **[CHEATSHEET.md](../CHEATSHEET.md)** - Quick code snippets (faster lookup)
-- 📖 **[README.md](../README.md)** - SDK overview and getting started
-- 🚀 **[QUICKSTART.md](../QUICKSTART.md)** - 2-minute getting started
-- 📊 **[examples/README.md](../examples/README.md)** - Interactive Jupyter notebooks
 
+- 📚 **[API_REFERENCE.md](API_REFERENCE.md)** - Complete API reference (function signatures)
+- 📋 **[CHEATSHEET.md](cheatsheet.md)** - Quick code snippets (faster lookup)
+- 📖 **[README.md](../README.md)** - SDK overview and getting started
+- 🚀 **[QUICKSTART.md](../getting-started/quickstart.md)** - 2-minute getting started
+- 📊 **[examples/README.md](../examples/README.md)** - Interactive Jupyter notebooks
 
 ---
 
@@ -494,12 +494,14 @@ The SDK provides convenience functions that simplify common order types. These f
 ### When to Use Convenience Functions
 
 **Use convenience functions when:**
+
 - You want simpler, more readable code
 - You're placing common order types (limit, stop, trailing stop, bracket, OCO)
 - You want built-in validation and error handling
 - You want type-safe parameters
 
 **Use low-level functions when:**
+
 - You need advanced order configurations
 - You're building custom order types
 - You need direct access to all API parameters
@@ -793,6 +795,7 @@ except Exception as e:
 ### Error Message Examples
 
 **Human-Readable Format:**
+
 ```
 Order placement failed: Invalid symbol 'INVALID_SYMBOL'
   - API Error Code: INVALID_SYMBOL
@@ -811,6 +814,7 @@ Order placement failed: Invalid symbol 'INVALID_SYMBOL'
 ```
 
 **Structured Format:**
+
 ```python
 error_dict = exception.to_dict()
 # Returns:

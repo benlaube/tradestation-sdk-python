@@ -14,9 +14,10 @@ This document outlines **current limitations, constraints, and known issues** in
 **Use this if:** You're experiencing issues, planning production deployment, or want to understand SDK constraints.
 
 **Related Documents:**
+
 - 📖 **[README.md](README.md)** - Complete SDK documentation
 - 🔒 **[SECURITY.md](SECURITY.md)** - Security considerations (related to token storage limitations)
-- 🚀 **[DEPLOYMENT.md](DEPLOYMENT.md)** - Production deployment (important to review limitations first)
+- 🚀 **[DEPLOYMENT.md](../guides/deployment.md)** - Production deployment (important to review limitations first)
 - 🗺️ **[docs/ROADMAP.md](docs/ROADMAP.md)** - Planned fixes and future versions
 - 📝 **[CHANGELOG.md](CHANGELOG.md)** - Version history and fixes
 - ❓ **[README.md#faq--troubleshooting](README.md#faq--troubleshooting)** - FAQ and troubleshooting
@@ -36,14 +37,16 @@ This document outlines current limitations, constraints, and known issues in the
 **Previous Issue:** OAuth tokens were stored as plain JSON in `config/tokens_paper.json` and `config/tokens_live.json`.
 
 **Current Implementation (v1.0.1):**
+
 - **Keychain Storage (Optional):** System keychain integration available when `keyring` package is installed
   - macOS: Keychain Services
   - Linux: Secret Service API / gnome-keyring
   - Windows: Windows Credential Manager
-- **File Storage (Fallback):** Secure file storage with automatic permission restrictions (chmod 600)
+- **File Storage (Fallback)::** Secure file storage with automatic permission restrictions (chmod 600)
 - **Configurable:** Set `TRADESTATION_TOKEN_STORAGE=keychain` to prefer keychain, or `auto` for auto-detection
 
 **Configuration:**
+
 ```bash
 # Use keychain storage (requires: pip install keyring)
 export TRADESTATION_TOKEN_STORAGE=keychain
@@ -59,11 +62,13 @@ export TRADESTATION_TOKEN_DIR=/path/to/secure/location
 ```
 
 **File Permissions:**
+
 - Token files are automatically set to `chmod 600` (owner read/write only)
 - Token directory is set to `chmod 700` (owner access only)
 - Works on macOS, Linux, and Windows
 
 **Keychain Usage:**
+
 ```python
 # Install keyring package
 # pip install keyring
@@ -86,6 +91,7 @@ sdk.authenticate(mode="PAPER")  # Tokens stored in keychain
 **Previous Issue:** OAuth callback server required a specific port (default: 8888), causing authentication failures if port was in use.
 
 **Current Implementation (v1.0.1):**
+
 - **Automatic Port Selection:** SDK automatically finds an available port in range 8888-8898
 - **Redirect URI Synchronization:** SDK automatically updates redirect_uri to match selected port
 - **Environment Override:** Can specify exact port via `TRADESTATION_OAUTH_PORT`
@@ -110,6 +116,7 @@ If the SDK auto-selects a port (e.g., 8889 when 8888 is busy), you must ensure t
    - SDK will use that port or fail with a clear error if unavailable
 
 **Configuration:**
+
 ```bash
 # Auto-select port from range 8888-8898 (default behavior)
 # IMPORTANT: Register all ports 8888-8898 in Developer Portal
@@ -123,6 +130,7 @@ export TRADESTATION_REDIRECT_URI=http://localhost:8888/callback
 ```
 
 **Behavior:**
+
 1. If `TRADESTATION_OAUTH_PORT` is set, use that port
 2. If port is in redirect URI, extract and use that port
 3. If port is in use, automatically try next port in range 8888-8898
@@ -131,6 +139,7 @@ export TRADESTATION_REDIRECT_URI=http://localhost:8888/callback
 6. If all ports unavailable, provide clear error message
 
 **Example:**
+
 ```python
 # SDK automatically handles port conflicts
 sdk = TradeStationSDK()
@@ -145,11 +154,13 @@ sdk.authenticate(mode="PAPER")
 **Troubleshooting:**
 
 **Error: "redirect_uri_mismatch"**
+
 - **Cause:** Selected port is not registered in TradeStation Developer Portal
 - **Solution:** Register the port being used (check SDK logs for the actual port)
 - **Prevention:** Register all ports 8888-8898 in Developer Portal
 
 **Manual Override (if needed):**
+
 ```bash
 # Kill process using port (if auto-selection fails)
 lsof -ti:8888 | xargs kill -9  # macOS/Linux
@@ -164,18 +175,21 @@ lsof -ti:8888 | xargs kill -9  # macOS/Linux
 **Previous Issue:** SDK used `requests` library (blocking I/O), limiting high-concurrency applications.
 
 **Current Implementation (v1.0.1):**
+
 - **Async Support (Optional):** Enable async HTTP client with `httpx` for non-blocking I/O
 - **Backward Compatible:** Default behavior unchanged (synchronous `requests` library)
 - **Connection Pooling:** Async client includes connection pooling for better performance
 - **Same API:** Retry logic, error handling, and logging work identically in async mode
 
 **When to Use Async:**
+
 - Building high-frequency trading systems
 - Processing hundreds of symbols simultaneously
 - Running multiple trading strategies in parallel
 - High-concurrency applications requiring non-blocking I/O
 
 **Configuration:**
+
 ```python
 # Enable async mode
 sdk = TradeStationSDK(use_async=True)
@@ -186,6 +200,7 @@ sdk = TradeStationSDK()
 ```
 
 **Async Usage:**
+
 ```python
 import asyncio
 
@@ -209,6 +224,7 @@ quotes = asyncio.run(fetch_multiple_quotes())
 ```
 
 **Performance Comparison:**
+
 - **Synchronous (default):** ~120 requests/minute (rate limit), 2-5 seconds per batch
 - **Async:** Better concurrency, non-blocking I/O, connection pooling
 - **Thread Pool (workaround):** Still supported, but async is more efficient
@@ -222,6 +238,7 @@ quotes = asyncio.run(fetch_multiple_quotes())
 **Status:** ✅ **REST API methods now have built-in retry logic with exponential backoff**
 
 **Features:**
+
 - Automatic retry for recoverable errors (network failures, rate limits, server errors)
 - Exponential backoff (1s initial, up to 60s max)
 - Configurable retry parameters (max_retries, retry_delay, max_retry_delay)
@@ -230,12 +247,14 @@ quotes = asyncio.run(fetch_multiple_quotes())
 - Rate limit handling with server-specified Retry-After header support
 
 **Default Configuration:**
+
 - Max retries: 3 attempts
 - Initial retry delay: 1.0 seconds
 - Max retry delay: 60.0 seconds
 - Retry enabled: True (can be disabled)
 
 **Custom Configuration:**
+
 ```python
 from tradestation_sdk import TradeStationSDK
 
@@ -248,6 +267,7 @@ sdk._client.enable_retry = True  # Enable/disable retry
 ```
 
 **What Gets Retried:**
+
 - ✅ Network errors (connection timeouts, DNS failures)
 - ✅ Rate limit errors (429) - with server Retry-After header support
 - ✅ Server errors (500+) - temporary failures
@@ -257,6 +277,7 @@ sdk._client.enable_retry = True  # Enable/disable retry
 
 **Logging:**
 All retry attempts are logged with context:
+
 - Retry attempt number and max retries
 - Error type and status code
 - Backoff delay duration
@@ -276,11 +297,13 @@ All retry attempts are logged with context:
 **Not Supported:** Second-based intervals (`30S`, `60S`)
 
 **Impact:**
+
 - Cannot get sub-minute bars from API
 - Need to use streaming for second-level data
 - Backtesting limited to minute granularity
 
 **Example Error:**
+
 ```python
 # This FAILS
 bars = sdk.get_bars("AAPL", "30", "Second", 100, mode="PAPER")
@@ -288,12 +311,14 @@ bars = sdk.get_bars("AAPL", "30", "Second", 100, mode="PAPER")
 ```
 
 **Correct Usage:**
+
 ```python
 # This WORKS
 bars = sdk.get_bars("AAPL", "1", "Minute", 100, mode="PAPER")
 ```
 
 **Workaround for Sub-Minute Data:**
+
 ```python
 # Use streaming to collect second-level data
 import asyncio
@@ -319,16 +344,19 @@ async def collect_second_data():
 **Issue:** `trail_amount` parameter is in price points, not dollar amounts.
 
 **Confusing Example (MNQ Futures):**
+
 - MNQ point value: $2.00 per point
 - Want $3.00 trailing stop
 - Must use `trail_amount=1.5` (not `trail_amount=3.0`)
 
 **Impact:**
+
 - Easy to set incorrect stop distances
 - Different for each instrument type
 - Documentation can be misleading
 
 **Correct Usage:**
+
 ```python
 # MNQ futures: 1 point = $2.00
 # For $3.00 trailing stop: 3.0 / 2.0 = 1.5 points
@@ -360,17 +388,20 @@ order_id, status = sdk.place_trailing_stop_order(
 **Issue:** If `TRADESTATION_ACCOUNT_ID` not set, SDK auto-selects first futures account.
 
 **Impact:**
+
 - Wrong account may be selected in multi-account scenarios
 - Production deployments should always set account ID explicitly
 - Account switching isn't intuitive
 
 **Best Practice:**
+
 ```env
 # Always set in production
 TRADESTATION_ACCOUNT_ID=SIM123456
 ```
 
 **Multi-Account Workaround:**
+
 ```python
 # Get all accounts
 account = sdk.get_account_info(mode="PAPER")
@@ -400,16 +431,19 @@ balances = sdk.get_account_balances(
 **Issue:** TradeStation API v3 uses HTTP Streaming, not true WebSockets.
 
 **Differences:**
+
 - HTTP Streaming: Long-lived HTTP connection with NDJSON
 - WebSocket: True bidirectional socket connection
 - HTTP Streaming has higher latency
 
 **Impact:**
+
 - Slightly higher latency than WebSockets (~10-50ms)
 - Connection management is more complex
 - Requires newline-delimited JSON parsing
 
 **Current Status:** SDK handles HTTP Streaming automatically with:
+
 - Automatic reconnection (v1.0.0+)
 - REST polling fallback
 - Stream health tracking
@@ -425,11 +459,13 @@ balances = sdk.get_account_balances(
 **Limit:** ~10 concurrent streams per account
 
 **Impact:**
+
 - Cannot stream 100+ symbols simultaneously
 - Need to batch symbols per stream
 - Multi-strategy systems may hit limits
 
 **Best Practice:**
+
 ```python
 # ❌ Bad: Too many streams
 for symbol in 100_symbols:
@@ -448,47 +484,24 @@ for chunk in chunks:
 ### 10. API Rate Limits
 
 **Limits:**
+
 - General endpoints: ~120 requests/minute
 - Market data: ~60 requests/minute
 - Order placement: ~60 orders/minute
 - Streaming: ~10 concurrent streams
 
 **Impact:**
+
 - High-frequency strategies may hit limits
 - Bulk operations need throttling
 - No built-in rate limit tracking
 
-**Workaround:** Implement rate limiting
+**Workaround:**
+ Use `RetryClient` (built-in) which handles 429s automatically.
+
 ```python
-import time
-from collections import deque
-
-class RateLimiter:
-    def __init__(self, max_calls, period):
-        self.max_calls = max_calls
-        self.period = period
-        self.calls = deque()
-
-    def __call__(self, func):
-        def wrapper(*args, **kwargs):
-            now = time.time()
-            # Remove old calls
-            while self.calls and self.calls[0] < now - self.period:
-                self.calls.popleft()
-            # Check rate limit
-            if len(self.calls) >= self.max_calls:
-                sleep_time = self.period - (now - self.calls[0])
-                time.sleep(sleep_time)
-            self.calls.append(time.time())
-            return func(*args, **kwargs)
-        return wrapper
-
-@RateLimiter(max_calls=60, period=60)
-def rate_limited_place_order(*args, **kwargs):
-    return sdk.place_order(*args, **kwargs)
+client = RetryClient(token)
 ```
-
-**Planned Fix:** v1.2 will add built-in rate limit tracking and throttling.
 
 ---
 
@@ -499,14 +512,17 @@ def rate_limited_place_order(*args, **kwargs):
 **Status:** ✅ **Backward compatible through main SDK class**
 
 **Change:** Internal code structure reorganized (v1.0.1):
+
 - Operation modules moved to `operations/` subpackage
 - Utility modules moved to `utils/` subpackage
 
 **Impact:**
+
 - **No impact for standard usage** - All functionality accessible via `TradeStationSDK` class
 - **Direct imports affected** - If code directly imports from old paths (e.g., `from tradestation_sdk.accounts import AccountOperations`), update to new paths
 
 **Standard Usage (No Changes Needed):**
+
 ```python
 # ✅ This still works (recommended)
 from tradestation_sdk import TradeStationSDK
@@ -515,6 +531,7 @@ sdk.get_account_info(mode="PAPER")
 ```
 
 **Direct Imports (Update Required):**
+
 ```python
 # ❌ Old path (v1.0.0 and earlier)
 from tradestation_sdk.accounts import AccountOperations
@@ -534,15 +551,18 @@ from tradestation_sdk.operations.accounts import AccountOperations
 **Requirement:** Python 3.10+
 
 **Reason:**
+
 - Type hints with `|` operator (PEP 604)
 - Structural pattern matching (used in error handling)
 - Async generator improvements
 
 **Impact:**
+
 - Cannot use with Python 3.9 or earlier
 - Some legacy systems may need Python upgrade
 
 **Workaround:** Use Docker with Python 3.10+
+
 ```dockerfile
 FROM python:3.10-slim
 RUN pip install tradestation-sdk
@@ -555,11 +575,13 @@ RUN pip install tradestation-sdk
 **Supported:** Windows, macOS, Linux
 
 **Known Issues:**
+
 - **Windows:** OAuth browser launch may fail on some systems
 - **macOS:** Keychain integration not yet implemented (v1.1)
 - **Linux:** Depends on browser availability for OAuth
 
 **Workaround for Headless Systems:**
+
 ```python
 # Manual token management for headless servers
 # 1. Authenticate on local machine first
@@ -578,11 +600,13 @@ shutil.copy('config/tokens_paper.json', '/server/path/')
 **Issue:** TradeStation API returns errors in multiple formats.
 
 **Impact:**
+
 - SDK may not parse all error formats correctly
 - Some edge-case errors have generic messages
 - Debugging can be challenging
 
 **Known Error Formats:**
+
 1. `{"Error": "message", "Code": "code"}`
 2. `{"Errors": [{"Error": "...", "Code": "..."}]}`
 3. `{"Message": "message"}`
@@ -590,7 +614,16 @@ shutil.copy('config/tokens_paper.json', '/server/path/')
 
 **Current:** SDK handles all known formats (as of v1.0.0).
 
-**If You Encounter Unknown Format:**
+**Workaround:**
+ Use `AsyncClient` for high-throughput scenarios.
+
+```python
+async with AsyncClient(token) as client:
+    await client.place_order(...)
+```
+
+If You Encounter Unknown Format:
+
 ```python
 try:
     order_id, status = sdk.place_order(...)
@@ -606,16 +639,19 @@ except TradeStationAPIError as e:
 ## Roadmap & Planned Fixes
 
 ### v1.0.1 (December 2025) ✅ Released
+
 - ✅ Token storage: Optional keychain integration with secure file fallback
 - ✅ OAuth port: Automatic port selection (8888-8898 range)
 - ✅ HTTP client: Async support with httpx (optional, backward compatible)
 - ✅ Improved error messages and logging
 
 ### v1.1 (Q1 2026)
+
 - `trail_amount_dollars` parameter for convenience
 - Additional keychain storage improvements
 
 ### v1.2 (Q2 2026)
+
 - ✅ Built-in retry logic with backoff (✅ **Implemented in v1.0.0**)
 - ✅ Rate limit tracking and throttling
 - ✅ Circuit breaker pattern for streaming
@@ -623,6 +659,7 @@ except TradeStationAPIError as e:
 - ✅ Multi-account API improvements
 
 ### v2.0 (Q3 2026)
+
 - ✅ Native async support (httpx/aiohttp)
 - ✅ Connection pooling
 - ✅ Native WebSocket support (if TradeStation adds it)
@@ -633,6 +670,7 @@ except TradeStationAPIError as e:
 ## Getting Help
 
 If you encounter limitations not listed here:
+
 - 📖 [Check FAQ & Troubleshooting](README.md#faq--troubleshooting)
 - 🐛 [Open an Issue](https://github.com/benlaube/tradestation-python-sdk/issues)
 - 💬 [GitHub Discussions](https://github.com/benlaube/tradestation-python-sdk/discussions)

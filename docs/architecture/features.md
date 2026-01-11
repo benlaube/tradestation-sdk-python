@@ -14,6 +14,7 @@ This document provides a **visual overview of all SDK features and capabilities*
 **Use this if:** You want to see all available features at a glance, compare capabilities, or find specific functions.
 
 **Related Documents:**
+
 - 📖 **[README.md](README.md)** - Complete SDK documentation
 - 📚 **[docs/API_REFERENCE.md](docs/API_REFERENCE.md)** - Detailed API reference for all functions
 - 📋 **[CHEATSHEET.md](CHEATSHEET.md)** - Quick code snippets
@@ -143,6 +144,7 @@ Visual overview of all SDK features and capabilities.
 | `streaming.get_stream_health()` | Stream health metrics | Health tracking ✅ |
 
 **Streaming Features:**
+
 - ✅ Automatic reconnection (exponential backoff)
 - ✅ REST polling fallback (if streaming fails)
 - ✅ Session auto-recovery (token refresh)
@@ -151,6 +153,7 @@ Visual overview of all SDK features and capabilities.
 - ✅ Error categorization (recoverable vs non-recoverable)
 
 **REST API Features:**
+
 - ✅ Built-in retry logic with exponential backoff (v1.0.0)
 - ✅ Automatic retry for recoverable errors (network, rate limits, server errors)
 - ✅ Configurable retry parameters (max_retries, retry_delay, max_retry_delay)
@@ -179,6 +182,7 @@ Visual overview of all SDK features and capabilities.
 #### Error Details
 
 All exceptions include `ErrorDetails` with:
+
 - ✅ Human-readable error message
 - ✅ API error code and message
 - ✅ Full request context (method, endpoint, params, body)
@@ -199,6 +203,7 @@ All exceptions include `ErrorDetails` with:
 | **Total Models** | 19+ | Complete type coverage |
 
 **Features:**
+
 - ✅ Pydantic validation
 - ✅ IDE autocomplete
 - ✅ Type hints everywhere
@@ -232,6 +237,7 @@ All exceptions include `ErrorDetails` with:
 | **Overall** | **92% (57/62)** | ✅ Production Ready |
 
 **Missing:**
+
 - OptionChain variations (low priority)
 - BarCharts streaming (low priority)
 
@@ -286,8 +292,8 @@ See [API_COVERAGE.md](docs/API_COVERAGE.md) for details.
 ### For Production
 
 - 🔒 [SECURITY.md](SECURITY.md) - Security best practices
-- 🚀 [DEPLOYMENT.md](DEPLOYMENT.md) - Deployment guide
-- ⚠️ [LIMITATIONS.md](LIMITATIONS.md) - Know the constraints
+- 🚀 [DEPLOYMENT.md](../guides/deployment.md) - Deployment guide
+- ⚠️ [LIMITATIONS.md](limitations.md) - Know the constraints
 - 📊 [ROADMAP.md](ROADMAP.md) - Future plans
 
 ---

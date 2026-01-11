@@ -8,7 +8,7 @@ Note: Tests use mocked HTTP streaming responses (newline-delimited JSON).
 import json
 
 import pytest
-from src.lib.tradestation.streaming import StreamingManager
+from ..operations.streaming import StreamingManager
 
 from .fixtures import api_responses
 
@@ -321,6 +321,7 @@ class TestStreamingManagerErrorHandling:
 
         streaming = StreamingManager(mock_token_manager, "client_id", "client_secret", mock_http_client)
 
+        # Should raise exception on error
         # Should raise exception on error
         with pytest.raises(Exception):
             async for quote in streaming.stream_quotes("MNQZ25", mode="PAPER"):

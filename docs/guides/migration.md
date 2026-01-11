@@ -14,11 +14,12 @@ This guide helps you **migrate to TradeStation SDK** from other libraries (like 
 **Use this if:** You're switching from another TradeStation library or upgrading the SDK version.
 
 **Related Documents:**
-- 📖 **[README.md](README.md)** - Complete SDK documentation
-- 📦 **[INSTALLATION.md](INSTALLATION.md)** - Installation instructions
-- 📚 **[docs/API_REFERENCE.md](docs/API_REFERENCE.md)** - Complete API reference
-- 💡 **[docs/SDK_USAGE_EXAMPLES.md](docs/SDK_USAGE_EXAMPLES.md)** - Usage examples
-- 📝 **[CHANGELOG.md](CHANGELOG.md)** - Version history and breaking changes
+
+- 📖 **[README.md](../../README.md)** - Complete SDK documentation
+- 📦 **[INSTALLATION.md](../getting-started/installation.md)** - Installation instructions
+- 📚 **[API Reference](../api/reference.md)** - Complete API reference
+- 💡 **[Usage Examples](usage-examples.md)** - Usage examples
+- 📝 **[CHANGELOG.md](../../CHANGELOG.md)** - Version history and breaking changes
 
 ---
 
@@ -42,17 +43,20 @@ If you were using the external `tradestation` package (tastyware/tradestation), 
 ### Installation Changes
 
 **Before:**
+
 ```bash
 pip install tradestation
 ```
 
 **After:**
+
 ```bash
 pip uninstall tradestation  # Remove old package
 pip install tradestation-python-sdk
 ```
 
 Update `requirements.txt`:
+
 ```diff
 - tradestation==0.2
 + tradestation-sdk>=1.0.0
@@ -61,11 +65,13 @@ Update `requirements.txt`:
 ### Import Changes
 
 **Before:**
+
 ```python
 from tradestation import Session
 ```
 
 **After:**
+
 ```python
 from tradestation_sdk import TradeStationSDK
 ```
@@ -73,6 +79,7 @@ from tradestation_sdk import TradeStationSDK
 ### Initialization Changes
 
 **Before:**
+
 ```python
 session = Session(
     api_key=client_id,
@@ -82,6 +89,7 @@ session = Session(
 ```
 
 **After:**
+
 ```python
 # SDK reads from environment variables (.env file)
 sdk = TradeStationSDK()
@@ -91,6 +99,7 @@ sdk.authenticate(mode="PAPER")  # Opens browser for OAuth
 ### Authentication Changes
 
 **Before:**
+
 ```python
 # Manual token management
 session = Session(
@@ -101,6 +110,7 @@ session = Session(
 ```
 
 **After:**
+
 ```python
 # Automatic token management
 sdk = TradeStationSDK()
@@ -111,6 +121,7 @@ sdk.authenticate(mode="PAPER")  # OAuth flow
 ### API Method Changes
 
 **Before:**
+
 ```python
 # Get account
 account = session.get_accounts()
@@ -129,6 +140,7 @@ order = session.place_order(
 ```
 
 **After:**
+
 ```python
 # Get account
 account = sdk.get_account_info(mode="PAPER")
@@ -155,6 +167,7 @@ order_id, status = sdk.place_order(
 ### Streaming Changes
 
 **Before:**
+
 ```python
 # WebSocket streaming
 for quote in session.stream_quotes(["AAPL"]):
@@ -162,6 +175,7 @@ for quote in session.stream_quotes(["AAPL"]):
 ```
 
 **After:**
+
 ```python
 # HTTP streaming with async/await
 import asyncio
@@ -190,6 +204,7 @@ sdk.place_order(..., mode="LIVE")
 ### Error Handling Changes
 
 **Before:**
+
 ```python
 try:
     order = session.place_order(...)
@@ -198,6 +213,7 @@ except Exception as e:
 ```
 
 **After:**
+
 ```python
 from tradestation_sdk import (
     TradeStationAPIError,
@@ -220,6 +236,7 @@ except TradeStationAPIError as e:
 ### Complete Migration Example
 
 **Before (External SDK):**
+
 ```python
 from tradestation import Session
 
@@ -247,6 +264,7 @@ for quote in session.stream_quotes(["AAPL"]):
 ```
 
 **After (This SDK):**
+
 ```python
 from tradestation_sdk import TradeStationSDK
 import asyncio
@@ -287,6 +305,7 @@ If you were making direct HTTP requests to TradeStation API, the SDK simplifies 
 ### Authentication
 
 **Before (Manual OAuth):**
+
 ```python
 import requests
 
@@ -313,6 +332,7 @@ headers = {"Authorization": f"Bearer {access_token}"}
 ```
 
 **After (SDK Handles Everything):**
+
 ```python
 from tradestation_sdk import TradeStationSDK
 
@@ -324,6 +344,7 @@ sdk.authenticate(mode="PAPER")
 ### API Requests
 
 **Before (Manual):**
+
 ```python
 import requests
 
@@ -336,6 +357,7 @@ accounts = response.json()
 ```
 
 **After (SDK):**
+
 ```python
 account = sdk.get_account_info(mode="PAPER")
 ```
@@ -343,6 +365,7 @@ account = sdk.get_account_info(mode="PAPER")
 ### Streaming
 
 **Before (Manual NDJSON Parsing):**
+
 ```python
 import requests
 import json
@@ -364,6 +387,7 @@ for chunk in response.iter_content(chunk_size=8192):
 ```
 
 **After (SDK):**
+
 ```python
 import asyncio
 
@@ -381,6 +405,7 @@ asyncio.run(stream())
 ### From Alpaca API
 
 **Alpaca:**
+
 ```python
 from alpaca.trading.client import TradingClient
 
@@ -395,6 +420,7 @@ order = client.submit_order(
 ```
 
 **TradeStation SDK:**
+
 ```python
 from tradestation_sdk import TradeStationSDK
 
@@ -413,6 +439,7 @@ order_id, status = sdk.place_order(
 ### From Interactive Brokers (ib_insync)
 
 **Interactive Brokers:**
+
 ```python
 from ib_insync import IB, MarketOrder
 
@@ -425,6 +452,7 @@ trade = ib.placeOrder(contract, order)
 ```
 
 **TradeStation SDK:**
+
 ```python
 from tradestation_sdk import TradeStationSDK
 
@@ -458,9 +486,11 @@ order_id, status = sdk.place_order(
 ### From v0.x to v1.0
 
 **Breaking Changes:**
+
 - None (v1.0 is first public release)
 
 **New Features:**
+
 - Automatic stream reconnection
 - REST polling fallback
 - Stream health tracking
@@ -468,6 +498,7 @@ order_id, status = sdk.place_order(
 - Enhanced error handling
 
 **Recommended Actions:**
+
 1. Update to v1.0: `pip install --upgrade tradestation-sdk`
 2. Enable automatic reconnection in streaming (enabled by default)
 3. Use convenience functions for cleaner code

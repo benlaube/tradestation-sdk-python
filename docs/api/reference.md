@@ -20,14 +20,14 @@ This is the **complete API reference** for all SDK classes, methods, models, and
 **Use this if:** You need to look up a specific SDK function, understand parameters, see return types, or find detailed method documentation.
 
 **Related Documents:**
-- 📋 **[CHEATSHEET.md](../CHEATSHEET.md)** - Quick code snippets (faster lookup)
+
+- 📋 **[CHEATSHEET.md](../guides/cheatsheet.md)** - Quick code snippets (faster lookup)
 - 💡 **[SDK_USAGE_EXAMPLES.md](SDK_USAGE_EXAMPLES.md)** - Real-world usage examples
 - 📚 **[API_ENDPOINT_MAPPING.md](API_ENDPOINT_MAPPING.md)** - SDK functions mapped to TradeStation API v3 endpoints (shows which API endpoints are called)
 - 🧭 **[SDK_ENDPOINT_MAPPING.md](sdk_endpoints.md)** - SDK methods to TradeStation API endpoints
 - 📝 **[ORDER_FUNCTIONS_REFERENCE.md](ORDER_FUNCTIONS_REFERENCE.md)** - Detailed order function documentation
 - 🏗️ **[MODELS.md](MODELS.md)** - Pydantic model documentation
 - 📖 **[README.md](../README.md)** - SDK overview and getting started
-
 
 ---
 
@@ -65,6 +65,7 @@ sdk = TradeStationSDK()  # Reads from environment
 ```
 
 **Parameters:**
+
 - `enable_full_logging: bool = False` - If True, logs complete request/response bodies without truncation. Useful for debugging. Can also be set via `TRADESTATION_FULL_LOGGING` environment variable.
 
 ### Properties
@@ -86,12 +87,15 @@ sdk = TradeStationSDK()  # Reads from environment
 Perform OAuth2 authentication. Opens browser for first-time login.
 
 **Parameters:**
+
 - `mode: str | None` - "PAPER" or "LIVE". Defaults to `secrets.trading_mode`
 
 **Raises:**
+
 - `AuthenticationError` - If authentication fails
 
 **Example:**
+
 ```python
 sdk = TradeStationSDK()
 sdk.authenticate(mode="PAPER")
@@ -104,13 +108,16 @@ sdk.authenticate(mode="PAPER")
 Refresh access token for specified mode.
 
 **Parameters:**
+
 - `mode: str | None` - "PAPER" or "LIVE". Defaults to `secrets.trading_mode`
 
 **Raises:**
+
 - `TokenExpiredError` - If refresh token is expired
 - `AuthenticationError` - If refresh fails
 
 **Example:**
+
 ```python
 sdk.refresh_access_token(mode="PAPER")
 ```
@@ -122,12 +129,15 @@ sdk.refresh_access_token(mode="PAPER")
 Ensure authenticated. Automatically refreshes token if needed.
 
 **Parameters:**
+
 - `mode: str | None` - "PAPER" or "LIVE". Defaults to `secrets.trading_mode`
 
 **Raises:**
+
 - `AuthenticationError` - If authentication fails
 
 **Example:**
+
 ```python
 sdk.ensure_authenticated(mode="PAPER")
 ```
@@ -141,14 +151,17 @@ sdk.ensure_authenticated(mode="PAPER")
 Get account information including account ID.
 
 **Parameters:**
+
 - `mode: str | None` - "PAPER" or "LIVE". Defaults to `secrets.trading_mode`
 
 **Returns:**
+
 - `dict` - Account information with keys:
   - `account_id: str` - TradeStation account ID
   - `accounts: list[dict]` - List of all accounts (for multi-account support)
 
 **Example:**
+
 ```python
 account = sdk.get_account_info(mode="PAPER")
 print(f"Account ID: {account['account_id']}")
@@ -161,10 +174,12 @@ print(f"Account ID: {account['account_id']}")
 Get account balances (basic).
 
 **Parameters:**
+
 - `mode: str | None` - "PAPER" or "LIVE". Defaults to `secrets.trading_mode`
 - `account_id: str | None` - Optional account ID. If None, uses default account
 
 **Returns:**
+
 - `dict[str, Any]` - Balance information with keys:
   - `equity: float` - Total account equity
   - `cash_balance: float` - Available cash
@@ -181,6 +196,7 @@ Get account balances (basic).
   - `currency: str` - Account currency
 
 **Example:**
+
 ```python
 balances = sdk.get_account_balances(mode="PAPER")
 print(f"Equity: ${balances['equity']:.2f}")
@@ -194,15 +210,18 @@ print(f"Buying Power: ${balances['buying_power']:.2f}")
 Get detailed account balances with BalanceDetail and CurrencyDetails.
 
 **Parameters:**
+
 - `account_ids: str | None` - Comma-separated account IDs or None for default
 - `mode: str | None` - "PAPER" or "LIVE". Defaults to `secrets.trading_mode`
 
 **Returns:**
+
 - `dict[str, Any]` - Response with keys:
   - `Balances: list[dict]` - List of balance dictionaries with detailed information
   - `Errors: list[dict]` - List of error dictionaries (if any)
 
 **Example:**
+
 ```python
 detailed = sdk.get_account_balances_detailed(account_ids="SIM123456", mode="PAPER")
 for balance in detailed["Balances"]:
@@ -217,15 +236,18 @@ for balance in detailed["Balances"]:
 Get Beginning of Day (BOD) balances.
 
 **Parameters:**
+
 - `account_ids: str | None` - Comma-separated account IDs or None for default
 - `mode: str | None` - "PAPER" or "LIVE". Defaults to `secrets.trading_mode`
 
 **Returns:**
+
 - `dict[str, Any]` - Response with keys:
   - `BODBalances: list[dict]` - List of BOD balance dictionaries
   - `Errors: list[dict]` - List of error dictionaries (if any)
 
 **Example:**
+
 ```python
 bod = sdk.get_account_balances_bod(account_ids="SIM123456", mode="PAPER")
 ```
@@ -239,6 +261,7 @@ bod = sdk.get_account_balances_bod(account_ids="SIM123456", mode="PAPER")
 Get historical bar data.
 
 **Parameters:**
+
 - `symbol: str` - Trading symbol (e.g., "MNQZ25")
 - `interval: str` - Time interval (e.g., "1", "5")
 - `unit: str` - "Minute", "Daily", "Weekly", "Monthly"
@@ -246,6 +269,7 @@ Get historical bar data.
 - `mode: str | None` - "PAPER" or "LIVE". Defaults to `secrets.trading_mode`
 
 **Returns:**
+
 - `list[dict[str, Any]]` - List of bar dictionaries with keys:
   - `Open: float` - Opening price
   - `High: float` - High price
@@ -255,6 +279,7 @@ Get historical bar data.
   - `Timestamp: str` - Bar timestamp
 
 **Example:**
+
 ```python
 bars = sdk.get_bars("MNQZ25", "1", "Minute", bars_back=100, mode="PAPER")
 for bar in bars:
@@ -268,15 +293,18 @@ for bar in bars:
 Search for symbols.
 
 **Parameters:**
+
 - `pattern: str` - Symbol pattern (e.g., "MNQ", "ES")
 - `category: str` - Symbol category: "Future", "Stock", "Option" (default: "Future")
 - `asset_type: str | None` - Asset type filter: "Index", "Equity", etc.
 - `mode: str | None` - "PAPER" or "LIVE". Defaults to `secrets.trading_mode`
 
 **Returns:**
+
 - `list[dict[str, Any]]` - List of symbol dictionaries
 
 **Example:**
+
 ```python
 symbols = sdk.search_symbols(pattern="MNQ", category="Future", mode="PAPER")
 for symbol in symbols:
@@ -290,15 +318,18 @@ for symbol in symbols:
 Get quote snapshots for one or more symbols.
 
 **Parameters:**
+
 - `symbols: str` - Comma-separated symbols (e.g., "MNQZ25,ESZ25")
 - `mode: str | None` - "PAPER" or "LIVE". Defaults to `secrets.trading_mode`
 
 **Returns:**
+
 - `dict[str, Any]` - Response with keys:
   - `Quotes: list[dict]` - List of quote dictionaries
   - `Errors: list[dict]` - List of error dictionaries (if any)
 
 **Example:**
+
 ```python
 quotes = sdk.get_quote_snapshots("MNQZ25,ESZ25", mode="PAPER")
 for quote in quotes["Quotes"]:
@@ -312,9 +343,11 @@ for quote in quotes["Quotes"]:
 Get curated futures index symbols (e.g., `$SPX.X`, `$NDX.X`).
 
 **Parameters:**
+
 - `mode: str | None` - "PAPER" or "LIVE". Defaults to `secrets.trading_mode`
 
 **Returns:**
+
 - `list[dict[str, Any]]` - List of curated futures index symbol dictionaries
 
 ---
@@ -324,10 +357,12 @@ Get curated futures index symbols (e.g., `$SPX.X`, `$NDX.X`).
 Get symbol details and formatting information.
 
 **Parameters:**
+
 - `symbols: str` - Comma-separated symbols (e.g., "AAPL,MSFT")
 - `mode: str | None` - "PAPER" or "LIVE". Defaults to `secrets.trading_mode`
 
 **Returns:**
+
 - `SymbolDetailsResponse | dict[str, Any]` - Symbol details (Pydantic model or dict)
 
 ---
@@ -337,9 +372,11 @@ Get symbol details and formatting information.
 Get list of available crypto symbol names.
 
 **Parameters:**
+
 - `mode: str | None` - "PAPER" or "LIVE". Defaults to `secrets.trading_mode`
 
 **Returns:**
+
 - `list[str]` - List of crypto symbol name strings
 
 ---
@@ -349,11 +386,13 @@ Get list of available crypto symbol names.
 Get option expiration dates for an underlying symbol.
 
 **Parameters:**
+
 - `underlying: str` - Underlying symbol (e.g., "MSFT")
 - `mode: str | None` - "PAPER" or "LIVE". Defaults to `secrets.trading_mode`
 - `strike_price: float | None` - Optional strike price filter
 
 **Returns:**
+
 - `list[str]` - Expiration date strings (ISO)
 
 ---
@@ -363,10 +402,12 @@ Get option expiration dates for an underlying symbol.
 Calculate option risk/reward analysis.
 
 **Parameters:**
+
 - `request: dict[str, Any]` - OptionRiskRewardRequest payload
 - `mode: str | None` - "PAPER" or "LIVE". Defaults to `secrets.trading_mode`
 
 **Returns:**
+
 - `dict[str, Any]` - Risk/reward calculations
 
 ---
@@ -376,9 +417,11 @@ Calculate option risk/reward analysis.
 Get available option spread types.
 
 **Parameters:**
+
 - `mode: str | None` - "PAPER" or "LIVE". Defaults to `secrets.trading_mode`
 
 **Returns:**
+
 - `list[dict[str, Any]]` - Spread type dictionaries
 
 ---
@@ -388,6 +431,7 @@ Get available option spread types.
 Get available strike prices for an underlying and expiration.
 
 **Parameters:**
+
 - `underlying: str` - Underlying symbol (e.g., "MSFT")
 - `expiration_date: str | None` - Expiration date (alias to `expiration`)
 - `min_strike: float | None` - Optional minimum strike filter
@@ -399,6 +443,7 @@ Get available strike prices for an underlying and expiration.
 - `expiration2: str | None` - Secondary expiration (calendar/diagonal)
 
 **Returns:**
+
 - `list[float]` - Strike prices
 
 ---
@@ -408,10 +453,12 @@ Get available strike prices for an underlying and expiration.
 Stream quotes via HTTP streaming (async).
 
 **Parameters:**
+
 - `symbols: list[str]` - Symbols to stream
 - `mode: str | None` - "PAPER" or "LIVE". Defaults to `secrets.trading_mode`
 
 **Yields:**
+
 - `dict[str, Any]` - Quote updates
 
 ---
@@ -421,6 +468,7 @@ Stream quotes via HTTP streaming (async).
 Stream bars via HTTP streaming (async).
 
 **Parameters:**
+
 - `symbol: str` - Symbol to stream
 - `interval: str` - Interval (e.g., "1", "5")
 - `unit: str` - "Minute", "Daily", etc.
@@ -428,6 +476,7 @@ Stream bars via HTTP streaming (async).
 - Other optional filters: `start_date`, `end_date`, `bars_back`, `session_template`, `price_type`
 
 **Yields:**
+
 - `dict[str, Any]` - Bar updates
 
 ---
@@ -439,6 +488,7 @@ Stream option chain data for an underlying symbol.
 **Parameters:** Matches API filters (expiration, strike proximity, spread type, greeks, ITM/OTM filters, etc.)
 
 **Yields:**
+
 - `dict[str, Any]` - Option chain updates
 
 ---
@@ -448,12 +498,14 @@ Stream option chain data for an underlying symbol.
 Stream option quotes for specified legs.
 
 **Parameters:**
+
 - `legs: list[dict[str, str]]` - Legs with `Symbol` (and optional `Ratio`)
 - `risk_free_rate: float | None` - Optional risk-free rate override
 - `enable_greeks: bool | None` - Include greeks (default True)
 - `mode: str | None` - "PAPER" or "LIVE". Defaults to `secrets.trading_mode`
 
 **Yields:**
+
 - `dict[str, Any]` - Option quote updates
 
 ---
@@ -463,11 +515,13 @@ Stream option quotes for specified legs.
 Stream Level 2 market depth quotes for a symbol.
 
 **Parameters:**
+
 - `symbol: str` - Symbol to stream
 - `mode: str | None` - "PAPER" or "LIVE". Defaults to `secrets.trading_mode`
 - `max_levels: int | None` - Optional depth levels (default API max 20)
 
 **Yields:**
+
 - `dict[str, Any]` - Market depth quote updates
 
 ---
@@ -477,11 +531,13 @@ Stream Level 2 market depth quotes for a symbol.
 Stream aggregated market depth data for a symbol.
 
 **Parameters:**
+
 - `symbol: str` - Symbol to stream
 - `mode: str | None` - "PAPER" or "LIVE". Defaults to `secrets.trading_mode`
 - `max_levels: int | None` - Optional depth levels (default API max 20)
 
 **Yields:**
+
 - `dict[str, Any]` - Aggregated market depth updates
 
 ---
@@ -499,6 +555,7 @@ Order execution operations handle all order placement, modification, cancellatio
 Place an order.
 
 **Parameters:**
+
 - `symbol: str` - Trading symbol
 - `side: str` - "BUY" or "SELL"
 - `quantity: int` - Number of contracts
@@ -512,13 +569,16 @@ Place an order.
 - `mode: str | None` - "PAPER" or "LIVE". Defaults to `secrets.trading_mode`
 
 **Returns:**
+
 - `tuple[str | None, str]` - (order_id, status_message)
 
 **Raises:**
+
 - `InvalidRequestError` - If order parameters are invalid
 - `TradeStationAPIError` - If order placement fails
 
 **Example:**
+
 ```python
 order_id, status = sdk.place_order(
     symbol="MNQZ25",
@@ -538,13 +598,16 @@ print(f"Order placed: {order_id}, Status: {status}")
 Cancel an order.
 
 **Parameters:**
+
 - `order_id: str` - TradeStation order ID
 - `mode: str | None` - "PAPER" or "LIVE". Defaults to `secrets.trading_mode`
 
 **Returns:**
+
 - `tuple[bool, str]` - (success, message)
 
 **Example:**
+
 ```python
 success, message = sdk.cancel_order("924243071", mode="PAPER")
 if success:
@@ -558,6 +621,7 @@ if success:
 Modify an existing order.
 
 **Parameters:**
+
 - `order_id: str` - TradeStation order ID
 - `quantity: int | None` - New quantity (optional)
 - `limit_price: float | None` - New limit price (optional)
@@ -565,9 +629,11 @@ Modify an existing order.
 - `mode: str | None` - "PAPER" or "LIVE". Defaults to `secrets.trading_mode`
 
 **Returns:**
+
 - `tuple[bool, str]` - (success, message)
 
 **Example:**
+
 ```python
 success, message = sdk.modify_order(
     order_id="924243071",
@@ -584,15 +650,18 @@ success, message = sdk.modify_order(
 Get historical orders.
 
 **Parameters:**
+
 - `start_date: str | None` - Start date in ISO format (YYYY-MM-DD) or None for all history
 - `end_date: str | None` - End date in ISO format (YYYY-MM-DD) or None for today
 - `limit: int` - Maximum number of orders (default: 100, max: 1000)
 - `mode: str | None` - "PAPER" or "LIVE". Defaults to `secrets.trading_mode`
 
 **Returns:**
+
 - `list[dict[str, Any]]` - List of order dictionaries
 
 **Example:**
+
 ```python
 history = sdk.get_order_history(
     start_date="2025-12-01",
@@ -611,10 +680,12 @@ for order in history:
 Get order executions (fills).
 
 **Parameters:**
+
 - `order_id: str` - TradeStation order ID
 - `mode: str | None` - "PAPER" or "LIVE". Defaults to `secrets.trading_mode`
 
 **Returns:**
+
 - `list[dict[str, Any]]` - List of execution dictionaries with keys:
   - `ExecutionID: str` - Execution ID
   - `Symbol: str` - Trading symbol
@@ -625,6 +696,7 @@ Get order executions (fills).
   - `ExecutionTime: str` - Execution timestamp
 
 **Example:**
+
 ```python
 executions = sdk.get_order_executions("924243071", mode="PAPER")
 for exec in executions:
@@ -638,12 +710,15 @@ for exec in executions:
 Confirm an order (pre-flight check) to get estimated cost and commission.
 
 **Parameters:**
+
 - Same as `place_order()`
 
 **Returns:**
+
 - `dict[str, Any]` - Confirmation details (EstimatedCost, EstimatedCommission, etc.)
 
 **Example:**
+
 ```python
 confirmation = sdk.confirm_order(
     symbol="MNQZ25",
@@ -663,14 +738,17 @@ print(f"Estimated cost: {confirmation.get('EstimatedCost')}")
 Confirm a group order (OCO/Bracket) before placement.
 
 **Parameters:**
+
 - `group_type: str` - "OCO", "BRK", or "NORMAL"
 - `orders: list[dict[str, Any]]` - List of order dictionaries
 - `mode: str | None` - "PAPER" or "LIVE". Defaults to `secrets.trading_mode`
 
 **Returns:**
+
 - `dict[str, Any]` - Confirmation details including estimated costs
 
 **Example:**
+
 ```python
 confirmation = sdk.confirm_group_order("BRK", orders, mode="PAPER")
 ```
@@ -682,11 +760,13 @@ confirmation = sdk.confirm_group_order("BRK", orders, mode="PAPER")
 Place a group order (OCO/Bracket) - low-level method.
 
 **Parameters:**
+
 - `group_type: str` - "OCO", "BRK", or "NORMAL"
 - `orders: list[dict[str, Any]]` - List of order dictionaries (see `TradeStationOrderRequest`)
 - `mode: str | None` - "PAPER" or "LIVE". Defaults to `secrets.trading_mode`
 
 **Returns:**
+
 - `dict[str, Any]` - Group order response with keys:
   - `GroupID: str` - Group order ID
   - `GroupName: str` - Group order name
@@ -694,6 +774,7 @@ Place a group order (OCO/Bracket) - low-level method.
   - `Orders: list[dict]` - List of order responses with OrderIDs
 
 **Example:**
+
 ```python
 bracket_orders = [
     {
@@ -717,12 +798,15 @@ result = sdk.place_group_order("BRK", bracket_orders, mode="PAPER")
 Get available activation trigger keys for conditional orders.
 
 **Parameters:**
+
 - `mode: str | None` - "PAPER" or "LIVE". Defaults to `secrets.trading_mode`
 
 **Returns:**
+
 - `list[dict[str, Any]]` - List of trigger dictionaries with Key, Name, Description
 
 **Example:**
+
 ```python
 triggers = sdk.get_activation_triggers(mode="PAPER")
 for trigger in triggers:
@@ -736,12 +820,15 @@ for trigger in triggers:
 Get available routing options for order execution.
 
 **Parameters:**
+
 - `mode: str | None` - "PAPER" or "LIVE". Defaults to `secrets.trading_mode`
 
 **Returns:**
+
 - `list[dict[str, Any]]` - List of route dictionaries
 
 **Example:**
+
 ```python
 routes = sdk.get_routes(mode="PAPER")
 ```
@@ -755,6 +842,7 @@ routes = sdk.get_routes(mode="PAPER")
 Place a limit order (convenience wrapper around `place_order()`).
 
 **Parameters:**
+
 - `symbol: str` - Trading symbol
 - `side: str` - "BUY" or "SELL"
 - `quantity: int` - Number of contracts
@@ -763,9 +851,11 @@ Place a limit order (convenience wrapper around `place_order()`).
 - `mode: str | None` - "PAPER" or "LIVE". Defaults to `secrets.trading_mode`
 
 **Returns:**
+
 - `tuple[str | None, str]` - (order_id, status_message)
 
 **Example:**
+
 ```python
 order_id, status = sdk.place_limit_order(
     symbol="MNQZ25",
@@ -783,6 +873,7 @@ order_id, status = sdk.place_limit_order(
 Place a stop order (convenience wrapper around `place_order()`).
 
 **Parameters:**
+
 - `symbol: str` - Trading symbol
 - `side: str` - "BUY" or "SELL"
 - `quantity: int` - Number of contracts
@@ -791,9 +882,11 @@ Place a stop order (convenience wrapper around `place_order()`).
 - `mode: str | None` - "PAPER" or "LIVE". Defaults to `secrets.trading_mode`
 
 **Returns:**
+
 - `tuple[str | None, str]` - (order_id, status_message)
 
 **Example:**
+
 ```python
 order_id, status = sdk.place_stop_order(
     symbol="MNQZ25",
@@ -811,6 +904,7 @@ order_id, status = sdk.place_stop_order(
 Place a stop-limit order (convenience wrapper around `place_order()`).
 
 **Parameters:**
+
 - `symbol: str` - Trading symbol
 - `side: str` - "BUY" or "SELL"
 - `quantity: int` - Number of contracts
@@ -820,9 +914,11 @@ Place a stop-limit order (convenience wrapper around `place_order()`).
 - `mode: str | None` - "PAPER" or "LIVE". Defaults to `secrets.trading_mode`
 
 **Returns:**
+
 - `tuple[str | None, str]` - (order_id, status_message)
 
 **Example:**
+
 ```python
 order_id, status = sdk.place_stop_limit_order(
     symbol="MNQZ25",
@@ -841,6 +937,7 @@ order_id, status = sdk.place_stop_limit_order(
 Place a trailing stop order (convenience wrapper around `place_order()`).
 
 **Parameters:**
+
 - `symbol: str` - Trading symbol
 - `side: str` - "BUY" or "SELL"
 - `quantity: int` - Number of contracts
@@ -852,9 +949,11 @@ Place a trailing stop order (convenience wrapper around `place_order()`).
 - `mode: str | None` - "PAPER" or "LIVE". Defaults to `secrets.trading_mode`
 
 **Returns:**
+
 - `tuple[str | None, str]` - (order_id, status_message)
 
 **Example:**
+
 ```python
 # Using trail amount (points)
 order_id, status = sdk.place_trailing_stop_order(
@@ -884,6 +983,7 @@ Place a bracket order (entry + profit target + stop-loss).
 Uses the proper group order API (BRK type) to ensure orders are linked.
 
 **Parameters:**
+
 - `symbol: str` - Trading symbol
 - `entry_side: str` - "BUY" or "SELL" for entry
 - `quantity: int` - Number of contracts
@@ -895,6 +995,7 @@ Uses the proper group order API (BRK type) to ensure orders are linked.
 - `mode: str | None` - "PAPER" or "LIVE". Defaults to `secrets.trading_mode`
 
 **Returns:**
+
 - `dict[str, Any]` - Group order response with:
   - `GroupID: str` - Group order ID
   - `GroupName: str` - Group order name
@@ -902,6 +1003,7 @@ Uses the proper group order API (BRK type) to ensure orders are linked.
   - `Orders: list[dict]` - List of 3 order responses (entry, profit target, stop-loss) with OrderIDs
 
 **Example:**
+
 ```python
 # Bracket order: Buy 2 MNQZ25 at market, profit target at 25100, stop-loss at 24900
 result = sdk.place_bracket_order(
@@ -941,11 +1043,13 @@ Place an OCO (One-Cancels-Other) order (convenience wrapper).
 OCO orders are a group of orders where if one fills, the others are cancelled.
 
 **Parameters:**
+
 - `orders: list[dict[str, Any]]` - List of 2+ order dictionaries (same format as place_order)
   - Each order dict should have: AccountID, Symbol, TradeAction, OrderType, Quantity, etc.
 - `mode: str | None` - "PAPER" or "LIVE". Defaults to `secrets.trading_mode`
 
 **Returns:**
+
 - `dict[str, Any]` - Group order response with:
   - `GroupID: str` - Group order ID
   - `GroupName: str` - Group order name
@@ -953,6 +1057,7 @@ OCO orders are a group of orders where if one fills, the others are cancelled.
   - `Orders: list[dict]` - List of order responses with OrderIDs
 
 **Example:**
+
 ```python
 # OCO order: Buy if price breaks above 25010, or sell short if price breaks below 24990
 oco_orders = [
@@ -993,15 +1098,18 @@ Order query operations handle order queries and streaming using the `/brokerage/
 Get historical orders.
 
 **Parameters:**
+
 - `start_date: str | None` - Start date in ISO format (YYYY-MM-DD) or None for all history
 - `end_date: str | None` - End date in ISO format (YYYY-MM-DD) or None for today
 - `limit: int` - Maximum number of orders (default: 100, max: 1000)
 - `mode: str | None` - "PAPER" or "LIVE". Defaults to `secrets.trading_mode`
 
 **Returns:**
+
 - `list[dict[str, Any]]` - List of order dictionaries
 
 **Example:**
+
 ```python
 history = sdk.get_order_history(
     start_date="2025-12-01",
@@ -1020,14 +1128,17 @@ for order in history:
 Get current/open orders.
 
 **Parameters:**
+
 - `account_ids: str | None` - Comma-separated account IDs or None for default
 - `next_token: str | None` - Pagination token for next page
 - `mode: str | None` - "PAPER" or "LIVE". Defaults to `secrets.trading_mode`
 
 **Returns:**
+
 - `dict[str, Any]` - Dictionary with Orders list, Errors list, and optional NextToken
 
 **Example:**
+
 ```python
 current = sdk.get_current_orders(account_ids="SIM123456", mode="PAPER")
 for order in current["Orders"]:
@@ -1041,14 +1152,17 @@ for order in current["Orders"]:
 Get specific current orders by order ID(s).
 
 **Parameters:**
+
 - `order_ids: str` - Comma-separated order IDs
 - `account_ids: str | None` - Comma-separated account IDs or None for default
 - `mode: str | None` - "PAPER" or "LIVE". Defaults to `secrets.trading_mode`
 
 **Returns:**
+
 - `dict[str, Any]` - Dictionary with Orders list and Errors list
 
 **Example:**
+
 ```python
 orders = sdk.get_orders_by_ids("924243071,924243072", mode="PAPER")
 ```
@@ -1060,6 +1174,7 @@ orders = sdk.get_orders_by_ids("924243071,924243072", mode="PAPER")
 Get specific historical orders by order ID(s).
 
 **Parameters:**
+
 - `order_ids: str` - Comma-separated order IDs
 - `account_ids: str | None` - Comma-separated account IDs or None for default
 - `start_date: str | None` - Start date in ISO format (YYYY-MM-DD)
@@ -1067,9 +1182,11 @@ Get specific historical orders by order ID(s).
 - `mode: str | None` - "PAPER" or "LIVE". Defaults to `secrets.trading_mode`
 
 **Returns:**
+
 - `dict[str, Any]` - Dictionary with Orders list and Errors list
 
 **Example:**
+
 ```python
 historical = sdk.get_historical_orders_by_ids(
     "924243071",
@@ -1085,13 +1202,16 @@ historical = sdk.get_historical_orders_by_ids(
 Stream real-time order updates.
 
 **Parameters:**
+
 - `account_id: str | None` - TradeStation account ID (optional)
 - `mode: str | None` - "PAPER" or "LIVE". Defaults to `secrets.trading_mode`
 
 **Yields:**
+
 - `OrderStream` - Order update dictionaries
 
 **Example:**
+
 ```python
 async for order in sdk.streaming.stream_orders("SIM123456", mode="PAPER"):
     if "StreamStatus" in order:
@@ -1108,13 +1228,16 @@ async for order in sdk.streaming.stream_orders("SIM123456", mode="PAPER"):
 Get position quantity for a symbol.
 
 **Parameters:**
+
 - `symbol: str` - Trading symbol
 - `mode: str | None` - "PAPER" or "LIVE". Defaults to `secrets.trading_mode`
 
 **Returns:**
+
 - `int` - Position quantity (positive=long, negative=short, 0=flat)
 
 **Example:**
+
 ```python
 position = sdk.get_position("MNQZ25", mode="PAPER")
 print(f"Position: {position} contracts")
@@ -1127,14 +1250,17 @@ print(f"Position: {position} contracts")
 Get all positions.
 
 **Parameters:**
+
 - `mode: str | None` - "PAPER" or "LIVE". Defaults to `secrets.trading_mode`
 
 **Returns:**
+
 - `list[dict[str, Any]]` - List of position dictionaries with keys:
   - `Symbol: str` - Trading symbol
   - `Quantity: int` - Position quantity
 
 **Example:**
+
 ```python
 positions = sdk.get_all_positions(mode="PAPER")
 for pos in positions:
@@ -1148,13 +1274,16 @@ for pos in positions:
 Flatten position(s) (close all or specific symbol).
 
 **Parameters:**
+
 - `symbol: str | None` - Optional symbol to flatten. If None, flattens all positions
 - `mode: str | None` - "PAPER" or "LIVE". Defaults to `secrets.trading_mode`
 
 **Returns:**
+
 - `list[dict[str, Any]]` - List of order dictionaries for flattening orders
 
 **Example:**
+
 ```python
 # Flatten all positions
 flattened = sdk.flatten_position(mode="PAPER")
@@ -1176,13 +1305,16 @@ Manages HTTP Streaming sessions for real-time data.
 Stream real-time quotes.
 
 **Parameters:**
+
 - `symbols: list[str]` - List of symbols to stream
 - `mode: str | None` - "PAPER" or "LIVE". Defaults to `secrets.trading_mode`
 
 **Yields:**
+
 - `dict[str, Any]` - Quote dictionaries (use `QuoteStream` model for validation)
 
 **Example:**
+
 ```python
 async for quote in sdk.streaming.stream_quotes(["MNQZ25"], mode="PAPER"):
     if "StreamStatus" in quote:
@@ -1197,13 +1329,16 @@ async for quote in sdk.streaming.stream_quotes(["MNQZ25"], mode="PAPER"):
 Stream real-time order updates.
 
 **Parameters:**
+
 - `account_id: str` - TradeStation account ID
 - `mode: str | None` - "PAPER" or "LIVE". Defaults to `secrets.trading_mode`
 
 **Yields:**
+
 - `dict[str, Any]` - Order update dictionaries (use `OrderStream` model for validation)
 
 **Example:**
+
 ```python
 async for order in sdk.streaming.stream_orders("SIM123456", mode="PAPER"):
     if "StreamStatus" in order:
@@ -1218,13 +1353,16 @@ async for order in sdk.streaming.stream_orders("SIM123456", mode="PAPER"):
 Stream real-time position updates.
 
 **Parameters:**
+
 - `account_id: str` - TradeStation account ID
 - `mode: str | None` - "PAPER" or "LIVE". Defaults to `secrets.trading_mode`
 
 **Yields:**
+
 - `dict[str, Any]` - Position update dictionaries (use `PositionStream` model for validation)
 
 **Example:**
+
 ```python
 async for position in sdk.streaming.stream_positions("SIM123456", mode="PAPER"):
     if "StreamStatus" in position:
@@ -1239,13 +1377,16 @@ async for position in sdk.streaming.stream_positions("SIM123456", mode="PAPER"):
 Stream real-time account balance updates.
 
 **Parameters:**
+
 - `account_id: str` - TradeStation account ID
 - `mode: str | None` - "PAPER" or "LIVE". Defaults to `secrets.trading_mode`
 
 **Yields:**
+
 - `dict[str, Any]` - Balance update dictionaries with real-time balance information
 
 **Example:**
+
 ```python
 async for balance in sdk.streaming.stream_balances("SIM123456", mode="PAPER"):
     if "StreamStatus" in balance:
@@ -1266,6 +1407,7 @@ async for balance in sdk.streaming.stream_balances("SIM123456", mode="PAPER"):
 Pydantic model for order placement requests.
 
 **Fields:**
+
 - `AccountID: str` - TradeStation account ID
 - `Symbol: str` - Trading symbol
 - `TradeAction: str` - "Buy" or "Sell"
@@ -1278,6 +1420,7 @@ Pydantic model for order placement requests.
 - `TrailPercent: str | None` - Trail percentage (optional)
 
 **Example:**
+
 ```python
 from src.lib.tradestation import TradeStationOrderRequest
 
@@ -1301,6 +1444,7 @@ order_request = TradeStationOrderRequest(
 Complete order response model with all 30+ fields.
 
 **Key Fields:**
+
 - `AccountID: str` - TradeStation account ID
 - `OrderID: str` - TradeStation order ID
 - `Status: str | None` - Order status (OPN, ACK, FLL, CNL, REJ)
@@ -1309,6 +1453,8 @@ Complete order response model with all 30+ fields.
 - `GroupID: str | None` - Order group ID (for OCO/Bracket)
 - `CommissionFee: str | None` - Commission fee
 - `TrailingStop: TradeStationTrailingStop | None` - Trailing stop parameters
+
+#### Parameters (stream_bars)
 
 ---
 
@@ -1319,6 +1465,7 @@ Complete order response model with all 30+ fields.
 Streaming quote response with additional fields.
 
 **Key Fields:**
+
 - `Symbol: str` - Trading symbol (REQUIRED)
 - `Last: str | None` - Last traded price
 - `Bid: str | None` - Current bid price
@@ -1331,6 +1478,7 @@ Streaming quote response with additional fields.
 - `Restrictions: list[str] | None` - Trading restrictions
 
 **Example:**
+
 ```python
 from src.lib.tradestation import QuoteStream
 
@@ -1348,6 +1496,7 @@ async for data in sdk.streaming.stream_quotes(["MNQZ25"]):
 Streaming order update (same structure as REST order response).
 
 **Example:**
+
 ```python
 from src.lib.tradestation import OrderStream
 
@@ -1365,6 +1514,7 @@ async for data in sdk.streaming.stream_orders("SIM123456"):
 Streaming position update with detailed P&L information.
 
 **Key Fields:**
+
 - `AccountID: str` - TradeStation account ID
 - `Symbol: str` - Trading symbol
 - `Quantity: str` - Position quantity (negative for short)
@@ -1378,6 +1528,7 @@ Streaming position update with detailed P&L information.
 - `Deleted: bool | None` - True if position was closed
 
 **Example:**
+
 ```python
 from src.lib.tradestation import PositionStream
 
@@ -1398,6 +1549,7 @@ async for data in sdk.streaming.stream_positions("SIM123456"):
 Streaming bar payload for `marketdata/stream/barcharts/{symbol}` (used by `stream_bars()`).
 
 **Key Fields (mirrors TradeStation Bar schema):**
+
 - `TimeStamp: str` - ISO timestamp of bar close time
 - `Open, High, Low, Close: str` - OHLC prices
 - `TotalVolume: str` - Total volume
@@ -1408,6 +1560,7 @@ Streaming bar payload for `marketdata/stream/barcharts/{symbol}` (used by `strea
 - Tick stats: `DownTicks`, `UpTicks`, `DownVolume`, `UpVolume`, `TotalTicks`, `UnchangedTicks`, `UnchangedVolume`
 
 **Example (raw API payload):**
+
 ```json
 {
   "TimeStamp": "2025-01-15T10:01:00Z",
@@ -1424,6 +1577,7 @@ Streaming bar payload for `marketdata/stream/barcharts/{symbol}` (used by `strea
 ```
 
 **Example (SDK model):**
+
 ```python
 async for data in sdk.market_data.stream_bars("MNQZ25", "1", "Minute"):
     bar = data  # BarStream
@@ -1441,6 +1595,7 @@ All exceptions inherit from `TradeStationAPIError` and include structured error 
 Structured error information dataclass included in all exceptions.
 
 **Attributes:**
+
 - `code: str | None` - Error code (e.g., "INVALID_REQUEST", "AUTHENTICATION_ERROR")
 - `message: str` - Human-readable error message
 - `api_error_code: str | None` - TradeStation API error code
@@ -1455,6 +1610,7 @@ Structured error information dataclass included in all exceptions.
 - `operation: str | None` - SDK operation that failed (e.g., "place_order")
 
 **Methods:**
+
 - `to_human_readable() -> str` - Generate human-readable error message with context
 - `to_dict() -> dict` - Return structured error representation
 
@@ -1465,13 +1621,16 @@ Structured error information dataclass included in all exceptions.
 Base exception for all TradeStation API errors.
 
 **Attributes:**
+
 - `details: ErrorDetails` - Structured error details
 
 **Methods:**
+
 - `__str__() -> str` - Returns human-readable error message
 - `to_dict() -> dict` - Returns structured error representation
 
 **Example:**
+
 ```python
 try:
     sdk.place_order(...)
@@ -1492,6 +1651,7 @@ except TradeStationAPIError as e:
 Raised when authentication fails (401, 403).
 
 **Example:**
+
 ```python
 try:
     sdk.authenticate(mode="PAPER")
@@ -1507,6 +1667,7 @@ except AuthenticationError as e:
 Raised when rate limit is exceeded (429).
 
 **Example:**
+
 ```python
 try:
     sdk.place_order(...)
@@ -1524,6 +1685,7 @@ except RateLimitError as e:
 Raised when request parameters are invalid (400).
 
 **Example:**
+
 ```python
 try:
     sdk.place_order(symbol="INVALID", side="BUY", quantity=0)
@@ -1540,6 +1702,7 @@ except InvalidRequestError as e:
 Raised when network errors occur (500+ or connection failures).
 
 **Example:**
+
 ```python
 try:
     sdk.get_account_info()
@@ -1555,6 +1718,7 @@ except NetworkError as e:
 Raised when access token is expired and refresh fails.
 
 **Example:**
+
 ```python
 try:
     sdk.refresh_access_token()
@@ -1570,6 +1734,7 @@ except TokenExpiredError as e:
 Raised when token is invalid or missing.
 
 **Example:**
+
 ```python
 try:
     sdk.ensure_authenticated()
@@ -1585,11 +1750,13 @@ except InvalidTokenError as e:
 **⚠️ Important:** Mappers are **optional utilities** for specific use cases. The SDK's primary API returns Pydantic models with PascalCase field names (matching the TradeStation API format).
 
 **When to use mappers:**
+
 - You need snake_case format for database storage
 - You're integrating with systems requiring snake_case
 - You have existing code expecting snake_case
 
 **When to use Pydantic models (default):**
+
 - Building new applications (recommended)
 - You want type safety and validation
 - You want to match the TradeStation API format exactly
@@ -1606,12 +1773,15 @@ Normalize TradeStation order object to snake_case dictionary format.
 **Note:** This is an optional utility. The SDK returns Pydantic models by default. Use this only if you need snake_case format.
 
 **Parameters:**
+
 - `order: Any` - Order object (dict, Pydantic model, or object) from TradeStation API
 
 **Returns:**
+
 - `dict[str, Any] | None` - Normalized order dictionary with snake_case keys, or None if invalid
 
 **Example:**
+
 ```python
 from src.lib.tradestation import TradeStationSDK, normalize_order
 
@@ -1638,12 +1808,15 @@ Normalize TradeStation position object to snake_case dictionary format.
 **Note:** This is an optional utility. The SDK returns Pydantic models by default. Use this only if you need snake_case format.
 
 **Parameters:**
+
 - `position: Any` - Position object (dict, Pydantic model, or object) from TradeStation API
 
 **Returns:**
+
 - `dict[str, Any] | None` - Normalized position dictionary with snake_case keys, or None if invalid
 
 **Example:**
+
 ```python
 from src.lib.tradestation import TradeStationSDK, normalize_position
 

@@ -14,8 +14,9 @@ This document provides **guidelines and best practices** for contributing to the
 **Use this if:** You want to contribute code, documentation, or examples to the SDK.
 
 **Related Documents:**
+
 - 📖 **[README.md](README.md)** - Complete SDK documentation
-- 📦 **[INSTALLATION.md](INSTALLATION.md)** - Development installation setup
+- 📦 **[INSTALLATION.md](docs/getting-started/installation.md)** - Development installation setup
 - 📚 **[docs/API_REFERENCE.md](docs/API_REFERENCE.md)** - API documentation standards
 - 📝 **[CHANGELOG.md](CHANGELOG.md)** - How to document changes
 - 🗺️ **[docs/ROADMAP.md](docs/ROADMAP.md)** - Planned features and priorities
@@ -79,6 +80,7 @@ pip install -e ".[dev]"
 ```
 
 This installs:
+
 - SDK dependencies (httpx, pydantic, PyJWT)
 - Development tools (pytest, black, ruff)
 - Testing tools (pytest-asyncio, pytest-cov, pytest-mock)
@@ -112,10 +114,12 @@ python cli/test_connection.py
 Create a feature branch:
 
 ```bash
-git checkout -b feat/your-feature-name
+# Create a new branch
+git checkout -b feature/my-new-feature
 ```
 
 Branch naming convention:
+
 - `feat/` - New features
 - `fix/` - Bug fixes
 - `docs/` - Documentation updates
@@ -156,8 +160,6 @@ tradestation_sdk/
 
 #### 1. Add New API Endpoint
 
-**Step 1:** Add method to appropriate module
-
 ```python
 # In accounts.py
 def get_new_feature(self, mode: str | None = None) -> dict[str, Any]:
@@ -183,16 +185,12 @@ def get_new_feature(self, mode: str | None = None) -> dict[str, Any]:
     return response
 ```
 
-**Step 2:** Add to main SDK class
-
 ```python
 # In __init__.py
 def get_new_feature(self, mode: str | None = None) -> dict[str, Any]:
     """Get new feature. Delegates to AccountOperations."""
     return self._accounts.get_new_feature(mode)
 ```
-
-**Step 3:** Add tests
 
 ```python
 # In tests/test_accounts.py
@@ -239,7 +237,7 @@ class NewFeatureResponse(BaseModel):
 ### Running Tests
 
 ```bash
-# Run all tests
+# Run tests
 pytest
 
 # Run with coverage
@@ -255,6 +253,7 @@ pytest tests/test_accounts.py::test_get_account_info -v
 ### Writing Tests
 
 Every new function must have tests covering:
+
 - ✅ Success case
 - ✅ Error handling
 - ✅ Edge cases
@@ -319,16 +318,19 @@ We follow [PEP 8](https://pep8.org/) with some modifications:
 ### Formatting Tools
 
 **Black** (auto-formatter):
+
 ```bash
 black .
 ```
 
 **Ruff** (linter):
+
 ```bash
 ruff check . --fix
 ```
 
 **Type Checking** (mypy):
+
 ```bash
 mypy .
 ```
@@ -384,16 +386,10 @@ def get_data(symbol, mode=None):
     pass
 ```
 
----
-
-## Documentation
-
-### Update Documentation When:
-
-1. **Adding new functions** → Update API_REFERENCE.md and SDK_USAGE_EXAMPLES.md
-2. **Changing behavior** → Update README.md and relevant docs
-3. **Fixing bugs** → Update LIMITATIONS.md if it was a known limitation
-4. **Adding dependencies** → Update README.md Installation section
+```bash
+# Build documentation
+mkdocs build
+```
 
 ### Documentation Files
 
@@ -419,17 +415,20 @@ def get_data(symbol, mode=None):
 ### Before Submitting
 
 1. **Run all tests:**
+
    ```bash
    pytest
    ```
 
 2. **Check code quality:**
+
    ```bash
    black .
    ruff check . --fix
    ```
 
 3. **Update CHANGELOG.md:**
+
    ```markdown
    ## [Unreleased]
 
@@ -458,6 +457,7 @@ Use Conventional Commits format:
 ```
 
 **Types:**
+
 - `feat` - New feature
 - `fix` - Bug fix
 - `docs` - Documentation changes
@@ -466,6 +466,7 @@ Use Conventional Commits format:
 - `chore` - Maintenance tasks
 
 **Examples:**
+
 ```
 feat(orders): add support for conditional orders
 

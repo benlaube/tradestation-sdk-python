@@ -8,7 +8,6 @@ description: Getting started guides and tutorials for new SDK users
 
 # Getting Started
 
-
 ## Getting Started Guides
 
 This section contains guides to help you get started with the TradeStation SDK.
@@ -16,17 +15,20 @@ This section contains guides to help you get started with the TradeStation SDK.
 ### Available Guides
 
 - **[Getting Started Tutorial](README.md)** - 15-minute comprehensive tutorial covering authentication, basic operations, and common patterns
-- **[Installation Guide](../INSTALLATION.md)** - Detailed installation instructions for all platforms
-- **[Quick Start Guide](../QUICKSTART.md)** - 2-minute quick start for experienced developers
+- **[Installation Guide](installation.md)** - Detailed installation instructions for all platforms
+- **[Quick Start Guide](quickstart.md)** - 2-minute quick start for experienced developers
+- **[Installation Guide](installation.md)** - Comprehensive installation instructions the SDK?**
 
 ### Quick Navigation
 
 **New to the SDK?**
-1. Start with [Quick Start Guide](../QUICKSTART.md) (2 minutes)
-2. Then read [Getting Started Tutorial](README.md) (15 minutes)
-3. Review [Installation Guide](../INSTALLATION.md) if needed
+
+1. Start with [Quick Start Guide](quickstart.md) (2 minutes)
+2. Follow this tutorial (15 minutes)
+3. Review [Installation Guide](installation.md) if needed
 
 **Experienced Developer?**
+
 - Jump to [API Reference](../api/reference.md)
 - Check [Usage Examples](../guides/usage-examples.md)
 - Review [SDK Functions List](../reference/functions-list.md)
@@ -36,6 +38,7 @@ This section contains guides to help you get started with the TradeStation SDK.
 ## Next Steps
 
 After getting started:
+
 - 📖 [Complete API Reference](../api/reference.md)
 - 💡 [Usage Examples](../guides/usage-examples.md)
 - 🏗️ [Architecture Overview](../architecture/overview.md)

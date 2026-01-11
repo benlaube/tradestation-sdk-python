@@ -14,11 +14,12 @@ This is a **comprehensive security guide** covering best practices, credential m
 **Use this if:** You're deploying to production, handling credentials, or want to ensure secure SDK usage.
 
 **Related Documents:**
+
 - 🚀 **[DEPLOYMENT.md](DEPLOYMENT.md)** - Production deployment guide (includes security checklist)
 - ⚠️ **[LIMITATIONS.md](LIMITATIONS.md)** - Security limitations (token storage, encryption)
 - 📖 **[README.md](README.md)** - Complete SDK documentation
 - 🔄 **[MIGRATION.md](MIGRATION.md)** - Security considerations when migrating
-- 📦 **[INSTALLATION.md](INSTALLATION.md)** - Secure installation practices
+- 📦 **[INSTALLATION.md](docs/getting-started/installation.md)** - Secure installation practices
 
 ---
 
@@ -44,15 +45,18 @@ Best practices and security considerations when using the TradeStation SDK.
 ### 1. Never Commit Credentials
 
 **Never commit these files:**
+
 - ❌ `.env` - Contains API credentials
 - ❌ `config/tokens_*.json` - Contains access/refresh tokens (or keychain entries)
 - ❌ Any file with `CLIENT_SECRET` or `ACCESS_TOKEN`
 
 **Always commit:**
+
 - ✅ `.env.example` - Template without credentials
 - ✅ `.gitignore` - Excludes sensitive files
 
 **Verify .gitignore includes:**
+
 ```gitignore
 .env
 .env.local
@@ -67,6 +71,7 @@ tokens_*.json
 ### 2. Secure Token Storage
 
 **Current Implementation (v1.0.1+):**
+
 - **Keychain Storage (Recommended):** System keychain integration available
   - macOS: Keychain Services
   - Linux: Secret Service API / gnome-keyring
@@ -77,6 +82,7 @@ tokens_*.json
   - Works on macOS, Linux, and Windows
 
 **Enable Keychain Storage:**
+
 ```bash
 # Install keyring package
 pip install keyring
@@ -86,6 +92,7 @@ export TRADESTATION_TOKEN_STORAGE=keychain
 ```
 
 **File Storage (Automatic Fallback):**
+
 - Tokens stored in `config/tokens_*.json` (not `logs/`)
 - Permissions automatically set to `chmod 600` (owner read/write only)
 - Directory permissions automatically set to `chmod 700` (owner access only)
@@ -94,6 +101,7 @@ export TRADESTATION_TOKEN_STORAGE=keychain
 **Verify Token File Permissions:**
 
 **On Linux/macOS:**
+
 ```bash
 # Verify permissions (should show -rw-------)
 ls -la config/tokens_*.json
@@ -105,6 +113,7 @@ ls -ld config/
 ```
 
 **On Windows:**
+
 ```powershell
 # Permissions are automatically set by SDK
 # Verify with:
@@ -113,6 +122,7 @@ icacls config\tokens_paper.json
 ```
 
 **Custom Encryption (Advanced):**
+
 ```python
 from cryptography.fernet import Fernet
 import json
@@ -132,12 +142,14 @@ class EncryptedTokenManager(TokenManager):
 ### 3. Environment Variable Security
 
 **Use .env files for local development:**
+
 ```env
 TRADESTATION_CLIENT_ID=abc123
 TRADESTATION_CLIENT_SECRET=xyz789
 ```
 
 **Use environment variables in production:**
+
 ```bash
 # Export via shell (temporary)
 export TRADESTATION_CLIENT_ID=abc123
@@ -147,6 +159,7 @@ export TRADESTATION_CLIENT_ID=abc123
 ```
 
 **Never hardcode credentials:**
+
 ```python
 # ❌ Bad - hardcoded credentials
 sdk = TradeStationSDK()
@@ -175,6 +188,7 @@ sdk.place_order(..., mode="LIVE")
 ```
 
 **Why?**
+
 - PAPER mode uses simulator (no real money)
 - Test strategies without risk
 - Verify code works before going live
@@ -214,6 +228,7 @@ def place_order_safe(symbol, side, quantity, price):
 ```
 
 **Why?**
+
 - Prevent accidental invalid orders
 - Catch errors before API call
 - Save API rate limit quota
@@ -370,6 +385,7 @@ Before deploying to production:
    - Monitor account for unauthorized activity
 
 3. **Delete token files:**
+
    ```bash
    rm config/tokens_*.json
    sdk.authenticate(mode="PAPER")  # Re-authenticate
@@ -382,6 +398,7 @@ Before deploying to production:
 ### Monitor These Indicators
 
 **Warning Signs:**
+
 - Unexpected orders in order history
 - Balance changes you didn't make
 - Failed authentication attempts
@@ -389,6 +406,7 @@ Before deploying to production:
 - Rate limit errors (may indicate credential theft/abuse)
 
 **Monitoring Script:**
+
 ```python
 def check_security_indicators(sdk):
     """Check for unusual activity."""
@@ -425,7 +443,8 @@ def check_security_indicators(sdk):
 **Please DO NOT open a public issue.**
 
 Instead:
-1. Email: security@example.com
+
+1. Email: <security@example.com>
 2. Include:
    - Description of vulnerability
    - Steps to reproduce

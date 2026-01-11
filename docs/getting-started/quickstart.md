@@ -14,12 +14,13 @@ This is the **fastest way to get started** with the TradeStation SDK. This guide
 **Use this if:** You want to get started immediately and see results fast.
 
 **If you need more detail, see:**
+
 - 📖 **[README.md](README.md)** - Complete SDK overview and documentation
-- 📦 **[INSTALLATION.md](INSTALLATION.md)** - Detailed installation for all platforms
+- 📦 **[INSTALLATION.md](installation.md)** - Detailed installation for all platforms
 - 📚 **[docs/GETTING_STARTED.md](docs/GETTING_STARTED.md)** - 15-minute comprehensive tutorial
-- 📋 **[CHEATSHEET.md](CHEATSHEET.md)** - Quick reference for common operations
+- 📋 **[CHEATSHEET.md](../guides/cheatsheet.md)** - Quick reference for common operations
 - 💡 **[docs/SDK_USAGE_EXAMPLES.md](docs/SDK_USAGE_EXAMPLES.md)** - More code examples
-- ⚠️ **[LIMITATIONS.md](LIMITATIONS.md)** - Important constraints to know
+- ⚠️ **[LIMITATIONS.md](../architecture/limitations.md)** - Important constraints to know
 
 ---
 
@@ -33,7 +34,7 @@ pip install tradestation-python-sdk
 
 ## Step 2: Get Credentials (60 seconds)
 
-1. Go to https://developer.tradestation.com
+1. Go to <https://developer.tradestation.com>
 2. Create an application
 3. Copy your **Client ID** and **Client Secret**
 4. **Set Redirect URI(s):**
@@ -97,25 +98,30 @@ python test.py
 ## Common Issues
 
 ### "Port 8888 in use"
+
 **v1.0.1+:** SDK will auto-select an available port. Ensure the selected port is registered in Developer Portal.
 
 **Or manually:**
+
 ```bash
 # Kill process on port 8888
 lsof -ti:8888 | xargs kill -9
 ```
 
 ### "redirect_uri_mismatch"
+
 **Cause:** Selected port not registered in TradeStation Developer Portal
 **Solution:** Register the port shown in SDK logs (or register all ports 8888-8898)
 
 ### "Module not found"
+
 ```bash
 # Reinstall SDK
 pip install --upgrade tradestation-python-sdk
 ```
 
 ### "Authentication failed"
+
 - Double-check credentials in `.env`
 - Ensure redirect URI is exactly: `http://localhost:8888/callback`
 
@@ -131,4 +137,4 @@ pip install --upgrade tradestation-python-sdk
 
 ---
 
-**Need help?** Open an issue: https://github.com/benlaube/tradestation-python-sdk/issues
+**Need help?** Open an issue: <https://github.com/benlaube/tradestation-python-sdk/issues>

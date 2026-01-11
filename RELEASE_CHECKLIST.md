@@ -1,6 +1,6 @@
 ---
-version: 1.0.0
-lastUpdated: 12-29-2025 17:19:32 EST
+version: 1.0.1
+lastUpdated: 01-08-2026 20:26:00 EST
 type: Documentation
 description: Documentation file
 ---
@@ -14,11 +14,12 @@ This is a **comprehensive checklist** for preparing SDK releases. It covers code
 **Use this if:** You're preparing a new SDK version for release or want to ensure release quality.
 
 **Related Documents:**
+
 - 📝 **[CHANGELOG.md](CHANGELOG.md)** - Document changes here before release
 - 📖 **[README.md](README.md)** - Update version numbers and features
-- 📦 **[INSTALLATION.md](INSTALLATION.md)** - Verify installation instructions
+- 📦 **[INSTALLATION.md](docs/getting-started/installation.md)** - Verify installation instructions
 - 🧪 **[tests/README.md](tests/README.md)** - Run all tests before release
-- 📚 **[docs/API_REFERENCE.md](docs/API_REFERENCE.md)** - Update API docs if needed
+- 📚 **[docs/api/reference.md](docs/api/reference.md)** - Update API docs if needed
 
 ---
 
@@ -57,7 +58,11 @@ Use this checklist when preparing for a public release.
 - [ ] **LICENSE file present** - License clearly stated
 - [ ] **.gitignore complete** - Sensitive files excluded
 
-### Examples & Tools
+```bash
+# Example
+git tag v1.0.1
+git push origin v1.0.1
+```
 
 - [ ] **Jupyter notebooks work** - All notebooks run without errors
 - [ ] **CLI tools work** - `test_auth.py` and `test_connection.py` pass
@@ -140,7 +145,7 @@ jobs:
 
 ### PyPI Account Setup
 
-- [ ] **PyPI account created** - https://pypi.org/account/register/
+- [ ] **PyPI account created** - <https://pypi.org/account/register/>
 - [ ] **2FA enabled** - Security requirement
 - [ ] **API token created** - For automated publishing
 - [ ] **Token saved** - In `~/.pypirc` or CI/CD secrets
@@ -168,7 +173,7 @@ python -m build
 twine upload dist/*
 ```
 
-- [ ] **Uploaded to PyPI** - https://pypi.org/project/tradestation-sdk/
+- [ ] **Uploaded to PyPI** - <https://pypi.org/project/tradestation-sdk/>
 - [ ] **Verified on PyPI** - Package page looks correct
 - [ ] **Installed from PyPI** - `pip install tradestation-python-sdk` works
 - [ ] **Tested after install** - All features work
@@ -231,6 +236,7 @@ See [QUICKSTART.md](QUICKSTART.md) for 2-minute setup.
 Thank you to everyone who contributed and provided feedback!
 
 **Full Changelog:** [CHANGELOG.md](CHANGELOG.md)
+
 ```
 
 ### Community Announcement

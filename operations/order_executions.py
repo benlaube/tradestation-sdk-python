@@ -433,9 +433,9 @@ class OrderExecutionOperations:
                     message = parsed.Message or "Order cancelled"
                     if success:
                         logger.info(f"✅ Order {order_id} cancelled successfully")
-                        return parsed
+                        return True, str(message)
                     logger.warning(f"⚠️  Order cancellation may have failed: {message}")
-                    return parsed
+                    return False, str(message)
                 except Exception:
                     message = response.get("Message", "Order cancelled")
                     success = response.get("Success", True)
@@ -445,9 +445,9 @@ class OrderExecutionOperations:
 
             if success:
                 logger.info(f"✅ Order {order_id} cancelled successfully")
-                return CancelOrderResponse(Success=True, Message=str(message))
+                return True, str(message)
             logger.warning(f"⚠️  Order cancellation may have failed: {message}")
-            return CancelOrderResponse(Success=bool(success), Message=str(message))
+            return bool(success), str(message)
 
         except TradeStationAPIError as e:
             e.details.operation = "cancel_order"

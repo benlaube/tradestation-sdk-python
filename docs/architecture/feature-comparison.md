@@ -14,10 +14,11 @@ This document compares the TradeStation SDK to other trading SDKs and libraries.
 **Use this if:** You're evaluating SDKs, migrating from another library, or want to understand this SDK's competitive advantages.
 
 **Related Documents:**
-- 🔄 **[MIGRATION.md](../MIGRATION.md)** - Migration guide from other SDKs
-- 🎯 **[FEATURES.md](../FEATURES.md)** - Complete feature overview
-- 📖 **[README.md](../README.md)** - SDK documentation
-- 🗺️ **[ROADMAP.md](ROADMAP.md)** - Future development plans
+
+- 🔄 **[MIGRATION.md](../guides/migration.md)** - Migration guide from other SDKs
+- 🎯 **[FEATURES.md](features.md)** - Complete feature overview
+- 📖 **[README.md](../../README.md)** - SDK documentation
+- 🗺️ **[ROADMAP.md](../analysis/roadmap.md)** - Future development plans
 
 ---
 
@@ -48,6 +49,7 @@ How this SDK compares to other trading SDKs and libraries.
 | **Active Maintenance** | ✅ Active | ⚠️ Sporadic | N/A |
 
 **Legend:**
+
 - ✅ Fully supported
 - ⚠️ Partially supported or manual
 - ❌ Not supported
@@ -207,6 +209,7 @@ How this SDK compares to other trading SDKs and libraries.
 ### Integrations
 
 **Works with:**
+
 - ✅ Pandas (data analysis)
 - ✅ TA-Lib (technical indicators)
 - ✅ Backtrader (backtesting)
@@ -215,6 +218,7 @@ How this SDK compares to other trading SDKs and libraries.
 - ✅ Celery (task queues)
 
 **Tested Platforms:**
+
 - ✅ Linux (Ubuntu, RHEL, Arch)
 - ✅ macOS (Intel, Apple Silicon)
 - ✅ Windows (10, 11)
@@ -226,6 +230,7 @@ How this SDK compares to other trading SDKs and libraries.
 ## Conclusion
 
 **Choose this SDK if you need:**
+
 - Futures trading support
 - Comprehensive TradeStation API coverage
 - Type safety and modern Python
@@ -233,13 +238,14 @@ How this SDK compares to other trading SDKs and libraries.
 - Production-ready reliability
 
 **Choose alternatives if you need:**
+
 - Ultra-low latency (IB)
 - Stock-only simplicity (Alpaca)
 - Mature async implementation (wait for v2.0 or use IB)
 
 ---
 
-**Still deciding?** Try the [Quick Start](../QUICKSTART.md) - takes 2 minutes!
+**Still deciding?** Try the [Quick Start](../getting-started/quickstart.md) - takes 2 minutes!
 
 ---
 

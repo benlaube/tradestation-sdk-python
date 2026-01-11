@@ -8,7 +8,6 @@ description: Main documentation index and navigation hub for TradeStation SDK do
 
 # TradeStation SDK Documentation
 
-
 ## Documentation Index
 
 Welcome to the TradeStation SDK documentation. This directory contains comprehensive documentation organized by category.
@@ -16,7 +15,7 @@ Welcome to the TradeStation SDK documentation. This directory contains comprehen
 ### Quick Navigation
 
 | Category | Description | Entry Point |
-|----------|-------------|-------------|
+| :------- | :---------- | :---------- |
 | 🚀 **Getting Started** | Installation, quick start, authentication | [Getting Started](getting-started/README.md) |
 | 📚 **API Reference** | Complete API documentation | [API Documentation](api/README.md) |
 | 🏗️ **Models** | Pydantic model documentation | [Models Documentation](models/README.md) |
@@ -34,8 +33,8 @@ Welcome to the TradeStation SDK documentation. This directory contains comprehen
 **For new users:** Start here to learn how to use the SDK.
 
 - **[Getting Started Tutorial](getting-started/README.md)** - 15-minute comprehensive tutorial
-- **[Installation Guide](../INSTALLATION.md)** - Detailed installation instructions
-- **[Quick Start Guide](../QUICKSTART.md)** - 2-minute quick start
+- **[Installation Guide](getting-started/installation.md)** - Detailed installation instructions
+- **[Quick Start Guide](getting-started/quickstart.md)** - 2-minute quick start
 
 ### 📚 API Documentation
 
@@ -135,10 +134,10 @@ docs/
 ### Main SDK Documentation
 
 - **[Main README](../README.md)** - Complete SDK overview and quick start
-- **[Quick Start Guide](../QUICKSTART.md)** - 2-minute quick start
-- **[Installation Guide](../INSTALLATION.md)** - Installation instructions
-- **[Cheat Sheet](../CHEATSHEET.md)** - Quick reference
-- **[Limitations](../LIMITATIONS.md)** - Known constraints
+- **[Quick Start Guide](getting-started/quickstart.md)** - 2-minute quick start
+- **[Installation Guide](getting-started/installation.md)** - Installation instructions
+- **[Cheat Sheet](guides/cheatsheet.md)** - Quick reference
+- **[Limitations](architecture/limitations.md)** - Known constraints
 - **[Security Guide](../SECURITY.md)** - Security best practices
 
 ### Source Code Documentation
@@ -153,19 +152,23 @@ docs/
 ## Finding Documentation
 
 **New to the SDK?**
+
 1. Start with [Getting Started](getting-started/README.md)
-2. Read [Quick Start Guide](../QUICKSTART.md)
+2. Read [Quick Start Guide](getting-started/quickstart.md)
 3. Review [Usage Examples](guides/usage-examples.md)
 
 **Looking for API methods?**
+
 - Use [API Reference](api/reference.md) - Complete method reference
 - Check [SDK Functions List](reference/functions-list.md) - Alphabetical list
 
 **Understanding models?**
+
 - See [Models Overview](models/README.md) - Complete model documentation
 - Review [Models Source Code](../models/) - Implementation details
 
 **Architecture questions?**
+
 - Read [SDK Architecture Overview](architecture/overview.md)
 - Check [API Structure](api/structure.md) - Visual diagrams
 
@@ -174,6 +177,7 @@ docs/
 ## Documentation Standards
 
 All documentation follows these standards:
+
 - **Metadata:** All files include version, last updated, type, and description
 - **Diagrams:** All diagrams use Mermaid format
 - **Cross-References:** Related documents are linked

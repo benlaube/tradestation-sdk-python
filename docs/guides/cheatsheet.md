@@ -14,11 +14,12 @@ This is a **quick reference guide** for common SDK operations. Print this out or
 **Use this if:** You know the SDK basics and need quick code snippets.
 
 **For more detail, see:**
-- 📖 **[README.md](README.md)** - Complete SDK documentation
-- 📚 **[docs/API_REFERENCE.md](docs/API_REFERENCE.md)** - Complete API reference with all parameters
-- 💡 **[docs/SDK_USAGE_EXAMPLES.md](docs/SDK_USAGE_EXAMPLES.md)** - Detailed examples with explanations
-- 🚀 **[QUICKSTART.md](QUICKSTART.md)** - 2-minute getting started guide
-- 📦 **[INSTALLATION.md](INSTALLATION.md)** - Installation instructions
+
+- 📖 **[README.md](../../README.md)** - Complete SDK documentation
+- 📚 **[API Reference](../api/reference.md)** - Complete API reference with all parameters
+- 💡 **[Usage Examples](usage-examples.md)** - Detailed examples with explanations
+- 🚀 **[QUICKSTART.md](../getting-started/quickstart.md)** - 2-minute getting started guide
+- 📦 **[INSTALLATION.md](../getting-started/installation.md)** - Installation instructions
 
 ---
 
@@ -71,6 +72,7 @@ quotes = sdk.get_quote_snapshots("AAPL,MSFT", mode="PAPER")
 ## Order Placement
 
 ### Market Order
+
 ```python
 order_id, status = sdk.place_order(
     symbol="AAPL",
@@ -82,6 +84,7 @@ order_id, status = sdk.place_order(
 ```
 
 ### Limit Order
+
 ```python
 order_id, status = sdk.place_limit_order(
     symbol="AAPL",
@@ -93,6 +96,7 @@ order_id, status = sdk.place_limit_order(
 ```
 
 ### Stop Order
+
 ```python
 order_id, status = sdk.place_stop_order(
     symbol="AAPL",
@@ -104,6 +108,7 @@ order_id, status = sdk.place_stop_order(
 ```
 
 ### Trailing Stop
+
 ```python
 order_id, status = sdk.place_trailing_stop_order(
     symbol="MNQZ25",
@@ -115,6 +120,7 @@ order_id, status = sdk.place_trailing_stop_order(
 ```
 
 ### Bracket Order (Entry + Profit + Stop)
+
 ```python
 result = sdk.place_bracket_order(
     symbol="MNQZ25",
@@ -229,6 +235,7 @@ except TradeStationAPIError as e:
 ## Common Patterns
 
 ### Retry with Backoff
+
 ```python
 import time
 for attempt in range(3):
@@ -242,6 +249,7 @@ for attempt in range(3):
 ```
 
 ### Check Before Trading
+
 ```python
 # Check position first
 position = sdk.get_position("AAPL", mode="PAPER")
@@ -251,6 +259,7 @@ if position == 0:
 ```
 
 ### Monitor Order Fill
+
 ```python
 import asyncio
 
@@ -298,6 +307,7 @@ sdk.place_order(..., mode="LIVE")
 - **Streams:** ~10 concurrent
 
 **Add delays:**
+
 ```python
 import time
 time.sleep(0.5)  # Between requests

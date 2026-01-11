@@ -18,17 +18,18 @@ This document provides **comprehensive API coverage analysis** showing which Tra
 **Use this if:** You want to understand SDK coverage, see what endpoints are available, identify gaps, or plan new implementations.
 
 **Related Documents:**
+
 - 📚 **[API_REFERENCE.md](API_REFERENCE.md)** - Complete API reference
 - 📊 **[API_ENDPOINT_MAPPING.md](API_ENDPOINT_MAPPING.md)** - SDK function to endpoint mapping
 - 🧭 **[SDK_ENDPOINT_MAPPING.md](sdk_endpoints.md)** - SDK methods to TradeStation API endpoints
-- 🎯 **[FEATURES.md](../FEATURES.md)** - Feature overview
+- 🎯 **[FEATURES.md](../architecture/features.md)** - Feature overview
 - 🗺️ **[ROADMAP.md](ROADMAP.md)** - Future development plans
 - 📖 **[README.md](../README.md)** - SDK documentation
-
 
 ## Executive Summary
 
 **Current State:**
+
 - ✅ **100% v3 endpoint coverage** - All 33 v3 endpoints from OpenAPI are implemented
 - ✅ **Complete model coverage** - All major REST and streaming endpoints use Pydantic models
 - ✅ **Type-safe data handling** - Streaming methods return Pydantic models directly
@@ -37,6 +38,7 @@ This document provides **comprehensive API coverage analysis** showing which Tra
 - ✅ **Convenience functions** - Simplified interfaces for common order types (bracket, OCO, trailing stop, limit, stop, stop-limit)
 
 **Key Achievements:**
+
 - All streaming endpoints return Pydantic models (`QuoteStream`, `OrderStream`, `PositionStream`, `BalanceStream`)
 - Major REST endpoints use Pydantic models (`AccountsListResponse`, `AccountBalancesResponse`, `PositionsResponse`, `QuotesResponse`, `TradeStationExecutionResponse`)
 - Complete v3 endpoint implementation (100% coverage)
@@ -174,6 +176,7 @@ This document provides **comprehensive API coverage analysis** showing which Tra
 ### ✅ Complete Models (All Fields Captured)
 
 **Orders:**
+
 - `TradeStationOrderRequest` - Order placement requests
 - `TradeStationOrderResponse` - Complete order response (30+ fields)
 - `TradeStationOrderGroupRequest` - Group order requests (OCO/Bracket)
@@ -185,9 +188,11 @@ This document provides **comprehensive API coverage analysis** showing which Tra
 - `TradeStationTrailingStop` - Trailing stop parameters
 
 **Order Executions:**
+
 - `TradeStationExecutionResponse` - Order execution (fill) responses
 
 **Streaming:**
+
 - `QuoteStream` - Real-time quote updates
 - `OrderStream` - Real-time order updates
 - `PositionStream` - Real-time position updates
@@ -198,6 +203,7 @@ This document provides **comprehensive API coverage analysis** showing which Tra
 - `MarketFlags` - Market-specific flags
 
 **Accounts / Balances:**
+
 - `AccountSummary` - Account information
 - `BalanceDetail` - Detailed balance information
 - `AccountBalancesResponse` - Account balances response
@@ -206,21 +212,25 @@ This document provides **comprehensive API coverage analysis** showing which Tra
 - `AccountsListResponse` - Account list response
 
 **Positions:**
+
 - `PositionResponse` - Position information
 - `PositionsResponse` - Positions list response
 
 **Quotes (REST):**
+
 - `QuoteSnapshot` - REST quote snapshot
 - `QuotesResponse` - Quotes response wrapper
 
 ### ⚠️ Partial Models (Some Fields May Be Missing)
 
 **Market Data:**
+
 - Bar responses (`get_bars`) - Currently raw dicts
 - Symbol details (`get_symbol_details`) - Currently raw dicts
 - Option responses - Currently raw dicts
 
 **Historical Orders:**
+
 - Uses `TradeStationOrderResponse` internally but response wrapper not modeled
 - List endpoints return raw dicts (though individual items use models)
 
@@ -243,6 +253,7 @@ This document provides **comprehensive API coverage analysis** showing which Tra
 - **Total Endpoints with Models:** 13/25 (52%)
 
 **Notes:**
+
 - All streaming endpoints return Pydantic models
 - Major REST endpoints (accounts, positions, quotes, executions) use Pydantic models
 - Market data endpoints (bars, symbol details) still return raw dicts
@@ -369,6 +380,7 @@ flowchart TB
    - ❌ **Missing all Bracket/OCO fields**
 
 **Resolution:**
+
 - ✅ TradeStation API models now exist (`TradeStationOrderResponse`, etc.)
 - ✅ Models capture all 30+ fields from TradeStation API
 - ⚠️ `sync_order_from_tradestation()` should be updated to use models or `normalize_order()`
@@ -376,6 +388,7 @@ flowchart TB
 ### Database Schema Support
 
 **From migration `20251201000006_enhance_orders_table.sql`:**
+
 - ✅ `group_id` - EXISTS
 - ✅ `group_type` - EXISTS
 - ✅ `conditional_orders` - EXISTS (JSONB)

@@ -12,9 +12,10 @@ This document provides a **complete guide to all trailing stop variations** and 
 **Use this if:** You're working with trailing stop orders, need to understand trailing stop parameters, or want to see all available trailing stop configurations.
 
 **Related Documents:**
+
 - 📝 **[ORDER_FUNCTIONS_REFERENCE.md](ORDER_FUNCTIONS_REFERENCE.md)** - Detailed order function documentation
 - 📚 **[API_REFERENCE.md](API_REFERENCE.md)** - Complete API reference
-- ⚠️ **[LIMITATIONS.md](../LIMITATIONS.md)** - Trailing stop limitations (points vs dollars)
+- ⚠️ **[LIMITATIONS.md](../architecture/limitations.md)** - Trailing stop limitations (points vs dollars)
 - 💡 **[SDK_USAGE_EXAMPLES.md](SDK_USAGE_EXAMPLES.md)** - Trailing stop usage examples
 
 ---
@@ -38,15 +39,18 @@ Trailing stop orders automatically adjust the stop price as the market moves in 
 **Variations:**
 
 #### A. Trail by Amount (Points)
+
 Trails by a fixed price amount in points/price units.
 
 **Key Points:**
+
 - For futures, `trail_amount` is in **price units (points)**, not dollar amounts
 - For MNQ: 1 point = $2.00, so `trail_amount=1.5` means $3.00 trail
 - For ES: 1 point = $50.00, so `trail_amount=1.0` means $50.00 trail
 - The stop price adjusts by this amount as price moves favorably
 
 **Example:**
+
 ```python
 # Trail by 1.5 points ($3.00 for MNQ)
 order_id, status = sdk.place_trailing_stop_order(
@@ -60,14 +64,17 @@ order_id, status = sdk.place_trailing_stop_order(
 ```
 
 #### B. Trail by Percentage
+
 Trails by a percentage of the current price.
 
 **Key Points:**
+
 - `trail_percent` is specified as a decimal (e.g., 1.0 = 1%, 0.5 = 0.5%)
 - The stop price adjusts by this percentage as price moves favorably
 - More dynamic than fixed amount - adjusts with price level
 
 **Example:**
+
 ```python
 # Trail by 1% of current price
 order_id, status = sdk.place_trailing_stop_order(
@@ -95,11 +102,13 @@ Bracket orders combine an entry order with both a profit target and a stop-loss.
 #### A. Bracket Order with Trailing Stop (Trail by Amount)
 
 **Configuration:**
+
 - Entry: Market or Limit order
 - Profit Target: Limit order (fixed price)
 - Stop-Loss: **Trailing Stop** with `trail_amount`
 
 **Example:**
+
 ```python
 result = sdk.place_bracket_order(
     symbol="MNQZ25",
@@ -118,11 +127,13 @@ result = sdk.place_bracket_order(
 #### B. Bracket Order with Trailing Stop (Trail by Percentage)
 
 **Configuration:**
+
 - Entry: Market or Limit order
 - Profit Target: Limit order (fixed price)
 - Stop-Loss: **Trailing Stop** with `trail_percent`
 
 **Example:**
+
 ```python
 result = sdk.place_bracket_order(
     symbol="MNQZ25",
@@ -141,11 +152,13 @@ result = sdk.place_bracket_order(
 #### C. Bracket Order with Fixed Stop-Loss (No Trailing)
 
 **Configuration:**
+
 - Entry: Market or Limit order
 - Profit Target: Limit order (fixed price)
 - Stop-Loss: **Fixed Stop** (not trailing)
 
 **Example:**
+
 ```python
 result = sdk.place_bracket_order(
     symbol="MNQZ25",
@@ -171,6 +184,7 @@ result = sdk.place_bracket_order(
 **Description:** Trail by a fixed price amount in points/price units.
 
 **Important Notes:**
+
 - **For Futures:** Specified in price units (points), not dollar amounts
 - **MNQ Example:** `trail_amount=1.5` = 1.5 points = $3.00 trail
 - **ES Example:** `trail_amount=1.0` = 1.0 point = $50.00 trail
@@ -178,11 +192,13 @@ result = sdk.place_bracket_order(
 - Only moves in the favorable direction (locks in profits, doesn't widen losses)
 
 **When to Use:**
+
 - You want a fixed dollar/point trail regardless of price level
 - Good for consistent risk management
 - Easier to calculate exact dollar risk
 
 **Example:**
+
 ```python
 # Always trail by $3.00 (1.5 points for MNQ)
 sdk.place_trailing_stop_order(
@@ -203,17 +219,20 @@ sdk.place_trailing_stop_order(
 **Description:** Trail by a percentage of the current price.
 
 **Important Notes:**
+
 - Specified as a decimal (e.g., `1.0` = 1%, `0.5` = 0.5%, `2.5` = 2.5%)
 - The stop price adjusts by this percentage as the market moves favorably
 - More dynamic - trail amount increases as price increases
 - Only moves in the favorable direction
 
 **When to Use:**
+
 - You want the trail to scale with price level
 - Good for percentage-based risk management
 - More appropriate for volatile instruments
 
 **Example:**
+
 ```python
 # Trail by 1% of current price
 sdk.place_trailing_stop_order(
@@ -427,6 +446,7 @@ order_id, status = sdk.place_order(
    - Trail by Percentage (`trail_percent`)
 
 **All variations support:**
+
 - Multiple `time_in_force` options (DAY, GTC, IOC, FOK)
 - Both PAPER and LIVE trading modes
 - Full order lifecycle management (cancel, modify, query)

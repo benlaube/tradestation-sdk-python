@@ -10,6 +10,7 @@ lastUpdated: 12-29-2025 17:19:25 EST
 ## About This Document
 
 This is the **main entry point** for the TradeStation Python SDK documentation. It provides:
+
 - Complete SDK overview and feature list
 - Quick start guide (5 minutes)
 - Comprehensive API reference links
@@ -19,6 +20,7 @@ This is the **main entry point** for the TradeStation Python SDK documentation. 
 **Start here if:** You're new to the SDK or want a complete overview.
 
 **Related Documents:**
+
 - 🚀 **[QUICKSTART.md](QUICKSTART.md)** - Get started in 2 minutes (even faster than this guide)
 - 📋 **[CHEATSHEET.md](CHEATSHEET.md)** - Quick reference for common operations
 - 📦 **[INSTALLATION.md](INSTALLATION.md)** - Detailed installation instructions for all platforms
@@ -93,6 +95,38 @@ A comprehensive, self-contained Python SDK for TradeStation API v3. This SDK pro
 - [Contributing](#contributing)
 - [Security](#security)
 - [License](#license)
+-**Quick Links:**
+[Installation](docs/getting-started/installation.md) |
+[Quick Start](docs/getting-started/quickstart.md) |
+[Documentation](docs/README.md) |
+[API Reference](docs/api/reference.md) |
+[Examples](examples/README.md) |
+[Features](docs/architecture/features.md)
+
+---
+
+## ⚡ Quick Start
+
+```bash
+pip install tradestation-python-sdk
+```
+
+See **[INSTALLATION.md](docs/getting-started/installation.md)** for detailed setup instructions.
+See **[QUICKSTART.md](docs/getting-started/quickstart.md)** for a 5-minute guide.
+
+---
+
+## ✨ Key Features
+
+- **Authentication**: OAuth2 with auto-token refresh & system keychain support
+- **Market Data**: Real-time bars, quotes, depth, and option chains
+- **Execution**: Advanced orders, positions, and balances
+- **Streaming**: HTTP streaming with auto-reconnection and heartbeats
+- **Reliability**: Built-in retry logic, rate limiting, and circuit breakers
+- **Type Safety**: Full Pydantic models for all requests/responses
+
+See **[FEATURES.md](docs/architecture/features.md)** for the complete feature list.
+See **[LIMITATIONS.md](docs/architecture/limitations.md)** for known issues.
 
 ---
 
@@ -110,6 +144,7 @@ The TradeStation SDK is a complete implementation of TradeStation API v3 functio
 ### Why Internal SDK?
 
 This SDK was created to:
+
 - **Remove External Dependencies** - No reliance on `tastyware/tradestation` or other external packages
 - **Complete Data Capture** - Ensures all 30+ fields from TradeStation API are captured
 - **Full Control** - Complete control over API integration and error handling
@@ -133,12 +168,14 @@ This SDK was created to:
 ### ✅ Supported Operations
 
 **Accounts:**
+
 - List accounts
 - Get account details
 - Get account balances (basic and detailed)
 - Get Beginning of Day (BOD) balances
 
 **Market Data:**
+
 - Historical bars
 - Symbol search
 - Quote snapshots
@@ -149,6 +186,7 @@ This SDK was created to:
 - Option spread types
 
 **Orders:**
+
 - Place orders (Market, Limit, Stop, StopLimit, TrailingStop)
 - Cancel orders
 - Modify orders
@@ -163,11 +201,13 @@ This SDK was created to:
 - Get routing options
 
 **Positions:**
+
 - Get position for symbol
 - Get all positions
 - Flatten positions (close all or specific symbol)
 
 **Streaming:**
+
 - Real-time quotes
 - Real-time order updates
 - Real-time position updates
@@ -182,11 +222,13 @@ This SDK was created to:
 ## Installation
 
 ### Via pip (Recommended for Standalone Use)
+
 ```bash
 pip install tradestation-python-sdk
 ```
 
 ### From Source
+
 ```bash
 git clone https://github.com/benlaube/tradestation-python-sdk.git
 cd tradestation-python-sdk
@@ -194,11 +236,13 @@ pip install -e .
 ```
 
 ### Development Installation
+
 ```bash
 pip install -e ".[dev]"
 ```
 
 ### As Part of Existing Project
+
 If you're using this SDK as part of the trading bot project, dependencies are managed via `requirements.txt`:
 
 ```bash
@@ -206,6 +250,7 @@ pip install -r requirements.txt
 ```
 
 ### Use as Git Submodule (Vendored)
+
 For monorepos or to pin the SDK to a specific commit without publishing to PyPI:
 
 ```bash
@@ -216,6 +261,7 @@ pip install -e ./libs/tradestation-sdk
 See [docs/SUBMODULE_INTEGRATION.md](docs/SUBMODULE_INTEGRATION.md) for the full workflow, CI tips, and update/rollback steps.
 
 **Required Dependencies:**
+
 - `httpx>=0.27.2` - HTTP client for API requests and streaming
 - `PyJWT>=2.8.0` - JWT token parsing
 - `pydantic>=2.12.5` - Data validation and models
@@ -237,6 +283,7 @@ TRADING_MODE=PAPER
 ```
 
 **Get your credentials:**
+
 1. Go to [TradeStation Developer Portal](https://developer.tradestation.com)
 2. Create an application
 3. Copy your Client ID and Client Secret
@@ -267,6 +314,7 @@ print(f"📊 Equity: ${balances['equity']:.2f}")
 ```
 
 **Run it:**
+
 ```bash
 python my_first_script.py
 ```
@@ -331,11 +379,13 @@ asyncio.run(stream_quotes())
 **Solution (v1.0.1+):**
 
 **Automatic (Recommended):** SDK will auto-select an available port (8888-8898)
+
 - Ensure the selected port is registered in TradeStation Developer Portal
 - SDK will warn you which port was selected
 - See [LIMITATIONS.md](LIMITATIONS.md#2-oauth-port-conflicts--fixed-in-v101) for details
 
 **Option 1:** Kill the process using port 8888
+
 ```bash
 # macOS/Linux:
 lsof -ti:8888 | xargs kill -9
@@ -346,11 +396,13 @@ taskkill /PID <PID> /F
 ```
 
 **Option 2:** Use a different port
+
 ```env
 TRADESTATION_OAUTH_PORT=8889
 # Or in redirect URI:
 TRADESTATION_REDIRECT_URI=http://localhost:8889/callback
 ```
+
 **Important:** Register the port you choose in TradeStation Developer Portal.
 
 #### ❌ "redirect_uri_mismatch" or "Invalid redirect URI"
@@ -358,6 +410,7 @@ TRADESTATION_REDIRECT_URI=http://localhost:8889/callback
 **Problem:** The redirect URI used by SDK doesn't match what's registered in TradeStation Developer Portal.
 
 **Solution:**
+
 1. Check SDK logs to see which port/redirect URI was used
 2. Go to [TradeStation Developer Portal](https://developer.tradestation.com)
 3. Add the exact redirect URI shown in logs (e.g., `http://localhost:8889/callback`)
@@ -368,6 +421,7 @@ TRADESTATION_REDIRECT_URI=http://localhost:8889/callback
 **Problem:** Client ID or secret is incorrect.
 
 **Solution:**
+
 1. Verify credentials in [TradeStation Developer Portal](https://developer.tradestation.com)
 2. Ensure `.env` file is in the same directory as your script
 3. Check for typos or extra spaces in credentials
@@ -378,6 +432,7 @@ TRADESTATION_REDIRECT_URI=http://localhost:8889/callback
 **Problem:** Access token has expired (20-minute lifespan).
 
 **Solution:** SDK automatically refreshes tokens. If refresh fails:
+
 ```python
 # Re-authenticate
 sdk.authenticate(mode="PAPER")
@@ -388,6 +443,7 @@ sdk.authenticate(mode="PAPER")
 **Problem:** Futures contract has expired or symbol is incorrect.
 
 **Solution:** Search for the current contract month:
+
 ```python
 # Find current MNQ contract
 symbols = sdk.search_symbols(pattern="MNQ", category="Future", mode="PAPER")
@@ -400,6 +456,7 @@ print(f"Current contract: {current_contract}")
 **Problem:** Too many API requests in a short time.
 
 **Solution:**
+
 ```python
 import time
 
@@ -417,6 +474,7 @@ quotes = sdk.get_quote_snapshots("AAPL,MSFT,GOOGL", mode="PAPER")
 **Problem:** When using SDK standalone, it tries to import project-specific modules.
 
 **Solution:** Use environment variables directly:
+
 ```python
 import os
 os.environ['TRADESTATION_CLIENT_ID'] = 'your_client_id'
@@ -431,6 +489,7 @@ sdk = TradeStationSDK()
 **Problem:** HTTP streaming connection dropped.
 
 **Solution:** SDK has automatic reconnection (v1.0.0+):
+
 ```python
 # Automatic reconnection is enabled by default
 async for quote in sdk.streaming.stream_quotes(
@@ -448,7 +507,7 @@ async for quote in sdk.streaming.stream_quotes(
 - 📖 **Documentation:** Check [docs/](docs/) for detailed guides
 - 🐛 **Bug Reports:** [Open an issue](https://github.com/benlaube/tradestation-python-sdk/issues)
 - 💬 **Discussions:** [GitHub Discussions](https://github.com/benlaube/tradestation-python-sdk/discussions)
-- 📧 **Email:** benlaube@example.com
+- 📧 **Email:** <benlaube@example.com>
 
 ---
 
@@ -464,6 +523,7 @@ TradeStation API v3 has rate limits to prevent abuse:
 ### Best Practices for Rate Limit Management
 
 **1. Add Delays Between Requests**
+
 ```python
 import time
 
@@ -473,6 +533,7 @@ for symbol in symbols:
 ```
 
 **2. Batch Requests When Possible**
+
 ```python
 # ❌ Bad: Individual requests for each symbol (3 API calls)
 for symbol in ["AAPL", "MSFT", "GOOGL"]:
@@ -483,6 +544,7 @@ quotes = sdk.get_quote_snapshots("AAPL,MSFT,GOOGL", mode="PAPER")
 ```
 
 **3. Use Streaming for Real-Time Data**
+
 ```python
 # ❌ Bad: Polling quotes every second (60+ API calls/minute)
 while True:
@@ -495,6 +557,7 @@ async for quote in sdk.streaming.stream_quotes(["AAPL"], mode="PAPER"):
 ```
 
 **4. Retry Logic (Built-in)**
+
 ```python
 # Retry logic is now built-in! All REST API methods automatically retry recoverable errors.
 # No manual retry wrapper needed for most cases.
@@ -592,6 +655,7 @@ except RateLimitError as e:
 See [CHANGELOG.md](CHANGELOG.md) and [GitHub Issues](https://github.com/benlaube/tradestation-python-sdk/issues) for planned enhancements.
 
 **Roadmap:**
+
 - **v1.1:** Token encryption, auto-port selection, improved error messages
 - **v1.2:** Circuit breaker pattern, request caching, rate limit tracking
 - **v2.0:** Native async support, WebSocket implementation, connection pooling
@@ -617,6 +681,7 @@ The SDK provides comprehensive error handling with descriptive error messages an
 ### Error Details
 
 All exceptions include structured `ErrorDetails` with:
+
 - Human-readable error messages
 - API error codes and messages
 - Full request context (method, endpoint, params, body)
@@ -664,6 +729,7 @@ except TradeStationAPIError as e:
 Errors provide both human-readable and structured formats:
 
 **Human-Readable:**
+
 ```
 Order placement failed: Invalid symbol 'INVALID_SYMBOL'
   - API Error Code: INVALID_SYMBOL
@@ -672,6 +738,7 @@ Order placement failed: Invalid symbol 'INVALID_SYMBOL'
 ```
 
 **Structured (via `to_dict()`):**
+
 ```python
 {
     "code": "INVALID_REQUEST",
@@ -693,6 +760,7 @@ The SDK provides comprehensive logging of all API requests and responses.
 ### Standard Logging
 
 By default, the SDK logs:
+
 - Request method, endpoint, and parameters
 - Response status, timing, and size
 - Response body (truncated to 500 characters)
@@ -712,6 +780,7 @@ sdk = TradeStationSDK()  # Reads from environment
 ```
 
 When enabled:
+
 - Complete request bodies are logged (no truncation)
 - Complete response bodies are logged (no truncation)
 - All sensitive data (tokens, passwords) is automatically redacted
@@ -719,6 +788,7 @@ When enabled:
 ### Logging Levels
 
 The SDK respects the project's logging configuration:
+
 - **DEBUG** - Full request/response details
 - **INFO** - Important operations (orders, authentication)
 - **WARNING** - API errors (400+ status codes)
@@ -727,6 +797,7 @@ The SDK respects the project's logging configuration:
 ### Log Output
 
 Logs are written to:
+
 - **Console** - Colorized output with categories
 - **File** - Session-based log files (`logs/session_YYYYMMDD_HHMMSS.log`)
 - **Database** - Optional Supabase logging (if configured)
@@ -734,12 +805,14 @@ Logs are written to:
 ### Example Log Output
 
 **Standard Logging:**
+
 ```
 [bot|api_request|tradestation_api] - API Request: POST orderexecution/orders | Params: None | Body: {'AccountID': 'SIM123456', 'Symbol': 'MNQZ25', ...} (truncated)
 [bot|api_response|tradestation_api] - API Response: POST orderexecution/orders | Status: 200 | Time: 0.234s | Size: 456 bytes
 ```
 
 **Full Logging:**
+
 ```
 [bot|api_request|tradestation_api] - API Request: POST orderexecution/orders | Params: None | Body: {'AccountID': 'SIM123456', 'Symbol': 'MNQZ25', 'TradeAction': 'BUY', 'OrderType': 'Market', 'Quantity': '1', 'TimeInForce': {'Duration': 'DAY'}}
 [bot|api_response|tradestation_api] - API Response: POST orderexecution/orders | Status: 200 | Time: 0.234s | Size: 456 bytes | Body: {"Orders": [{"OrderID": "924243071", "Status": "REC", ...}]}
@@ -749,9 +822,11 @@ Logs are written to:
 print(f"Order placed: {order_id}")
 
 # Get positions
+
 positions = sdk.get_all_positions(mode="PAPER")
 for pos in positions:
     print(f"{pos['Symbol']}: {pos['Quantity']}")
+
 ```
 
 ### Streaming Example
@@ -909,22 +984,26 @@ src/lib/tradestation/
 ### Core Components
 
 **TradeStationSDK** ([`__init__.py`](__init__.py))
+
 - Main SDK class that composes all modules
 - Provides unified interface for all operations
 - Manages authentication and mode switching
 
 **TokenManager** ([`session.py`](session.py))
+
 - OAuth2 token management
 - Automatic token refresh
 - Separate token storage for PAPER and LIVE modes
 
 **HTTPClient** ([`utils/client.py`](utils/client.py))
+
 - HTTP request handling
 - Authentication header injection
 - Request/response logging
 - HTTP Streaming support (NDJSON)
 
 **Operation Modules:**
+
 - [`operations/accounts.py`](operations/accounts.py) - Account operations (list accounts, balances, BOD)
 - [`operations/market_data.py`](operations/market_data.py) - Market data operations (bars, quotes, symbol search)
 - [`operations/orders.py`](operations/orders.py) - Order query operations (history, current orders, by IDs)
@@ -932,6 +1011,7 @@ src/lib/tradestation/
 - [`operations/positions.py`](operations/positions.py) - Position operations (get positions, flatten)
 
 **StreamingManager** ([`operations/streaming.py`](operations/streaming.py))
+
 - HTTP Streaming session management
 - Real-time data streaming
 - Automatic reconnection with exponential backoff
@@ -940,6 +1020,7 @@ src/lib/tradestation/
 - Stream health tracking
 
 **Models** ([`models/`](models/))
+
 - Pydantic models for type safety
 - [`models/orders.py`](models/orders.py) - Order request/response models, nested components
 - [`models/order_executions.py`](models/order_executions.py) - Order execution models
@@ -950,16 +1031,19 @@ src/lib/tradestation/
 - [`models/quotes.py`](models/quotes.py) - Quote snapshot models
 
 **Mappers** ([`utils/mappers.py`](utils/mappers.py))
+
 - Data normalization functions
 - Handles attribute name variations (PascalCase, camelCase)
 - Converts API responses to consistent format
 
 **Exceptions** ([`exceptions.py`](exceptions.py))
+
 - Custom SDK exceptions with structured error details
 - Error categorization (recoverable vs non-recoverable)
 - Automatic retry logic integration
 
 **Configuration** ([`config.py`](config.py))
+
 - Environment variable loading and validation
 - Configuration management for SDK settings
 
@@ -1039,6 +1123,7 @@ details = sdk.get_symbol_details("MNQZ25", mode="PAPER")
 #### Order Execution Methods
 
 **Core Order Execution:**
+
 ```python
 # Place order (generic - supports all order types)
 order_id, status = sdk.place_order(
@@ -1075,6 +1160,7 @@ confirmation = sdk.confirm_order(
 ```
 
 **Convenience Functions (Recommended):**
+
 ```python
 # Place limit order (convenience wrapper)
 order_id, status = sdk.place_limit_order(
@@ -1134,6 +1220,7 @@ result = sdk.place_oco_order(oco_orders, mode="PAPER")
 ```
 
 **Group Orders (Low-Level):**
+
 ```python
 # Place group order (low-level - for advanced use cases)
 result = sdk.place_group_order(
@@ -1151,6 +1238,7 @@ confirmation = sdk.confirm_group_order(
 ```
 
 **Configuration:**
+
 ```python
 # Get activation triggers (for conditional orders)
 triggers = sdk.get_activation_triggers(mode="PAPER")
@@ -1237,21 +1325,25 @@ TradeStation API v3 uses **HTTP Streaming** (long-lived HTTP connections with ND
 ### Streaming Endpoints
 
 **Quotes:**
+
 - Endpoint: `GET /v3/marketdata/stream/quotes/{symbols}`
 - Returns: `QuoteStream` objects
 - Fields: Last, Bid, Ask, Volume, VWAP, High52Week, Low52Week, MarketFlags, etc.
 
 **Orders:**
+
 - Endpoint: `GET /v3/brokerage/stream/accounts/{accountId}/orders`
 - Returns: `OrderStream` objects
 - Fields: Same as REST order responses, delivered in real-time
 
 **Positions:**
+
 - Endpoint: `GET /v3/brokerage/stream/accounts/{accountId}/positions`
 - Returns: `PositionStream` objects
 - Fields: AveragePrice, Last, Bid, Ask, TodaysProfitLoss, UnrealizedProfitLoss, etc.
 
 **Balances:**
+
 - Endpoint: `GET /v3/brokerage/stream/accounts/{accountId}/balances`
 - Returns: Balance update dictionaries
 - Fields: AccountID, Equity, BuyingPower, CashBalance, TodaysProfitLoss, etc.
@@ -1259,6 +1351,7 @@ TradeStation API v3 uses **HTTP Streaming** (long-lived HTTP connections with ND
 ### Control Messages
 
 Streams include control messages:
+
 - **StreamStatus** - `"EndSnapshot"` (initial snapshot complete), `"GoAway"` (server shutdown)
 - **Heartbeat** - Sent every 5 seconds on idle streams
 - **StreamErrorResponse** - Error messages
@@ -1343,48 +1436,59 @@ TradeStationAPIError (base)
 ### Request Models
 
 **TradeStationOrderRequest**
+
 - Used for placing single orders
 - Fields: AccountID, Symbol, TradeAction, OrderType, Quantity, LimitPrice, StopPrice, TimeInForce, TrailAmount, TrailPercent
 
 **TradeStationOrderGroupRequest**
+
 - Used for placing group orders (OCO/Bracket)
 - Fields: Type (OCO/BRK/NORMAL), Orders (list of TradeStationOrderRequest)
 
 ### Response Models (REST API)
 
 **TradeStationOrderResponse**
+
 - Complete order response with all 30+ fields
 - Includes: OrderID, Status, Legs, ConditionalOrders, MarketActivationRules, etc.
 
 **TradeStationOrderGroupResponse**
+
 - Group order response
 - Fields: GroupID, GroupName, Type, Orders
 
 **TradeStationExecutionResponse**
+
 - Order execution (fill) response
 - Fields: ExecutionID, Symbol, TradeAction, Quantity, Price, Commission, ExecutionTime
 
 ### Streaming Models
 
 **QuoteStream**
+
 - Streaming quote response
 - Additional fields: High52Week, Low52Week, MarketFlags, Restrictions, DailyOpenInterest, etc.
 
 **OrderStream**
+
 - Streaming order update
 - Same structure as TradeStationOrderResponse, delivered in real-time
 
 **PositionStream**
+
 - Streaming position update
 - Detailed fields: AveragePrice, Last, Bid, Ask, TodaysProfitLoss, UnrealizedProfitLoss, MarkToMarketPrice, etc.
 
 **StreamStatus**
+
 - Control message: "EndSnapshot", "GoAway"
 
 **Heartbeat**
+
 - Keep-alive message: Heartbeat (int), Timestamp
 
 **StreamErrorResponse**
+
 - Error message: Error, Message, AccountID, Symbol
 
 ### Using Models
@@ -1599,6 +1703,7 @@ print(f"Bracket order placed: {result}")
 If you were using the external SDK, here's how to migrate:
 
 **Before:**
+
 ```python
 from tradestation import Session
 
@@ -1610,6 +1715,7 @@ session = Session(
 ```
 
 **After:**
+
 ```python
 from src.lib.tradestation import TradeStationSDK
 
@@ -1618,6 +1724,7 @@ sdk.ensure_authenticated(mode="PAPER")
 ```
 
 **Before:**
+
 ```python
 from src.services.tradestation import TradeStationAPI
 
@@ -1625,6 +1732,7 @@ api = TradeStationAPI()
 ```
 
 **After:**
+
 ```python
 from src.lib.tradestation import TradeStationSDK
 
@@ -1659,6 +1767,7 @@ We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for deta
 7. Submit a pull request
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for complete guidelines including:
+
 - Code style and formatting
 - Testing requirements
 - Documentation standards
@@ -1703,6 +1812,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for complete guidelines including:
 ### External Resources
 
 For complete TradeStation API v3 documentation, see:
+
 - [TradeStation Developer Portal](https://developer.tradestation.com)
 - [API v3 Reference](https://developer.tradestation.com/webapi)
 - OpenAPI Spec: [`tradestation-api-v3-openapi.json`](./docs/reference/tradestation-api-v3-openapi.json)
@@ -1731,7 +1841,7 @@ Copyright (c) 2025 Ben Laube
 
 **Read the complete security guide:** [SECURITY.md](SECURITY.md)
 
-**Report security issues:** security@example.com (not GitHub issues!)
+**Report security issues:** <security@example.com> (not GitHub issues!)
 
 ---
 
@@ -1748,7 +1858,7 @@ Copyright (c) 2025 Ben Laube
 - ⚠️ **Limitations:** Check [LIMITATIONS.md](LIMITATIONS.md) for known constraints
 - 🐛 **Bug Reports:** [Open an issue](https://github.com/benlaube/tradestation-python-sdk/issues)
 - 💬 **Discussions:** [GitHub Discussions](https://github.com/benlaube/tradestation-python-sdk/discussions)
-- 📧 **Email:** benlaube@example.com
+- 📧 **Email:** <benlaube@example.com>
 
 ### Contributing
 

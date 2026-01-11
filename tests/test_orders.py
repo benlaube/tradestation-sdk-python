@@ -5,7 +5,7 @@ Tests for OrderOperations class including order history, current orders, and ord
 """
 
 import pytest
-from src.lib.tradestation.orders import OrderOperations
+from ..operations.orders import OrderOperations
 
 from .fixtures import api_responses
 
@@ -66,7 +66,7 @@ class TestOrderOperationsGetOrderHistory:
         order_ops.get_order_history(limit=50, mode="PAPER")
 
         call_args = mock_http_client.make_request.call_args
-        assert "limit" in call_args[1]["params"] or "Limit" in call_args[1]["params"]
+        assert "pageSize" in call_args[1]["params"]
 
     def test_get_order_history_default_start_date(self, mock_http_client, mocker):
         """Test get_order_history defaults to 7 days ago when start_date is None."""
@@ -110,9 +110,10 @@ class TestOrderOperationsGetCurrentOrders:
         call_args = mock_request.call_args
         assert "brokerage/accounts/SIM123456/orders" in call_args[0][1]
 
-        # Verify result structure
-        assert isinstance(result, dict)
-        assert "Orders" in result or isinstance(result, list)
+        if isinstance(result, dict):
+            assert "Orders" in result
+        else:
+            assert hasattr(result, "Orders")
 
     def test_get_current_orders_pagination(self, mock_http_client, mocker):
         """Test get_current_orders handles pagination with next_token."""
