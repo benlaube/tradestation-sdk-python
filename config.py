@@ -42,7 +42,7 @@ class SDKConfig:
         # TradeStation API Credentials
         self.client_id = os.getenv("TRADESTATION_CLIENT_ID", "")
         self.client_secret = os.getenv("TRADESTATION_CLIENT_SECRET", "")
-        self.redirect_uri = os.getenv("TRADESTATION_REDIRECT_URI", "http://localhost:8888/callback")
+        self.redirect_uri = os.getenv("TRADESTATION_REDIRECT_URI", "http://localhost:8080/callback")
         self.account_id = os.getenv("TRADESTATION_ACCOUNT_ID", "")  # Optional - can query from API
 
         # Trading Mode (PAPER or LIVE)

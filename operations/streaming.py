@@ -26,6 +26,7 @@ from ..exceptions import (
 )
 from ..models import BalanceStream
 from ..models.streaming import (
+    BarStream,
     OrderStream,
     PositionStream,
     QuoteStream,
@@ -1017,6 +1018,146 @@ class StreamingManager:
                 yield order
             except Exception as e:
                 logger.warning(f"Failed to parse order data: {e}, raw data: {order_data}")
+                raise
+
+    async def stream_bars(
+        self,
+        symbol: str,
+        interval: str,
+        unit: str,
+        session_template: str | None = None,
+        mode: str | None = None,
+        bars_back: int | None = None,
+        max_retries: int = 10,
+        retry_delay: float = 1.0,
+        max_retry_delay: float = 60.0,
+        auto_reconnect: bool = True,
+    ) -> AsyncGenerator[BarStream, None]:
+        """
+        Stream bars via TradeStation HTTP Streaming API.
+
+        Args:
+            symbol: Symbol to stream bars for
+            interval: Time interval (e.g., "1", "5")
+            unit: "Minute", "Daily", "Weekly", "Monthly"
+            session_template: US equity session template to include pre/post/24h bars (USEQPre, USEQPost, USEQPreAndPost, USEQ24Hour, Default). Ignored for non-US equity symbols.
+            mode: "PAPER" or "LIVE"
+            bars_back: Optional bars back to include in the stream handshake
+            max_retries: Maximum number of retry attempts (default: 10)
+            retry_delay: Initial retry delay in seconds (default: 1.0)
+            max_retry_delay: Maximum retry delay in seconds (default: 60.0)
+            auto_reconnect: Enable automatic reconnection on errors (default: True)
+
+        Yields:
+            BarStream models as they arrive
+        Dependencies: HTTPClient.stream_data, BarStream
+        """
+        if mode is None:
+            mode = sdk_config.trading_mode
+
+        async def _get_stream():
+            async for bar in self._stream_bars_internal(symbol, interval, unit, session_template, mode, bars_back):
+                yield bar
+
+        async for bar in self._with_retry(
+            stream_type="bars",
+            stream_func=_get_stream,
+            max_retries=max_retries,
+            retry_delay=retry_delay,
+            max_retry_delay=max_retry_delay,
+            auto_reconnect=auto_reconnect,
+            mode=mode,
+        ):
+            yield bar
+
+    async def _stream_bars_internal(
+        self,
+        symbol: str,
+        interval: str,
+        unit: str,
+        session_template: str | None,
+        mode: str,
+        bars_back: int | None,
+    ) -> AsyncGenerator[BarStream, None]:
+        """Internal method to stream bars via HTTP Streaming (no retry logic)."""
+        if not self._api_client:
+            self._api_client = HTTPClient(self.token_manager)
+
+        endpoint = f"marketdata/stream/barcharts/{symbol}"
+        params = {"interval": interval, "unit": unit}
+        allowed_templates = {"USEQPre", "USEQPost", "USEQPreAndPost", "USEQ24Hour", "Default"}
+
+        if bars_back is not None:
+            params["barsback"] = bars_back
+
+        if session_template:
+            if session_template in allowed_templates:
+                params["sessiontemplate"] = session_template
+            else:
+                logger.warning(
+                    "Ignoring unsupported session_template '%s' for symbol=%s; allowed=%s",
+                    session_template,
+                    symbol,
+                    sorted(allowed_templates),
+                )
+
+        logger.info(
+            "Starting bar stream for symbol=%s interval=%s unit=%s sessiontemplate=%s barsback=%s mode=%s params=%s",
+            symbol,
+            interval,
+            unit,
+            session_template or "default",
+            bars_back,
+            mode,
+            params,
+        )
+
+        import asyncio
+        import queue
+        import threading
+
+        bar_queue = queue.Queue()
+        stream_error = [None]
+
+        def run_stream():
+            """Run synchronous bar stream in background thread via HTTPClient.stream_data."""
+            try:
+                for bar_data in self._api_client.stream_data(endpoint, params=params, mode=mode):
+                    bar_queue.put(bar_data)
+                bar_queue.put(None)
+            except Exception as e:
+                stream_error[0] = e
+                bar_queue.put(None)
+
+        stream_thread = threading.Thread(target=run_stream, daemon=True)
+        stream_thread.start()
+
+        while True:
+            try:
+                bar_data = bar_queue.get(timeout=1.0)
+            except queue.Empty:
+                if stream_error[0]:
+                    raise stream_error[0]
+                await asyncio.sleep(0.01)
+                continue
+
+            if bar_data is None:
+                if stream_error[0]:
+                    raise stream_error[0]
+                break
+
+            if isinstance(bar_data, dict) and "StreamStatus" in bar_data:
+                continue
+
+            # Filter out heartbeats if necessary
+            if isinstance(bar_data, dict) and "Heartbeat" in bar_data and "TimeStamp" not in bar_data:
+                continue
+
+            try:
+                bar = BarStream(**bar_data)
+                yield bar
+            except Exception as e:
+                logger.warning(f"Failed to parse bar data: {e}, raw data: {bar_data}")
                 raise
 
 
