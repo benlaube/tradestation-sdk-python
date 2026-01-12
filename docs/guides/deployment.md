@@ -13,16 +13,16 @@ This is a **step-by-step production deployment guide** for deploying trading bot
 
 **Use this if:** You're ready to deploy to production, need cloud deployment instructions, or want deployment best practices.
 
-**⚠️ Critical:** Read **[LIMITATIONS.md](../architecture/limitations.md)** and **[SECURITY.md](../../SECURITY.md)** before deploying to production.
+**⚠️ Critical:** Read **[docs/architecture/limitations.md](../architecture/limitations.md)** and **[SECURITY.md](../../SECURITY.md)** before deploying to production.
 
 **Related Documents:**
 
-- 🔒 **[SECURITY.md](SECURITY.md)** - Security best practices (essential before deployment)
-- ⚠️ **[LIMITATIONS.md](../architecture/limitations.md)** - Known constraints (review before production)
+- 🔒 **[SECURITY.md](../../SECURITY.md)** - Security best practices (essential before deployment)
+- ⚠️ **[docs/architecture/limitations.md](../architecture/limitations.md)** - Known constraints (review before production)
 - 📖 **[README.md](README.md)** - Complete SDK documentation
-- 🚀 **[QUICKSTART.md](../getting-started/quickstart.md)** - Development setupe SDK documentation
-- 🚀 **[QUICKSTART.md](QUICKSTART.md)** - Development setup
-- 📝 **[CHANGELOG.md](CHANGELOG.md)** - Version history and breaking changes
+- 🚀 **[docs/getting-started/quickstart.md](../getting-started/quickstart.md)** - Development setupe SDK documentation
+- 🚀 **[docs/getting-started/quickstart.md](docs/getting-started/quickstart.md)** - Development setup
+- 📝 **[CHANGELOG.md](../../CHANGELOG.md)** - Version history and breaking changes
 
 ---
 
@@ -45,7 +45,7 @@ Step-by-step guide for deploying trading bots using this SDK to production envir
 - Untested code
 - Without stop-losses
 - Without monitoring
-- Without understanding [LIMITATIONS.md](../architecture/limitations.md)
+- Without understanding [docs/architecture/limitations.md](../architecture/limitations.md)
 - On Friday (can't monitor over weekend)
 
 ---
@@ -267,7 +267,7 @@ TRADESTATION_CLIENT_ID=abc123
 ```bash
 # In systemd service file or startup script
 export TRADESTATION_CLIENT_ID="abc123"
-export TRADESTATION_CLIENT_SECRET="xyz789"
+export TRADESTATION_CLIENT_SECRET="xyz789"  # pragma: allowlist secret
 export TRADING_MODE="LIVE"
 ```
 
@@ -879,8 +879,8 @@ def can_day_trade(sdk):
 ## Checklist Before Going Live
 
 - [ ] Read this entire document
-- [ ] Read [SECURITY.md](SECURITY.md)
-- [ ] Read [LIMITATIONS.md](../architecture/limitations.md)
+- [ ] Read [SECURITY.md](../../SECURITY.md)
+- [ ] Read [docs/architecture/limitations.md](../architecture/limitations.md)
 - [ ] Tested in PAPER mode (1+ weeks)
 - [ ] Implemented all error handling
 - [ ] Set up monitoring and alerts
@@ -899,8 +899,8 @@ def can_day_trade(sdk):
 
 ## Resources
 
-- 🔒 [SECURITY.md](SECURITY.md) - Security best practices
-- ⚠️ [LIMITATIONS.md](../architecture/limitations.md) - Known constraints
+- 🔒 [SECURITY.md](../../SECURITY.md) - Security best practices
+- ⚠️ [docs/architecture/limitations.md](../architecture/limitations.md) - Known constraints
 - 📖 [README.md](README.md) - Main documentation
 - 💬 [Get Help](https://github.com/benlaube/tradestation-python-sdk/discussions)
 

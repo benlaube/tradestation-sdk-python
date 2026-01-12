@@ -5,7 +5,8 @@ Tests for AccountOperations class including account info and balance queries.
 """
 
 import pytest
-from src.lib.tradestation.accounts import AccountOperations
+
+from tradestation.operations.accounts import AccountOperations
 
 from .fixtures import api_responses
 
@@ -73,7 +74,7 @@ class TestAccountOperationsGetAccountInfo:
 
     def test_get_account_info_error_handling(self, mock_http_client, mocker):
         """Test get_account_info handles errors gracefully."""
-        from src.lib.tradestation.exceptions import TradeStationAPIError
+        from tradestation.exceptions import TradeStationAPIError
 
         mocker.patch.object(mock_http_client, "make_request", side_effect=TradeStationAPIError("API Error"))
 

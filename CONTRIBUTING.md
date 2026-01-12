@@ -394,7 +394,7 @@ mkdocs build
 ### Documentation Files
 
 - `README.md` - Main SDK documentation
-- `LIMITATIONS.md` - Known limitations and constraints
+- `docs/architecture/limitations.md` - Known limitations and constraints
 - `CHANGELOG.md` - Version history and changes
 - `docs/API_REFERENCE.md` - Complete API reference
 - `docs/SDK_USAGE_EXAMPLES.md` - Usage examples

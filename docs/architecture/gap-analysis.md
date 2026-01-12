@@ -19,11 +19,11 @@ This document provides **comprehensive gap analysis** identifying missing endpoi
 
 **Related Documents:**
 
-- 📊 **[API_COVERAGE.md](API_COVERAGE.md)** - Current API coverage status
+- 📊 **[../api/coverage.md](../api/coverage.md)** - Current API coverage status
 - 🗺️ **[ROADMAP.md](ROADMAP.md)** - Planned improvements and timeline
 - 🎯 **[FEATURES.md](features.md)** - Current feature overview
 - 📖 **[README.md](../README.md)** - SDK documentation
-- ⚠️ **[LIMITATIONS.md](limitations.md)** - Known limitations
+- ⚠️ **[docs/architecture/limitations.md](limitations.md)** - Known limitations
 
 ---
 

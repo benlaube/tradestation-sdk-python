@@ -13,10 +13,10 @@ This document provides a **complete guide to all trailing stop variations** and 
 
 **Related Documents:**
 
-- 📝 **[ORDER_FUNCTIONS_REFERENCE.md](ORDER_FUNCTIONS_REFERENCE.md)** - Detailed order function documentation
-- 📚 **[API_REFERENCE.md](API_REFERENCE.md)** - Complete API reference
-- ⚠️ **[LIMITATIONS.md](../architecture/limitations.md)** - Trailing stop limitations (points vs dollars)
-- 💡 **[SDK_USAGE_EXAMPLES.md](SDK_USAGE_EXAMPLES.md)** - Trailing stop usage examples
+- 📝 **[../guides/order-functions.md](../guides/order-functions.md)** - Detailed order function documentation
+- 📚 **[../api/reference.md](../api/reference.md)** - Complete API reference
+- ⚠️ **[docs/architecture/limitations.md](../architecture/limitations.md)** - Trailing stop limitations (points vs dollars)
+- 💡 **[../guides/usage-examples.md](../guides/usage-examples.md)** - Trailing stop usage examples
 
 ---
 

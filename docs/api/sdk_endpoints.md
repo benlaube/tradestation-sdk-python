@@ -18,11 +18,11 @@ This document provides a **comprehensive mapping** between SDK functions and Tra
 **Use this if:** You need to understand the relationship between SDK functions and API endpoints, see what models are used, or debug API calls.
 
 **Related Documents:**
-- 📚 **[API_REFERENCE.md](API_REFERENCE.md)** - Complete SDK API reference
-- 📝 **[ORDER_FUNCTIONS_REFERENCE.md](ORDER_FUNCTIONS_REFERENCE.md)** - Detailed order function documentation
-- 💡 **[SDK_USAGE_EXAMPLES.md](SDK_USAGE_EXAMPLES.md)** - Usage examples
-- 📊 **[API_COVERAGE.md](API_COVERAGE.md)** - API coverage analysis
-- 🏗️ **[MODELS.md](MODELS.md)** - Pydantic model documentation
+- 📚 **[reference.md](reference.md)** - Complete SDK API reference
+- 📝 **[../guides/order-functions.md](../guides/order-functions.md)** - Detailed order function documentation
+- 💡 **[../guides/usage-examples.md](../guides/usage-examples.md)** - Usage examples
+- 📊 **[coverage.md](coverage.md)** - API coverage analysis
+- 🏗️ **[../models/README.md](../models/README.md)** - Pydantic model documentation
 
 
 ## Overview

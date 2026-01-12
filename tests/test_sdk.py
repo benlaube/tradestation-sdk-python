@@ -5,7 +5,8 @@ Tests for TradeStationSDK class including initialization, function delegation, a
 """
 
 import pytest
-from src.lib.tradestation import TradeStationSDK
+
+from tradestation import TradeStationSDK
 
 # ============================================================================
 # TradeStationSDK Initialization Tests
@@ -28,7 +29,7 @@ class TestTradeStationSDKInitialization:
         mock_secrets.log_level = "DEBUG"
 
         mocker.patch("config.secrets.secrets", mock_secrets)
-        mocker.patch("src.lib.tradestation.setup_logger")
+        mocker.patch("utils.logger.setup_logger")
 
         sdk = TradeStationSDK(enable_full_logging=False)
 
@@ -49,7 +50,7 @@ class TestTradeStationSDKInitialization:
         mock_secrets.log_level = "DEBUG"
 
         mocker.patch("config.secrets.secrets", mock_secrets)
-        mocker.patch("src.lib.tradestation.setup_logger")
+        mocker.patch("utils.logger.setup_logger")
 
         sdk = TradeStationSDK(enable_full_logging=True)
 

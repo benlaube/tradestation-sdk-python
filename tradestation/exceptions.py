@@ -6,8 +6,21 @@ Custom exceptions for TradeStation API operations with structured error details.
 Dependencies: dataclasses, typing
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
+
+
+@dataclass
+class APIErrorItem:
+    """
+    Individual API error item.
+
+    Represents a specific error within a TradeStation API response,
+    which may contain multiple errors in the "Errors" list.
+    """
+
+    error: str  # The error message
+    code: str | None = None  # The error code (e.g. "123")
 
 
 @dataclass
@@ -22,6 +35,8 @@ class ErrorDetails:
     message: str = ""
     api_error_code: str | None = None
     api_error_message: str | None = None
+    api_errors: list[APIErrorItem] = field(default_factory=list)
+
     request_method: str | None = None
     request_endpoint: str | None = None
     request_params: dict[str, Any] | None = None
@@ -65,6 +80,14 @@ class ErrorDetails:
             if self.api_error_message:
                 lines.append(f"  - API Error Message: {self.api_error_message}")
 
+        # Multiple API errors
+        if self.api_errors:
+            lines.append("")
+            lines.append("  API Errors:")
+            for i, error in enumerate(self.api_errors, 1):
+                code_str = f"[{error.code}] " if error.code else ""
+                lines.append(f"    {i}. {code_str}{error.error}")
+
         # Request details
         if self.request_method or self.request_endpoint:
             lines.append("")
@@ -107,6 +130,7 @@ class ErrorDetails:
             "message": self.message,
             "api_error_code": self.api_error_code,
             "api_error_message": self.api_error_message,
+            "api_errors": [{"code": e.code, "error": e.error} for e in self.api_errors],
             "request_method": self.request_method,
             "request_endpoint": self.request_endpoint,
             "request_params": self._sanitize_dict(self.request_params) if self.request_params else None,

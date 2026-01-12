@@ -22,11 +22,11 @@ This is the **complete API reference** for all SDK classes, methods, models, and
 **Related Documents:**
 
 - 📋 **[CHEATSHEET.md](../guides/cheatsheet.md)** - Quick code snippets (faster lookup)
-- 💡 **[SDK_USAGE_EXAMPLES.md](SDK_USAGE_EXAMPLES.md)** - Real-world usage examples
+- 💡 **[../guides/usage-examples.md](../guides/usage-examples.md)** - Real-world usage examples
 - 📚 **[API_ENDPOINT_MAPPING.md](API_ENDPOINT_MAPPING.md)** - SDK functions mapped to TradeStation API v3 endpoints (shows which API endpoints are called)
 - 🧭 **[SDK_ENDPOINT_MAPPING.md](sdk_endpoints.md)** - SDK methods to TradeStation API endpoints
-- 📝 **[ORDER_FUNCTIONS_REFERENCE.md](ORDER_FUNCTIONS_REFERENCE.md)** - Detailed order function documentation
-- 🏗️ **[MODELS.md](MODELS.md)** - Pydantic model documentation
+- 📝 **[../guides/order-functions.md](../guides/order-functions.md)** - Detailed order function documentation
+- 🏗️ **[../models/README.md](../models/README.md)** - Pydantic model documentation
 - 📖 **[README.md](../README.md)** - SDK overview and getting started
 
 ---

@@ -89,7 +89,7 @@ How this SDK compares to other trading SDKs and libraries.
 | **Streaming** | 80% | 5/7 | Missing: BarCharts, OptionChain streams |
 | **Overall** | 92% | 57/62 | Production-ready |
 
-**Details:** See [API_COVERAGE.md](API_COVERAGE.md)
+**Details:** See [../api/coverage.md](../api/coverage.md)
 
 ---
 

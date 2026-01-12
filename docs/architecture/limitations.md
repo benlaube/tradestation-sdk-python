@@ -16,10 +16,10 @@ This document outlines **current limitations, constraints, and known issues** in
 **Related Documents:**
 
 - 📖 **[README.md](README.md)** - Complete SDK documentation
-- 🔒 **[SECURITY.md](SECURITY.md)** - Security considerations (related to token storage limitations)
+- 🔒 **[SECURITY.md](../../SECURITY.md)** - Security considerations (related to token storage limitations)
 - 🚀 **[DEPLOYMENT.md](../guides/deployment.md)** - Production deployment (important to review limitations first)
 - 🗺️ **[docs/ROADMAP.md](docs/ROADMAP.md)** - Planned fixes and future versions
-- 📝 **[CHANGELOG.md](CHANGELOG.md)** - Version history and fixes
+- 📝 **[CHANGELOG.md](../../CHANGELOG.md)** - Version history and fixes
 - ❓ **[README.md#faq--troubleshooting](README.md#faq--troubleshooting)** - FAQ and troubleshooting
 
 ---
@@ -426,53 +426,37 @@ balances = sdk.get_account_balances(
 
 ## Streaming Limitations
 
-### 8. HTTP Streaming vs WebSocket
-
-**Issue:** TradeStation API v3 uses HTTP Streaming, not true WebSockets.
-
-**Differences:**
-
-- HTTP Streaming: Long-lived HTTP connection with NDJSON
-- WebSocket: True bidirectional socket connection
-- HTTP Streaming has higher latency
-
-**Impact:**
-
-- Slightly higher latency than WebSockets (~10-50ms)
-- Connection management is more complex
-- Requires newline-delimited JSON parsing
-
-**Current Status:** SDK handles HTTP Streaming automatically with:
-
-- Automatic reconnection (v1.0.0+)
-- REST polling fallback
-- Stream health tracking
-
-**Future:** TradeStation may add native WebSocket support in future API versions.
-
 ---
 
-### 9. Concurrent Stream Limit
+### 8. Concurrent Stream Limit
 
-**Issue:** TradeStation limits concurrent streams per account.
+**Issue:** TradeStation limits concurrent HTTP stream connections per account.
 
-**Limit:** ~10 concurrent streams per account
+**Limit:** ~10 concurrent streams (connections) per account.
+
+**Clarification:**
+
+- You **CAN** stream hundreds of symbols in a single stream (by passing a comma-separated list of symbols).
+- You **CANNOT** open hundreds of separate stream connections (one per symbol).
 
 **Impact:**
 
-- Cannot stream 100+ symbols simultaneously
-- Need to batch symbols per stream
-- Multi-strategy systems may hit limits
+- Opening a new stream connection for every single symbol will hit the limit quickly (429 Too Many Requests).
+- Multi-strategy systems should share stream connections where possible.
 
 **Best Practice:**
 
 ```python
-# ❌ Bad: Too many streams
+# ❌ Bad: One stream per symbol (Hit limit at ~10 symbols)
 for symbol in 100_symbols:
     asyncio.create_task(sdk.streaming.stream_quotes([symbol]))
 
-# ✅ Good: Batch symbols
-chunks = [symbols[i:i+10] for i in range(0, len(symbols), 10)]
+# ✅ Good: Batch symbols into fewer streams (Can handle hundreds of symbols)
+# Example: 1 stream for all 100 symbols
+asyncio.create_task(sdk.streaming.stream_quotes(all_100_symbols))
+
+# OR: Batch into chunks if preferred
+chunks = [symbols[i:i+50] for i in range(0, len(symbols), 50)]
 for chunk in chunks:
     asyncio.create_task(sdk.streaming.stream_quotes(chunk))
 ```
@@ -595,15 +579,28 @@ shutil.copy('config/tokens_paper.json', '/server/path/')
 
 ## Error Handling Gaps
 
-### 14. Error Message Inconsistency
+### 14. Error Message Inconsistency (✅ Fixed in v1.0.2)
 
-**Issue:** TradeStation API returns errors in multiple formats.
+**Status:** ✅ **Structured error objects (APIErrorDetail) implemented**
 
-**Impact:**
+**Previous Issue:** TradeStation API returns errors in multiple formats, making parsing difficult.
 
-- SDK may not parse all error formats correctly
-- Some edge-case errors have generic messages
-- Debugging can be challenging
+**Current Implementation (v1.0.2):**
+
+- Unified `TradeStationAPIError.details.api_errors` list
+- Automatically parses all known error formats (Standard, List, Simple, OAuth)
+- Provides standard access to error codes and messages
+
+**Example:**
+
+```python
+try:
+    sdk.place_order(...)
+except TradeStationAPIError as e:
+    # Access multiple validation errors
+    for error in e.details.api_errors:
+       print(f"Code: {error.code}, Msg: {error.error}")
+```
 
 **Known Error Formats:**
 

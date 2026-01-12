@@ -14,10 +14,10 @@ This directory contains **interactive examples** demonstrating SDK usage pattern
 **Use this if:** You want to learn by example, experiment interactively, or see working code you can copy.
 
 **Related Documents:**
-- 🚀 **[QUICKSTART.md](../QUICKSTART.md)** - 2-minute getting started
-- 📚 **[docs/GETTING_STARTED.md](../docs/GETTING_STARTED.md)** - 15-minute comprehensive tutorial
-- 💡 **[docs/SDK_USAGE_EXAMPLES.md](../docs/SDK_USAGE_EXAMPLES.md)** - More detailed examples with explanations
-- 📋 **[CHEATSHEET.md](../CHEATSHEET.md)** - Quick code snippets
+- 🚀 **[docs/getting-started/quickstart.md](../docs/getting-started/quickstart.md)** - 2-minute getting started
+- 📚 **[docs/GETTING_STARTED.md](../docs/getting-started/README.md)** - 15-minute comprehensive tutorial
+- 💡 **[docs/SDK_USAGE_EXAMPLES.md](../docs/guides/usage-examples.md)** - More detailed examples with explanations
+- 📋 **[CHEATSHEET.md](../docs/guides/cheatsheet.md)** - Quick code snippets
 - 📖 **[README.md](../README.md)** - Complete SDK documentation
 
 ---
@@ -90,5 +90,5 @@ TRADING_MODE=PAPER
 ## Support
 
 - 📖 [SDK Documentation](../docs/)
-- 💡 [Usage Examples](../docs/SDK_USAGE_EXAMPLES.md)
+- 💡 [Usage Examples](../docs/guides/usage-examples.md)
 - 🐛 [Report Issues](https://github.com/benlaube/tradestation-python-sdk/issues)

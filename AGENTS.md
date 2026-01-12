@@ -37,12 +37,12 @@ When something conflicts, treat these as the canonical sources (top = most autho
   - [docs/API_REFERENCE.md](docs/API_REFERENCE.md) (API guide + examples)
 - **OAuth, token storage, port behavior**:
   - [session.py](session.py) (implementation)
-  - [LIMITATIONS.md](LIMITATIONS.md) (constraints + operational guidance)
+  - [docs/architecture/limitations.md](docs/architecture/limitations.md) (constraints + operational guidance)
   - [SECURITY.md](SECURITY.md) (best practices)
 - **HTTP behavior (base URLs, retries, logging, error parsing)**:
   - [client.py](client.py) (implementation)
   - [exceptions.py](exceptions.py) (error taxonomy + structured details)
-  - [LIMITATIONS.md](LIMITATIONS.md) (rate limits + constraints)
+  - [docs/architecture/limitations.md](docs/architecture/limitations.md) (rate limits + constraints)
 - **Streaming behavior**:
   - [streaming.py](streaming.py) (implementation)
   - [README.md](README.md) (streaming usage + troubleshooting)
@@ -73,7 +73,7 @@ This SDK is intentionally split by concern:
 - **Models**: [models/](models/) (Pydantic request/response models)
 - **Normalization**: [utils/mappers.py](utils/mappers.py) (normalize API shapes)
 - **Errors**: [exceptions.py](exceptions.py) (typed errors + structured details)
-- **Docs**: [docs/](docs/) (+ root docs like [LIMITATIONS.md](LIMITATIONS.md), [SECURITY.md](SECURITY.md))
+- **Docs**: [docs/](docs/) (+ root docs like [docs/architecture/limitations.md](docs/architecture/limitations.md), [SECURITY.md](SECURITY.md))
 
 If you need “what endpoints exist / what’s implemented”, use:
 
@@ -142,7 +142,7 @@ Reference: [streaming.py](streaming.py) and docs under “Streaming” in [READM
 
 Second-based bar intervals are **not supported** (minute-based intervals only).
 
-See: [LIMITATIONS.md](LIMITATIONS.md) (“Bar Data Interval Constraints”).
+See: [docs/architecture/limitations.md](docs/architecture/limitations.md) (“Bar Data Interval Constraints”).
 
 ---
 
@@ -222,7 +222,7 @@ Avoid duplicating long docs in multiple places; prefer links.
 When behavior changes:
 
 - Update [CHANGELOG.md](CHANGELOG.md) (this SDK’s changelog)
-- Update [LIMITATIONS.md](LIMITATIONS.md) if a limitation changes
+- Update [docs/architecture/limitations.md](docs/architecture/limitations.md) if a limitation changes
 - Update API docs if public functions/endpoints change:
   - [docs/API_REFERENCE.md](docs/API_REFERENCE.md)
   - [docs/reference/functions-list.md](docs/reference/functions-list.md)
@@ -251,7 +251,7 @@ See: [CONTRIBUTING.md](CONTRIBUTING.md) for examples and docstring conventions.
 Primary references:
 
 - [README.md](README.md) (FAQ section)
-- [LIMITATIONS.md](LIMITATIONS.md)
+- [docs/architecture/limitations.md](docs/architecture/limitations.md)
 - [SECURITY.md](SECURITY.md)
 
 ---
@@ -263,7 +263,7 @@ Primary references:
 - **Getting started / overview**: [README.md](README.md), [docs/INDEX.md](docs/INDEX.md), [docs/GETTING_STARTED.md](docs/GETTING_STARTED.md)
 - **API surface**: [docs/API_REFERENCE.md](docs/API_REFERENCE.md), [docs/reference/functions-list.md](docs/reference/functions-list.md)
 - **Endpoints & coverage**: [docs/API_ENDPOINT_MAPPING.md](docs/API_ENDPOINT_MAPPING.md), [docs/API_COVERAGE.md](docs/API_COVERAGE.md), [docs/api/sdk_endpoints.md](docs/api/sdk_endpoints.md)
-- **Security & ops**: [SECURITY.md](SECURITY.md), [DEPLOYMENT.md](DEPLOYMENT.md), [LIMITATIONS.md](LIMITATIONS.md)
+- **Security & ops**: [SECURITY.md](SECURITY.md), [DEPLOYMENT.md](DEPLOYMENT.md), [docs/architecture/limitations.md](docs/architecture/limitations.md)
 - **Dev process**: [CONTRIBUTING.md](CONTRIBUTING.md), [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md), [CHANGELOG.md](CHANGELOG.md)
 - **OpenAPI spec (vendored)**: [tradestation-api-v3-openapi.json](docs/reference/tradestation-api-v3-openapi.json)
 

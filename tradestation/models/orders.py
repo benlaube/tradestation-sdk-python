@@ -9,7 +9,7 @@ Dependencies: pydantic
 
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 # Nested Order Models
 
@@ -137,6 +137,32 @@ class TradeStationOrderGroupRequest(BaseModel):
             }
         }
     )
+
+
+class OSO(TradeStationOrderGroupRequest):
+    """Helper for OSO (Order Sends Order) groups."""
+
+    Type: str = "OSO"
+
+    @field_validator("Orders")
+    @classmethod
+    def validate_orders_count(cls, v: list[TradeStationOrderRequest]) -> list[TradeStationOrderRequest]:
+        if len(v) < 2:
+            raise ValueError("OSO orders must contain at least 2 orders (Parent + Child)")
+        return v
+
+
+class Bracket(TradeStationOrderGroupRequest):
+    """Helper for Bracket groups."""
+
+    Type: str = "BRK"
+
+    @field_validator("Orders")
+    @classmethod
+    def validate_orders_count(cls, v: list[TradeStationOrderRequest]) -> list[TradeStationOrderRequest]:
+        if len(v) < 3:
+            raise ValueError("Bracket orders must contain at least 3 orders (Parent + Stop + Limit)")
+        return v
 
 
 # Response Models

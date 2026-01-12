@@ -6,7 +6,8 @@ executions, confirmations, and group orders (OCO/Bracket).
 """
 
 import pytest
-from ..operations.order_executions import OrderExecutionOperations
+
+from tradestation.operations.order_executions import OrderExecutionOperations
 
 from .fixtures import api_responses
 
@@ -361,7 +362,7 @@ class TestOrderExecutionOperationsGroupOrders:
         call_args = mock_http_client.make_request.call_args
         json_data = call_args[1]["json_data"]
         assert json_data["Type"] == "BRK"
-        
+
     def test_confirm_group_order(self, mock_http_client, mocker):
         """Test confirm_group_order performs pre-flight check."""
         mock_accounts = mocker.MagicMock()
@@ -375,11 +376,10 @@ class TestOrderExecutionOperationsGroupOrders:
 
         call_args = mock_http_client.make_request.call_args
         assert "orderexecution/ordergroupconfirm" in call_args[0][1]
-        
+
     # ============================================================================
     # OrderExecutionOperations Convenience Functions Tests
     # ============================================================================
-
 
     def test_place_limit_order(self, mock_http_client, mocker):
         """Test place_limit_order convenience function."""
@@ -521,16 +521,16 @@ class TestOrderExecutionOperationsOtherMethods:
         # 1. GET orders
         # 2. DELETE order 1
         # ...
-        
+
         # Current orders response
         current_orders = {
             "Orders": [
                 {"OrderID": "1", "Symbol": "MNQZ25", "Status": "ACK"},
                 {"OrderID": "2", "Symbol": "MNQZ25", "Status": "OPN"},
-                {"OrderID": "3", "Symbol": "ESZ25", "Status": "OPN"}, # Wrong symbol
+                {"OrderID": "3", "Symbol": "ESZ25", "Status": "OPN"},  # Wrong symbol
             ]
         }
-        
+
         # We need a dynamic side_effect because calls depend on logic
         def side_effect(method, endpoint, **kwargs):
             if method == "GET" and endpoint.endswith("/orders"):
@@ -542,14 +542,14 @@ class TestOrderExecutionOperationsOtherMethods:
         mocker.patch.object(mock_http_client, "make_request", side_effect=side_effect)
 
         order_exec = OrderExecutionOperations(mock_http_client, mock_accounts, default_mode="PAPER")
-        
+
         results = order_exec.cancel_all_orders_for_symbol("MNQZ25", mode="PAPER")
 
         # Verify results
         assert len(results) == 2
         assert results[0]["order_id"] == "1"
         assert results[1]["order_id"] == "2"
-        
+
         # Verify calls
         # 1 GET + 2 DELETEs = 3 calls
         assert mock_http_client.make_request.call_count == 3
@@ -610,7 +610,7 @@ class TestOrderExecutionOperationsOtherMethods:
 
     def test_replace_order_fails_if_filled(self, mock_http_client, mocker):
         """Test replace_order handles failure if order is already filled (cancellation fails)."""
-        from ..exceptions import TradeStationAPIError, APIErrorItem, ErrorDetails
+        from tradestation.exceptions import ErrorDetails, TradeStationAPIError
 
         mock_accounts = mocker.MagicMock()
         mock_accounts.get_account_info.return_value = {"account_id": "SIM123456"}
@@ -620,18 +620,16 @@ class TestOrderExecutionOperationsOtherMethods:
             message="Order cannot be cancelled",
             api_error_code="ORDER_FILLED",
             api_error_message="Order is already filled",
-            response_status=400
-        )
-        
-        mocker.patch.object(
-            mock_http_client, "make_request", side_effect=TradeStationAPIError(error_details)
+            response_status=400,
         )
 
+        mocker.patch.object(mock_http_client, "make_request", side_effect=TradeStationAPIError(error_details))
+
         order_exec = OrderExecutionOperations(mock_http_client, mock_accounts, default_mode="PAPER")
-        
+
         order_id, message = order_exec.replace_order(
             "924243070", "MNQZ25", "BUY", 3, "Limit", limit_price=25010.0, mode="PAPER"
         )
-        
+
         assert order_id is None
         assert "Failed to cancel old order" in message

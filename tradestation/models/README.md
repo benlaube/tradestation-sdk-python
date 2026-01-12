@@ -226,9 +226,9 @@ These models are designed to capture **ALL** fields from the TradeStation API:
 ### Missing Fields Detection
 
 If you find missing fields:
-1. Check `docs/MODELS.md` for field coverage analysis
+1. Check `docs/models/README.md` for field coverage analysis
 2. Add the field to the appropriate model
-3. Update `docs/MODELS.md` with the new field
+3. Update `docs/models/README.md` with the new field
 4. Test with real API responses
 
 ## Dependencies
@@ -238,9 +238,9 @@ If you find missing fields:
 
 ## Related Documentation
 
-- 📚 **[docs/MODELS.md](../docs/MODELS.md)** - Complete model documentation and field coverage analysis
-- 📖 **[docs/API_REFERENCE.md](../docs/API_REFERENCE.md)** - API reference with model usage examples
-- 💡 **[docs/SDK_USAGE_EXAMPLES.md](../docs/SDK_USAGE_EXAMPLES.md)** - Code examples using models
+- 📚 **[docs/models/README.md](../../docs/models/README.md)** - Complete model documentation and field coverage analysis
+- 📖 **[docs/api/reference.md](../../docs/api/reference.md)** - API reference with model usage examples
+- 💡 **[docs/guides/usage-examples.md](../../docs/guides/usage-examples.md)** - Code examples using models
 - 🏗️ **[models/__init__.py](__init__.py)** - Model exports and organization
 
 ## Model Design Principles
@@ -256,4 +256,4 @@ If you find missing fields:
 
 - **Version:** 1.0.0
 - **Last Updated:** 2025-12-28
-- **SDK Version:** See [README.md](../README.md)
+- **SDK Version:** See [README.md](../../README.md)

@@ -207,9 +207,9 @@ When adding a new operation module:
 
 ## Related Documentation
 
-- [Main README](../README.md) - SDK overview
-- [API Reference](../docs/api/reference.md) - Complete API documentation
-- [Functions List](../docs/reference/functions-list.md) - All SDK functions
+- [Main README](../../README.md) - SDK overview
+- [API Reference](../../docs/api/reference.md) - Complete API documentation
+- [Functions List](../../docs/reference/functions-list.md) - All SDK functions
 - [Utils README](../utils/README.md) - Utility modules documentation
 
 ---

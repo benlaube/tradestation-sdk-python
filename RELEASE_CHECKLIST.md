@@ -222,7 +222,7 @@ First public release of comprehensive TradeStation API v3 SDK for Python.
 pip install tradestation-python-sdk
 ```
 
-See [QUICKSTART.md](QUICKSTART.md) for 2-minute setup.
+See [docs/getting-started/quickstart.md](docs/getting-started/quickstart.md) for 2-minute setup.
 
 ### 📖 Resources
 

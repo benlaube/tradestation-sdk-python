@@ -16,7 +16,7 @@ This is a **comprehensive security guide** covering best practices, credential m
 **Related Documents:**
 
 - 🚀 **[DEPLOYMENT.md](DEPLOYMENT.md)** - Production deployment guide (includes security checklist)
-- ⚠️ **[LIMITATIONS.md](LIMITATIONS.md)** - Security limitations (token storage, encryption)
+- ⚠️ **[docs/architecture/limitations.md](docs/architecture/limitations.md)** - Security limitations (token storage, encryption)
 - 📖 **[README.md](README.md)** - Complete SDK documentation
 - 🔄 **[MIGRATION.md](MIGRATION.md)** - Security considerations when migrating
 - 📦 **[INSTALLATION.md](docs/getting-started/installation.md)** - Secure installation practices

@@ -23,7 +23,7 @@ This is a **detailed reference guide** for all order-related functions in the SD
 - 💡 **[SDK_USAGE_EXAMPLES.md](SDK_USAGE_EXAMPLES.md)** - Order usage examples
 - 📊 **[API_ENDPOINT_MAPPING.md](API_ENDPOINT_MAPPING.md)** - Order endpoint mappings
 - 📋 **[CHEATSHEET.md](cheatsheet.md)** - Quick order code snippets
-- ⚠️ **[LIMITATIONS.md](../architecture/limitations.md)** - Order-related limitations (trailing stops, etc.)
+- ⚠️ **[docs/architecture/limitations.md](../architecture/limitations.md)** - Order-related limitations (trailing stops, etc.)
 
 ---
 

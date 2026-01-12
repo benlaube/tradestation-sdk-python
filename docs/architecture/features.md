@@ -16,9 +16,9 @@ This document provides a **visual overview of all SDK features and capabilities*
 **Related Documents:**
 
 - 📖 **[README.md](README.md)** - Complete SDK documentation
-- 📚 **[docs/API_REFERENCE.md](docs/API_REFERENCE.md)** - Detailed API reference for all functions
-- 📋 **[CHEATSHEET.md](CHEATSHEET.md)** - Quick code snippets
-- 💡 **[docs/SDK_USAGE_EXAMPLES.md](docs/SDK_USAGE_EXAMPLES.md)** - Usage examples
+- 📚 **[docs/../api/reference.md](docs/../api/reference.md)** - Detailed API reference for all functions
+- 📋 **[../guides/cheatsheet.md](../guides/cheatsheet.md)** - Quick code snippets
+- 💡 **[../guides/usage-examples.md](../guides/usage-examples.md)** - Usage examples
 - 🎯 **[docs/FEATURE_COMPARISON.md](docs/FEATURE_COMPARISON.md)** - Comparison with other SDKs
 
 ---
@@ -64,7 +64,7 @@ Visual overview of all SDK features and capabilities.
 | `get_futures_index_symbols()` | List of futures symbols | PAPER ✅ LIVE ✅ |
 | `get_crypto_symbol_names()` | List of crypto symbols | PAPER ✅ LIVE ✅ |
 | **Options Data** | Expirations, strikes, spreads | PAPER ✅ LIVE ✅ |
-| **More...** | See [API_REFERENCE.md](docs/API_REFERENCE.md) | |
+| **More...** | See [../api/reference.md](docs/../api/reference.md) | |
 
 ---
 
@@ -241,7 +241,7 @@ All exceptions include `ErrorDetails` with:
 - OptionChain variations (low priority)
 - BarCharts streaming (low priority)
 
-See [API_COVERAGE.md](docs/API_COVERAGE.md) for details.
+See [../api/coverage.md](docs/../api/coverage.md) for details.
 
 ---
 
@@ -277,23 +277,23 @@ See [API_COVERAGE.md](docs/API_COVERAGE.md) for details.
 
 ### For Beginners
 
-- 📖 [QUICKSTART.md](QUICKSTART.md) - 2-minute setup
+- 📖 [docs/getting-started/quickstart.md](docs/getting-started/quickstart.md) - 2-minute setup
 - 📓 [01_authentication.ipynb](examples/01_authentication.ipynb) - Interactive auth
-- 🔧 [test_connection.py](cli/test_connection.py) - Verify setup
-- 📋 [CHEATSHEET.md](CHEATSHEET.md) - Quick reference
+- 🔧 [test_connection.py](../../tradestation/cli/test_connection.py) - Verify setup
+- 📋 [../guides/cheatsheet.md](../guides/cheatsheet.md) - Quick reference
 
 ### For Developers
 
 - 📚 [README.md](README.md) - Complete guide
-- 💡 [SDK_USAGE_EXAMPLES.md](docs/SDK_USAGE_EXAMPLES.md) - Code examples
+- 💡 [../guides/usage-examples.md](../guides/usage-examples.md) - Code examples
 - 🏗️ [ARCHITECTURE.md](docs/ARCHITECTURE.md) - Architecture deep-dive
-- 📖 [API_REFERENCE.md](docs/API_REFERENCE.md) - Function reference
+- 📖 [../api/reference.md](docs/../api/reference.md) - Function reference
 
 ### For Production
 
-- 🔒 [SECURITY.md](SECURITY.md) - Security best practices
+- 🔒 [SECURITY.md](../../SECURITY.md) - Security best practices
 - 🚀 [DEPLOYMENT.md](../guides/deployment.md) - Deployment guide
-- ⚠️ [LIMITATIONS.md](limitations.md) - Know the constraints
+- ⚠️ [docs/architecture/limitations.md](limitations.md) - Know the constraints
 - 📊 [ROADMAP.md](ROADMAP.md) - Future plans
 
 ---

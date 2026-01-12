@@ -16,7 +16,7 @@ This document provides a **visual overview of SDK architecture**, design decisio
 **Related Documents:**
 - 📖 **[README.md](../README.md)** - SDK overview and user-facing documentation
 - 📚 **[docs/README.md](README.md)** - Technical service documentation
-- 📚 **[API_REFERENCE.md](API_REFERENCE.md)** - Complete API reference
+- 📚 **[../api/reference.md](../api/reference.md)** - Complete API reference
 - 🏗️ **[MODELS.md](MODELS.md)** - Pydantic model documentation
 - 📊 **[API_ENDPOINT_MAPPING.md](API_ENDPOINT_MAPPING.md)** - Endpoint mappings
 
@@ -792,9 +792,9 @@ flowchart TD
 
 ## Related Documentation
 
-- [API Coverage](API_COVERAGE.md) - Endpoint implementation status
+- [API Coverage](../api/coverage.md) - Endpoint implementation status
 - [Models](MODELS.md) - Complete model documentation
-- [API Reference](API_REFERENCE.md) - Function reference
+- [API Reference](../api/reference.md) - Function reference
 
 ---
 

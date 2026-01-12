@@ -9,9 +9,10 @@ from typing import Any
 from unittest.mock import MagicMock
 
 import pytest
-from src.lib.tradestation import TradeStationSDK
-from src.lib.tradestation.client import HTTPClient
-from src.lib.tradestation.session import TokenManager
+
+from tradestation import TradeStationSDK
+from tradestation.session import TokenManager
+from tradestation.utils.client import HTTPClient
 
 from .fixtures import api_responses, mock_requests
 
@@ -137,7 +138,7 @@ def sdk_instance(mocker):
     mocker.patch("config.secrets.secrets", mock_secrets)
 
     # Mock logger
-    mocker.patch("src.lib.tradestation.setup_logger")
+    mocker.patch("utils.logger.setup_logger")
 
     # Create SDK instance
     sdk = TradeStationSDK(enable_full_logging=False)
@@ -163,7 +164,7 @@ def sdk_instance_full_logging(mocker):
     mock_secrets.log_level = "DEBUG"
 
     mocker.patch("config.secrets.secrets", mock_secrets)
-    mocker.patch("src.lib.tradestation.setup_logger")
+    mocker.patch("utils.logger.setup_logger")
 
     sdk = TradeStationSDK(enable_full_logging=True)
     sdk._token_manager = mock_token_manager(mocker)
@@ -270,7 +271,7 @@ def mock_requests_success(mock_requests_lib):
 @pytest.fixture
 def mock_logger(mocker):
     """Mock logger for log verification."""
-    return mocker.patch("src.lib.tradestation.client.logger")
+    return mocker.patch("utils.client.logger")
 
 
 # ============================================================================

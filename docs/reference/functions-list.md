@@ -19,9 +19,9 @@ This is a **quick reference index** of all functions available in the SDK, organ
 
 **Related Documents:**
 
-- 📚 **[API_REFERENCE.md](API_REFERENCE.md)** - Detailed function documentation with parameters
-- 📝 **[ORDER_FUNCTIONS_REFERENCE.md](ORDER_FUNCTIONS_REFERENCE.md)** - Detailed order function documentation
-- 💡 **[SDK_USAGE_EXAMPLES.md](SDK_USAGE_EXAMPLES.md)** - Usage examples for all functions
+- 📚 **[../api/reference.md](../api/reference.md)** - Detailed function documentation with parameters
+- 📝 **[../guides/order-functions.md](../guides/order-functions.md)** - Detailed order function documentation
+- 💡 **[../guides/usage-examples.md](../guides/usage-examples.md)** - Usage examples for all functions
 - 📋 **[CHEATSHEET.md](../guides/cheatsheet.md)** - Quick code snippets
 - 🎯 **[FEATURES.md](../architecture/features.md)** - Feature overview
 
@@ -216,19 +216,19 @@ result = sdk.place_bracket_order(
 
 | Function | Description | Returns | API Endpoint / Dependency |
 |----------|-------------|---------|--------------------------|
-| [`place_order()`](./ORDER_FUNCTIONS_REFERENCE.md#1-place_order) | Place an order (Market, Limit, Stop, StopLimit, TrailingStop) | tuple[str \| None, str] | `POST /v3/orderexecution/orders` |
-| [`cancel_order()`](./ORDER_FUNCTIONS_REFERENCE.md#2-cancel_order) | Cancel an order by order ID | tuple[bool, str] | `DELETE /v3/orderexecution/orders/{orderID}` |
-| [`modify_order()`](./ORDER_FUNCTIONS_REFERENCE.md#3-modify_order) | Modify an existing order | tuple[bool, str] | `PUT /v3/orderexecution/orders/{orderID}` |
-| [`get_order_executions()`](./ORDER_FUNCTIONS_REFERENCE.md#5-get_order_executions) | Get execution details (fills) for a specific order | list[dict[str, Any]] | `GET /v3/orderexecution/orders/{orderID}/executions` |
-| [`is_order_filled()`](./ORDER_FUNCTIONS_REFERENCE.md#4-is_order_filled) | Check if an order has been filled (convenience function) | bool | `GET /v3/brokerage/accounts/{accounts}/orders/{orderIds}` |
-| [`confirm_order()`](./ORDER_FUNCTIONS_REFERENCE.md#6-confirm_order) | Pre-flight check to get estimated cost and commission | dict[str, Any] | `POST /v3/orderexecution/orderconfirm` |
-| [`cancel_all_orders_for_symbol()`](./ORDER_FUNCTIONS_REFERENCE.md#11-cancel_all_orders_for_symbol) | Cancel all open orders for a specific symbol | list[dict[str, Any]] | Depends on `get_current_orders()` + `cancel_order()` |
-| [`cancel_all_orders()`](./ORDER_FUNCTIONS_REFERENCE.md#12-cancel_all_orders) | Cancel all open orders for account(s) | list[dict[str, Any]] | Depends on `get_current_orders()` + `cancel_order()` |
-| [`replace_order()`](./ORDER_FUNCTIONS_REFERENCE.md#13-replace_order) | Replace an order by canceling old and placing new | tuple[str \| None, str] | Depends on `cancel_order()` + `place_order()` |
-| [`confirm_group_order()`](./ORDER_FUNCTIONS_REFERENCE.md#7-confirm_group_order) | Confirm a group order (OCO/Bracket) before placement | dict[str, Any] | `POST /v3/orderexecution/ordergroupconfirm` |
-| [`place_group_order()`](./ORDER_FUNCTIONS_REFERENCE.md#8-place_group_order) | Place a group order (OCO/Bracket/NORMAL) | dict[str, Any] | `POST /v3/orderexecution/ordergroups` |
-| [`get_activation_triggers()`](./ORDER_FUNCTIONS_REFERENCE.md#9-get_activation_triggers) | Get available activation trigger keys for conditional orders | list[dict[str, Any]] | `GET /v3/orderexecution/activationtriggers` |
-| [`get_routes()`](./ORDER_FUNCTIONS_REFERENCE.md#10-get_routes) | Get available routing options for order execution | list[dict[str, Any]] | `GET /v3/orderexecution/routes` |
+| [`place_order()`](../guides/order-functions.md#1-place_order) | Place an order (Market, Limit, Stop, StopLimit, TrailingStop) | tuple[str \| None, str] | `POST /v3/orderexecution/orders` |
+| [`cancel_order()`](../guides/order-functions.md#2-cancel_order) | Cancel an order by order ID | tuple[bool, str] | `DELETE /v3/orderexecution/orders/{orderID}` |
+| [`modify_order()`](../guides/order-functions.md#3-modify_order) | Modify an existing order | tuple[bool, str] | `PUT /v3/orderexecution/orders/{orderID}` |
+| [`get_order_executions()`](../guides/order-functions.md#5-get_order_executions) | Get execution details (fills) for a specific order | list[dict[str, Any]] | `GET /v3/orderexecution/orders/{orderID}/executions` |
+| [`is_order_filled()`](../guides/order-functions.md#4-is_order_filled) | Check if an order has been filled (convenience function) | bool | `GET /v3/brokerage/accounts/{accounts}/orders/{orderIds}` |
+| [`confirm_order()`](../guides/order-functions.md#6-confirm_order) | Pre-flight check to get estimated cost and commission | dict[str, Any] | `POST /v3/orderexecution/orderconfirm` |
+| [`cancel_all_orders_for_symbol()`](../guides/order-functions.md#11-cancel_all_orders_for_symbol) | Cancel all open orders for a specific symbol | list[dict[str, Any]] | Depends on `get_current_orders()` + `cancel_order()` |
+| [`cancel_all_orders()`](../guides/order-functions.md#12-cancel_all_orders) | Cancel all open orders for account(s) | list[dict[str, Any]] | Depends on `get_current_orders()` + `cancel_order()` |
+| [`replace_order()`](../guides/order-functions.md#13-replace_order) | Replace an order by canceling old and placing new | tuple[str \| None, str] | Depends on `cancel_order()` + `place_order()` |
+| [`confirm_group_order()`](../guides/order-functions.md#7-confirm_group_order) | Confirm a group order (OCO/Bracket) before placement | dict[str, Any] | `POST /v3/orderexecution/ordergroupconfirm` |
+| [`place_group_order()`](../guides/order-functions.md#8-place_group_order) | Place a group order (OCO/Bracket/NORMAL) | dict[str, Any] | `POST /v3/orderexecution/ordergroups` |
+| [`get_activation_triggers()`](../guides/order-functions.md#9-get_activation_triggers) | Get available activation trigger keys for conditional orders | list[dict[str, Any]] | `GET /v3/orderexecution/activationtriggers` |
+| [`get_routes()`](../guides/order-functions.md#10-get_routes) | Get available routing options for order execution | list[dict[str, Any]] | `GET /v3/orderexecution/routes` |
 
 ---
 
@@ -238,12 +238,12 @@ result = sdk.place_bracket_order(
 
 | Function | Description | Returns | API Endpoint / Dependency |
 |----------|-------------|---------|--------------------------|
-| [`place_limit_order()`](./ORDER_FUNCTIONS_REFERENCE.md#10-place_limit_order) | Place a limit order (convenience wrapper) | tuple[str \| None, str] | Depends on `place_order()` |
-| [`place_stop_order()`](./ORDER_FUNCTIONS_REFERENCE.md#11-place_stop_order) | Place a stop order (convenience wrapper) | tuple[str \| None, str] | Depends on `place_order()` |
-| [`place_stop_limit_order()`](./ORDER_FUNCTIONS_REFERENCE.md#12-place_stop_limit_order) | Place a stop-limit order (convenience wrapper) | tuple[str \| None, str] | Depends on `place_order()` |
-| [`place_trailing_stop_order()`](./ORDER_FUNCTIONS_REFERENCE.md#13-place_trailing_stop_order) | Place a trailing stop order (convenience wrapper) | tuple[str \| None, str] | Depends on `place_order()` |
-| [`place_oco_order()`](./ORDER_FUNCTIONS_REFERENCE.md#14-place_oco_order) | Place an OCO (One-Cancels-Other) order (convenience wrapper) | dict[str, Any] | Depends on `place_group_order("OCO", ...)` |
-| [`place_bracket_order()`](./ORDER_FUNCTIONS_REFERENCE.md#15-place_bracket_order) | Place a bracket order (entry + profit target + stop-loss or trailing stop) | dict[str, Any] | Depends on `place_group_order("BRK", ...)` |
+| [`place_limit_order()`](../guides/order-functions.md#10-place_limit_order) | Place a limit order (convenience wrapper) | tuple[str \| None, str] | Depends on `place_order()` |
+| [`place_stop_order()`](../guides/order-functions.md#11-place_stop_order) | Place a stop order (convenience wrapper) | tuple[str \| None, str] | Depends on `place_order()` |
+| [`place_stop_limit_order()`](../guides/order-functions.md#12-place_stop_limit_order) | Place a stop-limit order (convenience wrapper) | tuple[str \| None, str] | Depends on `place_order()` |
+| [`place_trailing_stop_order()`](../guides/order-functions.md#13-place_trailing_stop_order) | Place a trailing stop order (convenience wrapper) | tuple[str \| None, str] | Depends on `place_order()` |
+| [`place_oco_order()`](../guides/order-functions.md#14-place_oco_order) | Place an OCO (One-Cancels-Other) order (convenience wrapper) | dict[str, Any] | Depends on `place_group_order("OCO", ...)` |
+| [`place_bracket_order()`](../guides/order-functions.md#15-place_bracket_order) | Place a bracket order (entry + profit target + stop-loss or trailing stop) | dict[str, Any] | Depends on `place_group_order("BRK", ...)` |
 
 ---
 
@@ -253,11 +253,11 @@ result = sdk.place_bracket_order(
 
 | Function | Description | Returns | API Endpoint / Dependency |
 |----------|-------------|---------|--------------------------|
-| [`get_order_history()`](./ORDER_FUNCTIONS_REFERENCE.md#16-get_order_history) | Get historical orders with date filtering | list[dict[str, Any]] | `GET /v3/brokerage/accounts/{accounts}/historicalorders` |
-| [`get_current_orders()`](./ORDER_FUNCTIONS_REFERENCE.md#17-get_current_orders) | Get current/open orders for account(s) | dict[str, Any] | `GET /v3/brokerage/accounts/{accounts}/orders` |
-| [`get_orders_by_ids()`](./ORDER_FUNCTIONS_REFERENCE.md#18-get_orders_by_ids) | Get specific current orders by order ID(s) | dict[str, Any] | `GET /v3/brokerage/accounts/{accounts}/orders/{orderIds}` |
-| [`get_historical_orders_by_ids()`](./ORDER_FUNCTIONS_REFERENCE.md#19-get_historical_orders_by_ids) | Get specific historical orders by order ID(s) | dict[str, Any] | `GET /v3/brokerage/accounts/{accounts}/historicalorders/{orderIds}` |
-| [`stream_orders()`](./ORDER_FUNCTIONS_REFERENCE.md#20-stream_orders) | Stream order updates via HTTP Streaming (async) | AsyncGenerator[dict[str, Any], None] | `GET /v3/brokerage/stream/accounts/{accounts}/orders` |
+| [`get_order_history()`](../guides/order-functions.md#16-get_order_history) | Get historical orders with date filtering | list[dict[str, Any]] | `GET /v3/brokerage/accounts/{accounts}/historicalorders` |
+| [`get_current_orders()`](../guides/order-functions.md#17-get_current_orders) | Get current/open orders for account(s) | dict[str, Any] | `GET /v3/brokerage/accounts/{accounts}/orders` |
+| [`get_orders_by_ids()`](../guides/order-functions.md#18-get_orders_by_ids) | Get specific current orders by order ID(s) | dict[str, Any] | `GET /v3/brokerage/accounts/{accounts}/orders/{orderIds}` |
+| [`get_historical_orders_by_ids()`](../guides/order-functions.md#19-get_historical_orders_by_ids) | Get specific historical orders by order ID(s) | dict[str, Any] | `GET /v3/brokerage/accounts/{accounts}/historicalorders/{orderIds}` |
+| [`stream_orders()`](../guides/order-functions.md#20-stream_orders) | Stream order updates via HTTP Streaming (async) | AsyncGenerator[dict[str, Any], None] | `GET /v3/brokerage/stream/accounts/{accounts}/orders` |
 
 ---
 

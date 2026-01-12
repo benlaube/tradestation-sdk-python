@@ -18,7 +18,7 @@ This is a **quick reference guide** for common SDK operations. Print this out or
 - 📖 **[README.md](../../README.md)** - Complete SDK documentation
 - 📚 **[API Reference](../api/reference.md)** - Complete API reference with all parameters
 - 💡 **[Usage Examples](usage-examples.md)** - Detailed examples with explanations
-- 🚀 **[QUICKSTART.md](../getting-started/quickstart.md)** - 2-minute getting started guide
+- 🚀 **[docs/getting-started/quickstart.md](../getting-started/quickstart.md)** - 2-minute getting started guide
 - 📦 **[INSTALLATION.md](../getting-started/installation.md)** - Installation instructions
 
 ---
@@ -330,7 +330,7 @@ time.sleep(0.5)  # Between requests
 ## Resources
 
 - 📖 [Full Documentation](README.md)
-- 💡 [Examples](docs/SDK_USAGE_EXAMPLES.md)
+- 💡 [Examples](usage-examples.md)
 - 🐛 [Issues](https://github.com/benlaube/tradestation-python-sdk/issues)
 - 💬 [Discussions](https://github.com/benlaube/tradestation-python-sdk/discussions)
 

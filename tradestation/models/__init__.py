@@ -42,6 +42,8 @@ from .order_wrappers import (
     OrdersWrapper,
 )
 from .orders import (
+    OSO,
+    Bracket,
     TradeStationConditionalOrder,
     TradeStationMarketActivationRule,
     TradeStationOrderGroupRequest,
@@ -83,6 +85,8 @@ __all__ = [
     "TradeStationMarketActivationRule",
     "TradeStationTimeActivationRule",
     "TradeStationTrailingStop",
+    "OSO",
+    "Bracket",
     # Order Execution Models
     "TradeStationExecutionResponse",
     # Bar Models

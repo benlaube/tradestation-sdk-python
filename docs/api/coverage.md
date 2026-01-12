@@ -19,7 +19,7 @@ This document provides **comprehensive API coverage analysis** showing which Tra
 
 **Related Documents:**
 
-- 📚 **[API_REFERENCE.md](API_REFERENCE.md)** - Complete API reference
+- 📚 **[reference.md](reference.md)** - Complete API reference
 - 📊 **[API_ENDPOINT_MAPPING.md](API_ENDPOINT_MAPPING.md)** - SDK function to endpoint mapping
 - 🧭 **[SDK_ENDPOINT_MAPPING.md](sdk_endpoints.md)** - SDK methods to TradeStation API endpoints
 - 🎯 **[FEATURES.md](../architecture/features.md)** - Feature overview

@@ -15,11 +15,11 @@ This is a **comprehensive installation guide** covering all installation methods
 
 **Related Documents:**
 
-- 🚀 **[QUICKSTART.md](quickstart.md)** - Fast 2-minute setup (most users)
+- 🚀 **[docs/getting-started/quickstart.md](quickstart.md)** - Fast 2-minute setup (most users)
 - 📖 **[README.md](README.md)** - Complete SDK documentation
 - 🔄 **[MIGRATION.md](../guides/migration.md)** - Migrating from other SDKs documentation
-- 🔒 **[SECURITY.md](SECURITY.md)** - Security considerations for credentials
-- 🤝 **[CONTRIBUTING.md](CONTRIBUTING.md)** - Development setup for contributors
+- 🔒 **[SECURITY.md](../../SECURITY.md)** - Security considerations for credentials
+- 🤝 **[CONTRIBUTING.md](../../CONTRIBUTING.md)** - Development setup for contributors
 
 ---
 
@@ -105,7 +105,7 @@ echo "-e ./libs/tradestation-sdk" >> requirements.txt
 
 - Update to latest: `git submodule update --remote --merge libs/tradestation-sdk`
 - Pin to a release: `(cd libs/tradestation-sdk && git checkout v1.0.0)`
-- See [docs/SUBMODULE_INTEGRATION.md](docs/SUBMODULE_INTEGRATION.md) for detailed workflow, CI tips, and rollback steps.
+- See [SUBMODULE_INTEGRATION.md](../guides/submodule-integration.md) for detailed workflow, CI tips, and rollback steps.
 
 ---
 
@@ -279,7 +279,7 @@ pip3 install tradestation-sdk
 
 ```bash
 # Check if SDK is installed
-python -c "import tradestation_sdk; print(tradestation_sdk.__version__)"
+python -c "import tradestation; print(tradestation.__version__)"
 ```
 
 Expected output: `1.0.0`
@@ -297,7 +297,7 @@ Expected:
 httpx               0.27.2
 pydantic            2.12.5
 PyJWT               2.8.0
-tradestation-sdk    1.0.0
+tradestation        1.1.0
 ```
 
 ### Run Test Script
@@ -367,7 +367,7 @@ print(tradestation_sdk.__version__)
 
 ### Upgrade Notes
 
-See [CHANGELOG.md](CHANGELOG.md) for version-specific upgrade notes.
+See [CHANGELOG.md](../../CHANGELOG.md) for version-specific upgrade notes.
 
 **From v0.x to v1.0:**
 
@@ -526,13 +526,13 @@ pip install --break-system-packages tradestation-sdk
 1. ✅ **Verify installation:** `python -c "import tradestation_sdk; print(tradestation_sdk.__version__)"`
 2. ✅ **Configure credentials:** Create `.env` file
 3. ✅ **Test connection:** Run `python cli/test_connection.py`
-4. ✅ **Follow Quick Start:** See [QUICKSTART.md](quickstart.md)
+4. ✅ **Follow Quick Start:** See [docs/getting-started/quickstart.md](quickstart.md)
 
 ---
 
 ## Need Help?
 
-- 📖 [FAQ & Troubleshooting](README.md#faq--troubleshooting)
+- 📖 [FAQ & Troubleshooting](../../README.md#faq--troubleshooting)
 - 🐛 [Report Installation Issues](https://github.com/benlaube/tradestation-python-sdk/issues)
 - 💬 [Get Help on Discussions](https://github.com/benlaube/tradestation-python-sdk/discussions)
 

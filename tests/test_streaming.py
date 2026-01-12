@@ -8,7 +8,8 @@ Note: Tests use mocked HTTP streaming responses (newline-delimited JSON).
 import json
 
 import pytest
-from ..operations.streaming import StreamingManager
+
+from tradestation.operations.streaming import StreamingManager
 
 from .fixtures import api_responses
 

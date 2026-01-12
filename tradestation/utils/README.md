@@ -222,10 +222,10 @@ When adding a new utility module:
 
 ## Related Documentation
 
-- [Main README](../README.md) - SDK overview
+- [Main README](../../README.md) - SDK overview
 - [Operations README](../operations/README.md) - Operation modules
-- [Data Transformation Guide](../docs/guides/data-transformation.md) - Mapper usage
-- [API Reference](../docs/api/reference.md) - Complete API documentation
+- [Data Transformation Guide](../../docs/guides/data-transformation.md) - Mapper usage
+- [API Reference](../../docs/api/reference.md) - Complete API documentation
 
 ---
 

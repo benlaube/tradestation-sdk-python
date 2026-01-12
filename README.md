@@ -1,5 +1,5 @@
 ---
-version: 1.0.1
+version: 1.1.0
 lastUpdated: 12-29-2025 17:19:25 EST
 ---
 
@@ -21,12 +21,12 @@ This is the **main entry point** for the TradeStation Python SDK documentation. 
 
 **Related Documents:**
 
-- 🚀 **[QUICKSTART.md](QUICKSTART.md)** - Get started in 2 minutes (even faster than this guide)
+- 🚀 **[docs/getting-started/quickstart.md](docs/getting-started/quickstart.md)** - Get started in 2 minutes (even faster than this guide)
 - 📋 **[CHEATSHEET.md](CHEATSHEET.md)** - Quick reference for common operations
 - 📦 **[INSTALLATION.md](INSTALLATION.md)** - Detailed installation instructions for all platforms
 - 📖 **[docs/GETTING_STARTED.md](docs/GETTING_STARTED.md)** - 15-minute comprehensive tutorial
 - 📚 **[docs/INDEX.md](docs/INDEX.md)** - Complete documentation index and navigation
-- ⚠️ **[LIMITATIONS.md](LIMITATIONS.md)** - Known constraints and workarounds
+- ⚠️ **[docs/architecture/limitations.md](docs/architecture/limitations.md)** - Known constraints and workarounds
 - 🔒 **[SECURITY.md](SECURITY.md)** - Security best practices
 - 🚀 **[DEPLOYMENT.md](DEPLOYMENT.md)** - Production deployment guide
 - 🔄 **[MIGRATION.md](MIGRATION.md)** - Migrate from other SDKs
@@ -50,25 +50,25 @@ A comprehensive, self-contained Python SDK for TradeStation API v3. This SDK pro
 
 | New to SDK? | Documentation | Tools & Examples |
 |------------|---------------|------------------|
-| [2-Min Quick Start](QUICKSTART.md) | [Complete README](README.md) | [Jupyter Notebooks](examples/) |
+| [2-Min Quick Start](docs/getting-started/quickstart.md) | [Complete README](README.md) | [Jupyter Notebooks](examples/) |
 | [15-Min Tutorial](docs/GETTING_STARTED.md) | [API Reference](docs/API_REFERENCE.md) | [CLI Tools](cli/) |
 | [Installation Guide](INSTALLATION.md) | [Usage Examples](docs/SDK_USAGE_EXAMPLES.md) | [Cheat Sheet](CHEATSHEET.md) |
 
 | Need Help? | Going Live? | Contributing? |
 |------------|-------------|---------------|
 | [FAQ & Troubleshooting](README.md#faq--troubleshooting) | [Security Guide](SECURITY.md) | [Contributing Guide](CONTRIBUTING.md) |
-| [Known Limitations](LIMITATIONS.md) | [Deployment Guide](DEPLOYMENT.md) | [Roadmap](docs/ROADMAP.md) |
+| [Known Limitations](docs/architecture/limitations.md) | [Deployment Guide](DEPLOYMENT.md) | [Roadmap](docs/ROADMAP.md) |
 | [Migration Guide](MIGRATION.md) | [Production Checklist](DEPLOYMENT.md#checklist-before-going-live) | [GitHub Issues](https://github.com/benlaube/tradestation-python-sdk/issues) |
 
 ---
 
 ## 📚 Documentation Hub
 
-- 🚀 **[QUICKSTART.md](QUICKSTART.md)** - Get started in 2 minutes
+- 🚀 **[docs/getting-started/quickstart.md](docs/getting-started/quickstart.md)** - Get started in 2 minutes
 - 📋 **[CHEATSHEET.md](CHEATSHEET.md)** - Quick reference (print and keep!)
 - 📦 **[INSTALLATION.md](INSTALLATION.md)** - Detailed installation guide
 - 🔄 **[MIGRATION.md](MIGRATION.md)** - Migrate from other SDKs
-- ⚠️ **[LIMITATIONS.md](LIMITATIONS.md)** - Known constraints and workarounds
+- ⚠️ **[docs/architecture/limitations.md](docs/architecture/limitations.md)** - Known constraints and workarounds
 - 🔒 **[SECURITY.md](SECURITY.md)** - Security best practices
 - 🤝 **[CONTRIBUTING.md](CONTRIBUTING.md)** - Contribution guidelines
 - 📝 **[CHANGELOG.md](CHANGELOG.md)** - Version history
@@ -112,7 +112,7 @@ pip install tradestation-python-sdk
 ```
 
 See **[INSTALLATION.md](docs/getting-started/installation.md)** for detailed setup instructions.
-See **[QUICKSTART.md](docs/getting-started/quickstart.md)** for a 5-minute guide.
+See **[docs/getting-started/quickstart.md](docs/getting-started/quickstart.md)** for a 5-minute guide.
 
 ---
 
@@ -126,7 +126,7 @@ See **[QUICKSTART.md](docs/getting-started/quickstart.md)** for a 5-minute guide
 - **Type Safety**: Full Pydantic models for all requests/responses
 
 See **[FEATURES.md](docs/architecture/features.md)** for the complete feature list.
-See **[LIMITATIONS.md](docs/architecture/limitations.md)** for known issues.
+See **[docs/architecture/limitations.md](docs/architecture/limitations.md)** for known issues.
 
 ---
 
@@ -295,7 +295,7 @@ TRADING_MODE=PAPER
 ### Step 2: First Script (Hello TradeStation!)
 
 ```python
-from tradestation_sdk import TradeStationSDK
+from tradestation import TradeStationSDK
 
 # Initialize SDK
 sdk = TradeStationSDK()
@@ -382,7 +382,7 @@ asyncio.run(stream_quotes())
 
 - Ensure the selected port is registered in TradeStation Developer Portal
 - SDK will warn you which port was selected
-- See [LIMITATIONS.md](LIMITATIONS.md#2-oauth-port-conflicts--fixed-in-v101) for details
+- See [docs/architecture/limitations.md](docs/architecture/limitations.md#2-oauth-port-conflicts--fixed-in-v101) for details
 
 **Option 1:** Kill the process using port 8888
 
@@ -600,14 +600,14 @@ except RateLimitError as e:
    - **Enhanced:** System keychain support (macOS Keychain, Linux Secret Service, Windows Credential Manager)
    - **Configuration:** Set `TRADESTATION_TOKEN_STORAGE=keychain` (requires `pip install keyring`)
    - **Auto-fallback:** Falls back to secure file storage if keychain unavailable
-   - **See:** [LIMITATIONS.md](LIMITATIONS.md#1-token-storage--improved-in-v101) for details
+   - **See:** [docs/architecture/limitations.md](docs/architecture/limitations.md#1-token-storage--improved-in-v101) for details
 
 2. **OAuth Port Conflicts** ✅ **Fixed in v1.0.1**
    - **Status:** Automatic port selection implemented
    - **Current:** SDK automatically finds available port in range 8888-8898
    - **Override:** Set `TRADESTATION_OAUTH_PORT` environment variable for specific port
    - **No manual intervention needed** - handles port conflicts automatically
-   - **See:** [LIMITATIONS.md](LIMITATIONS.md#2-oauth-port-conflicts--fixed-in-v101) for details
+   - **See:** [docs/architecture/limitations.md](docs/architecture/limitations.md#2-oauth-port-conflicts--fixed-in-v101) for details
 
 3. **Built-in Retry Logic for REST API** ✅ **Implemented in v1.0.0**
    - **Status:** All REST API methods now have automatic retry with exponential backoff
@@ -625,7 +625,7 @@ except RateLimitError as e:
    - **Current:** Default synchronous mode (backward compatible)
    - **Enhanced:** Enable async mode with `use_async=True` or `TRADESTATION_USE_ASYNC=true`
    - **Features:** Non-blocking I/O, connection pooling, same retry logic
-   - **See:** [LIMITATIONS.md](LIMITATIONS.md#3-synchronous-http-client--async-support-added-in-v101) for details
+   - **See:** [docs/architecture/limitations.md](docs/architecture/limitations.md#3-synchronous-http-client--async-support-added-in-v101) for details
 
 6. **Bar Data Interval Limits**
    - **Issue:** Only minute-based intervals supported (1, 2, 5, etc.)
@@ -1780,10 +1780,10 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for complete guidelines including:
 ### SDK Documentation Files
 
 - **[README.md](README.md)** - This file (main documentation)
-- **[QUICKSTART.md](QUICKSTART.md)** - 2-minute quick start guide
+- **[docs/getting-started/quickstart.md](docs/getting-started/quickstart.md)** - 2-minute quick start guide
 - **[CHEATSHEET.md](CHEATSHEET.md)** - Quick reference for common operations
 - **[MIGRATION.md](MIGRATION.md)** - Migration guide from other SDKs
-- **[LIMITATIONS.md](LIMITATIONS.md)** - Known limitations and constraints
+- **[docs/architecture/limitations.md](docs/architecture/limitations.md)** - Known limitations and constraints
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** - Contribution guidelines
 - **[CHANGELOG.md](CHANGELOG.md)** - Version history and changes
 - **[LICENSE](LICENSE)** - MIT License
@@ -1850,12 +1850,12 @@ Copyright (c) 2025 Ben Laube
 ### Getting Help
 
 - 📖 **Documentation:** Check [docs/](docs/) for detailed guides
-- 🚀 **Quick Start:** See [QUICKSTART.md](QUICKSTART.md) for 2-minute setup
+- 🚀 **Quick Start:** See [docs/getting-started/quickstart.md](docs/getting-started/quickstart.md) for 2-minute setup
 - 📋 **Cheat Sheet:** Keep [CHEATSHEET.md](CHEATSHEET.md) handy for quick reference
 - 📦 **Installation:** See [INSTALLATION.md](INSTALLATION.md) for platform-specific guides
 - ❓ **FAQ:** Read [FAQ & Troubleshooting](#faq--troubleshooting) section above
 - 🔄 **Migration:** See [MIGRATION.md](MIGRATION.md) to switch from other SDKs
-- ⚠️ **Limitations:** Check [LIMITATIONS.md](LIMITATIONS.md) for known constraints
+- ⚠️ **Limitations:** Check [docs/architecture/limitations.md](docs/architecture/limitations.md) for known constraints
 - 🐛 **Bug Reports:** [Open an issue](https://github.com/benlaube/tradestation-python-sdk/issues)
 - 💬 **Discussions:** [GitHub Discussions](https://github.com/benlaube/tradestation-python-sdk/discussions)
 - 📧 **Email:** <benlaube@example.com>

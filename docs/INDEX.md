@@ -18,7 +18,7 @@ This is the **complete navigation hub** for all SDK documentation. It organizes 
 **Related Documents:**
 
 - 📖 **[README.md](../README.md)** - Main SDK documentation (start here)
-- 🚀 **[QUICKSTART.md](../getting-started/quickstart.md)** - 2-minute getting started guide
+- 🚀 **[docs/getting-started/quickstart.md](../getting-started/quickstart.md)** - 2-minute getting started guide
 - 📚 **[Getting Started Tutorial](getting-started/README.md)** - 15-minute comprehensive tutorial
 - 📋 **[CHEATSHEET.md](../guides/cheatsheet.md)** - Quick reference guide
 
@@ -48,7 +48,7 @@ Complete guide to all SDK documentation. Start here to find what you need!
 
 **Start here if you're new to the SDK:**
 
-1. **[QUICKSTART.md](../getting-started/quickstart.md)** - 2-minute setup guide (copy-paste and go!)
+1. **[docs/getting-started/quickstart.md](../getting-started/quickstart.md)** - 2-minute setup guide (copy-paste and go!)
 2. **[README.md](../README.md#quick-start-5-minutes)** - 5-minute tutorial with explanations
 3. **[examples/01_authentication.ipynb](../examples/01_authentication.ipynb)** - Interactive authentication tutorial
 4. **[cli/test_connection.py](../cli/test_connection.py)** - Verify your setup works
@@ -56,7 +56,7 @@ Complete guide to all SDK documentation. Start here to find what you need!
 **Recommended Path:**
 
 ```
-QUICKSTART.md → README.md → Jupyter Notebooks → API Reference
+docs/getting-started/quickstart.md → README.md → Jupyter Notebooks → API Reference
 ```
 
 ---
@@ -68,7 +68,7 @@ QUICKSTART.md → README.md → Jupyter Notebooks → API Reference
 | File | Purpose | When to Use |
 |------|---------|-------------|
 | [README.md](../README.md) | Main SDK documentation | Starting point, feature overview |
-| [QUICKSTART.md](../getting-started/quickstart.md) | 2-minute setup guide | Fastest path to running code |
+| [docs/getting-started/quickstart.md](../getting-started/quickstart.md) | 2-minute setup guide | Fastest path to running code |
 | [CHEATSHEET.md](../guides/cheatsheet.md) | Quick reference | Keep handy while coding |
 | [FAQ & Troubleshooting](../README.md#faq--troubleshooting) | Common issues | When something doesn't work |
 
@@ -77,7 +77,7 @@ QUICKSTART.md → README.md → Jupyter Notebooks → API Reference
 | File | Purpose | When to Use |
 |------|---------|-------------|
 | [MIGRATION.md](../guides/migration.md) | Migration guide | Switching from other SDKs |
-| [LIMITATIONS.md](../architecture/limitations.md) | Known constraints | Understanding SDK boundaries |
+| [docs/architecture/limitations.md](../architecture/limitations.md) | Known constraints | Understanding SDK boundaries |
 | [CONTRIBUTING.md](../CONTRIBUTING.md) | Contribution guide | Adding features/fixing bugs |
 | [CHANGELOG.md](../CHANGELOG.md) | Version history | Tracking changes, upgrade notes |
 | [ROADMAP.md](analysis/roadmap.md) | Future plans | Upcoming features and timeline |
@@ -204,7 +204,7 @@ pytest tests/test_accounts.py   # Specific module
 
 ### Path 1: Beginner (Never used trading APIs)
 
-1. [QUICKSTART.md](../getting-started/quickstart.md) - Get started in 2 minutes
+1. [docs/getting-started/quickstart.md](../getting-started/quickstart.md) - Get started in 2 minutes
 2. [01_authentication.ipynb](../examples/01_authentication.ipynb) - Learn authentication
 3. [Getting Started Tutorial](getting-started/README.md) - Complete 15-minute tutorial
 4. [03_market_data.ipynb](../examples/03_market_data.ipynb) - Get market data
@@ -220,7 +220,7 @@ pytest tests/test_accounts.py   # Specific module
 
 ### Path 3: Advanced (Building production systems)
 
-1. [LIMITATIONS.md](../architecture/limitations.md) - Understand constraints
+1. [docs/architecture/limitations.md](../architecture/limitations.md) - Understand constraints
 2. [API Coverage](api/coverage.md) - Know what's available
 3. [Order Functions](guides/order-functions.md) - Master order execution
 4. [Models Documentation](models/README.md) - Understand data structures
@@ -234,7 +234,7 @@ pytest tests/test_accounts.py   # Specific module
 
 | I want to... | Go to... |
 |--------------|----------|
-| Set up SDK in 2 minutes | [QUICKSTART.md](../getting-started/quickstart.md) |
+| Set up SDK in 2 minutes | [docs/getting-started/quickstart.md](../getting-started/quickstart.md) |
 | Learn authentication | [01_authentication.ipynb](../examples/01_authentication.ipynb) |
 | Place my first order | [04_placing_orders.ipynb](../examples/04_placing_orders.ipynb) |
 | Fix port conflict | [FAQ & Troubleshooting](../README.md#faq--troubleshooting) |
@@ -244,7 +244,7 @@ pytest tests/test_accounts.py   # Specific module
 | Understand errors | [README.md](../README.md#error-handling) |
 | Stream real-time data | [Usage Examples](guides/usage-examples.md) |
 | Migrate from other SDK | [MIGRATION.md](../guides/migration.md) |
-| Know SDK limits | [LIMITATIONS.md](../architecture/limitations.md) |
+| Know SDK limits | [docs/architecture/limitations.md](../architecture/limitations.md) |
 | See future plans | [Roadmap](analysis/roadmap.md) |
 | Contribute code | [CONTRIBUTING.md](../CONTRIBUTING.md) |
 | Check version changes | [CHANGELOG.md](../CHANGELOG.md) |
@@ -306,10 +306,10 @@ tradestation-sdk/
 
 ### First Steps
 
-1. **Check [QUICKSTART.md](../getting-started/quickstart.md)** - Maybe you just need the quick start
+1. **Check [docs/getting-started/quickstart.md](../getting-started/quickstart.md)** - Maybe you just need the quick start
 2. **Read [FAQ](../README.md#faq--troubleshooting)** - Common issues are documented
 3. **Run [test_connection.py](../cli/test_connection.py)** - Diagnose connection issues
-4. **Check [LIMITATIONS.md](../architecture/limitations.md)** - Your issue might be a known limitation
+4. **Check [docs/architecture/limitations.md](../architecture/limitations.md)** - Your issue might be a known limitation
 
 ### Still Stuck?
 

@@ -16,7 +16,7 @@ This is a **comprehensive status report** documenting the SDK transformation fro
 **Related Documents:**
 
 - 📖 **[README.md](README.md)** - Main SDK documentation
-- 📝 **[CHANGELOG.md](CHANGELOG.md)** - Version history
+- 📝 **[CHANGELOG.md](../../CHANGELOG.md)** - Version history
 - 🎯 **[FEATURES.md](../architecture/features.md)** - Complete feature overview
 - 🗺️ **[docs/ROADMAP.md](docs/ROADMAP.md)** - Future development plans
 - 📋 **[RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md)** - Release preparation checklist
@@ -140,11 +140,11 @@ sdk.authenticate(mode="PAPER")
 tradestation-python-sdk/
 ├── Core Documentation (12 files)
 │   ├── README.md              # Main documentation
-│   ├── QUICKSTART.md          # 2-minute guide (moved to getting-started/quickstart.md)
+│   ├── docs/getting-started/quickstart.md          # 2-minute guide (moved to getting-started/quickstart.md)
 │   ├── CHEATSHEET.md          # Quick reference (moved to guides/cheatsheet.md)
 │   ├── INSTALLATION.md        # Install guide (moved to getting-started/installation.md)
 │   ├── MIGRATION.md           # Migration from other SDKs (moved to guides/migration.md)
-│   ├── LIMITATIONS.md         # Known constraints (moved to architecture/limitations.md)
+│   ├── docs/architecture/limitations.md         # Known constraints (moved to architecture/limitations.md)
 │   ├── SECURITY.md            # Security best practices
 │   ├── DEPLOYMENT.md          # Production deployment (moved to guides/deployment.md)
 │   ├── CONTRIBUTING.md        # Contribution guide
@@ -481,7 +481,7 @@ twine upload dist/*
 
 **Quick Start Options:**
 
-- ⏱️ 2 minutes: [QUICKSTART.md](../getting-started/quickstart.md)
+- ⏱️ 2 minutes: [docs/getting-started/quickstart.md](../getting-started/quickstart.md)
 - ⏱️ 5 minutes: README Quick Start section
 - ⏱️ 15 minutes: docs/GETTING_STARTED.md
 
@@ -562,11 +562,11 @@ Your SDK now has:
 **Root Documentation (12 .md files):**
 
 1. README.md
-2. [QUICKSTART.md](../getting-started/quickstart.md)
+2. [docs/getting-started/quickstart.md](../getting-started/quickstart.md)
 3. [CHEATSHEET.md](../guides/cheatsheet.md)
 4. [INSTALLATION.md](../getting-started/installation.md)
 5. [MIGRATION.md](../guides/migration.md)
-6. [LIMITATIONS.md](../architecture/limitations.md)
+6. [docs/architecture/limitations.md](../architecture/limitations.md)
 7. SECURITY.md
 8. [DEPLOYMENT.md](../guides/deployment.md)
 9. CONTRIBUTING.md

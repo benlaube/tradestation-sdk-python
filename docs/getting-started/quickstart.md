@@ -17,10 +17,10 @@ This is the **fastest way to get started** with the TradeStation SDK. This guide
 
 - 📖 **[README.md](README.md)** - Complete SDK overview and documentation
 - 📦 **[INSTALLATION.md](installation.md)** - Detailed installation for all platforms
-- 📚 **[docs/GETTING_STARTED.md](docs/GETTING_STARTED.md)** - 15-minute comprehensive tutorial
+- 📚 **[README.md](README.md)** - 15-minute comprehensive tutorial
 - 📋 **[CHEATSHEET.md](../guides/cheatsheet.md)** - Quick reference for common operations
-- 💡 **[docs/SDK_USAGE_EXAMPLES.md](docs/SDK_USAGE_EXAMPLES.md)** - More code examples
-- ⚠️ **[LIMITATIONS.md](../architecture/limitations.md)** - Important constraints to know
+- 💡 **[../guides/usage-examples.md](../guides/usage-examples.md)** - More code examples
+- ⚠️ **[docs/architecture/limitations.md](../architecture/limitations.md)** - Important constraints to know
 
 ---
 
@@ -130,9 +130,9 @@ pip install --upgrade tradestation-python-sdk
 ## Next Steps
 
 - 📖 [Full README](README.md)
-- 💡 [Usage Examples](docs/SDK_USAGE_EXAMPLES.md)
-- 📊 [Jupyter Notebooks](examples/)
-- 🔧 [CLI Tools](cli/)
+- 💡 [Usage Examples](../guides/usage-examples.md)
+- 📊 [Jupyter Notebooks](../../examples/)
+- 🔧 [CLI Tools](../../tradestation/cli/)
 - ❓ [FAQ & Troubleshooting](README.md#faq--troubleshooting)
 
 ---

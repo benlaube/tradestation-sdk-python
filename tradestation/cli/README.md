@@ -14,10 +14,10 @@ This directory contains **command-line diagnostic tools** for testing and verify
 **Use this if:** You want to quickly test your SDK setup, verify credentials, or diagnose connection problems.
 
 **Related Documents:**
-- 📖 **[README.md](../README.md)** - Complete SDK documentation
-- 🚀 **[QUICKSTART.md](../QUICKSTART.md)** - Getting started guide
-- ⚠️ **[LIMITATIONS.md](../LIMITATIONS.md)** - Known issues and troubleshooting
-- ❓ **[README.md#faq--troubleshooting](../README.md#faq--troubleshooting)** - FAQ and troubleshooting
+- 📖 **[README.md](../../README.md)** - Complete SDK documentation
+- 🚀 **[docs/getting-started/quickstart.md](../../docs/getting-started/quickstart.md)** - Getting started guide
+- ⚠️ **[docs/architecture/limitations.md](../../docs/architecture/limitations.md)** - Known issues and troubleshooting
+- ❓ **[README.md#faq--troubleshooting](../../README.md#faq--troubleshooting)** - FAQ and troubleshooting
 
 ---
 
@@ -85,4 +85,4 @@ TRADING_MODE=PAPER
 
 ## Support
 
-See [main README](../README.md) for troubleshooting and support options.
+See [main README](../../README.md) for troubleshooting and support options.

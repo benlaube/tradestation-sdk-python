@@ -19,6 +19,7 @@ import requests
 
 from ..config import sdk_config
 from ..exceptions import (
+    APIErrorItem,
     AuthenticationError,
     ErrorDetails,
     InvalidRequestError,
@@ -80,21 +81,30 @@ def parse_api_error_response(response: requests.Response | Any) -> ErrorDetails:
 
         # Format 1: {"Error": "message", "Code": "code"}
         if "Error" in error_body and "Code" in error_body:
-            details.api_error_code = str(error_body.get("Code", ""))
-            details.api_error_message = str(error_body.get("Error", ""))
-            details.message = error_body.get("Error", "")
+            code = str(error_body.get("Code", ""))
+            msg = str(error_body.get("Error", ""))
+            details.api_error_code = code
+            details.api_error_message = msg
+            details.message = msg
+            details.api_errors.append(APIErrorItem(code=code, error=msg))
 
         # Format 2: {"Errors": [{"Error": "...", "Code": "..."}]}
         elif "Errors" in error_body and isinstance(error_body["Errors"], list):
             errors = error_body["Errors"]
             if errors:
-                first_error = errors[0]
-                if isinstance(first_error, dict):
-                    details.api_error_code = str(first_error.get("Code", ""))
-                    details.api_error_message = str(first_error.get("Error", ""))
-                    details.message = first_error.get("Error", "")
-                else:
-                    details.message = str(first_error)
+                for err_item in errors:
+                    if isinstance(err_item, dict):
+                        code = str(err_item.get("Code", ""))
+                        msg = str(err_item.get("Error", ""))
+                        details.api_errors.append(APIErrorItem(code=code, error=msg))
+                    else:
+                        details.api_errors.append(APIErrorItem(error=str(err_item)))
+
+                # Use first error for top-level message
+                first_item = details.api_errors[0]
+                details.api_error_code = first_item.code
+                details.api_error_message = first_item.error
+                details.message = first_item.error
 
         # Format 3: {"Message": "error message"}
         elif "Message" in error_body:

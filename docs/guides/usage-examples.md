@@ -22,7 +22,7 @@ This document provides **comprehensive usage examples** demonstrating SDK usage 
 - 📚 **[API_REFERENCE.md](API_REFERENCE.md)** - Complete API reference (function signatures)
 - 📋 **[CHEATSHEET.md](cheatsheet.md)** - Quick code snippets (faster lookup)
 - 📖 **[README.md](../README.md)** - SDK overview and getting started
-- 🚀 **[QUICKSTART.md](../getting-started/quickstart.md)** - 2-minute getting started
+- 🚀 **[docs/getting-started/quickstart.md](../getting-started/quickstart.md)** - 2-minute getting started
 - 📊 **[examples/README.md](../examples/README.md)** - Interactive Jupyter notebooks
 
 ---

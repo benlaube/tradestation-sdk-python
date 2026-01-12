@@ -242,8 +242,8 @@ from tradestation import Session
 
 session = Session(
     api_key="client_id",
-    secret_key="client_secret",
-    refresh_token="refresh_token"
+    secret_key="client_secret",  # pragma: allowlist secret
+    refresh_token="refresh_token"  # pragma: allowlist secret
 )
 
 accounts = session.get_accounts()
@@ -506,7 +506,7 @@ order_id, status = sdk.place_order(
 
 ### Future Versions
 
-Check [CHANGELOG.md](CHANGELOG.md) for version-specific migration notes.
+Check [CHANGELOG.md](../../CHANGELOG.md) for version-specific migration notes.
 
 ---
 
@@ -532,8 +532,8 @@ Use this checklist when migrating:
 ## Need Help?
 
 - 📖 [README](README.md) - Full documentation
-- 💡 [Examples](docs/SDK_USAGE_EXAMPLES.md) - Code examples
-- ❓ [FAQ](README.md#faq--troubleshooting) - Common issues
+- 💡 [Examples](usage-examples.md) - Code examples
+- ❓ [FAQ](../../README.md#faq--troubleshooting) - Common issues
 - 🐛 [Issues](https://github.com/benlaube/tradestation-python-sdk/issues) - Report problems
 
 ---

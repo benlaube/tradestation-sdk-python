@@ -9,11 +9,14 @@ from unittest.mock import MagicMock
 
 import pytest
 import requests
-from src.lib.tradestation.client import get_base_url, parse_api_error_response
-from src.lib.tradestation.exceptions import (
+
+from tradestation.config import sdk_config
+from tradestation.exceptions import (
     NonRecoverableError,
     RecoverableError,
 )
+from tradestation.utils import client as client_module
+from tradestation.utils.client import get_base_url, parse_api_error_response
 
 from .fixtures import api_responses
 
@@ -28,19 +31,19 @@ class TestGetBaseURL:
 
     def test_get_base_url_paper(self, mocker):
         """Test get_base_url returns PAPER URL for PAPER mode."""
-        mocker.patch("config.secrets.secrets.trading_mode", "PAPER")
+        mocker.patch.object(sdk_config, "trading_mode", "PAPER")
         url = get_base_url("PAPER")
         assert url == "https://sim-api.tradestation.com/v3"
 
     def test_get_base_url_live(self, mocker):
         """Test get_base_url returns LIVE URL for LIVE mode."""
-        mocker.patch("config.secrets.secrets.trading_mode", "LIVE")
+        mocker.patch.object(sdk_config, "trading_mode", "LIVE")
         url = get_base_url("LIVE")
         assert url == "https://api.tradestation.com/v3"
 
     def test_get_base_url_default(self, mocker):
         """Test get_base_url uses secrets.trading_mode when mode is None."""
-        mocker.patch("config.secrets.secrets.trading_mode", "PAPER")
+        mocker.patch.object(sdk_config, "trading_mode", "PAPER")
         url = get_base_url(None)
         assert url == "https://sim-api.tradestation.com/v3"
 
@@ -132,7 +135,7 @@ class TestHTTPClientRequestLogging:
     def test_log_request_basic(self, mock_http_client, mocker):
         """Test _log_request logs method, endpoint, params, body."""
         # Mock log_with_context to verify it's called correctly
-        mock_log = mocker.patch("src.lib.tradestation.client.log_with_context")
+        mock_log = mocker.patch.object(client_module, "log_with_context")
 
         mock_http_client._log_request("GET", "/v3/brokerage/accounts", {"key": "value"}, None)
 
@@ -145,14 +148,14 @@ class TestHTTPClientRequestLogging:
 
     def test_log_request_sanitizes_tokens(self, mock_http_client, mocker):
         """Test _log_request sanitizes sensitive data (tokens, secrets)."""
-        mock_log = mocker.patch("src.lib.tradestation.client.log_with_context")
+        mock_log = mocker.patch.object(client_module, "log_with_context")
 
         sensitive_data = {
             "access_token": "secret_token_123",
             "refresh_token": "refresh_secret",
             "client_secret": "client_secret_value",
         }
-        mock_http_client._log_request("POST", "/v3/oauth/token", None, sensitive_data)
+        mock_http_client._log_request("POST", "/v3/test/endpoint", None, sensitive_data)
 
         # Verify log_with_context was called
         assert mock_log.called
@@ -164,7 +167,7 @@ class TestHTTPClientRequestLogging:
 
     def test_log_request_truncates_body_when_full_logging_disabled(self, mock_http_client, mocker):
         """Test _log_request truncates body when enable_full_logging=False."""
-        mock_log = mocker.patch("src.lib.tradestation.client.log_with_context")
+        mock_log = mocker.patch.object(client_module, "log_with_context")
 
         long_body = {"data": "x" * 1000}
         mock_http_client._log_request("POST", "/v3/endpoint", None, long_body)
@@ -177,7 +180,7 @@ class TestHTTPClientRequestLogging:
 
     def test_log_request_full_body_when_full_logging_enabled(self, mock_http_client_full_logging, mocker):
         """Test _log_request logs full body when enable_full_logging=True."""
-        mock_log = mocker.patch("src.lib.tradestation.client.log_with_context")
+        mock_log = mocker.patch.object(client_module, "log_with_context")
 
         long_body = {"data": "x" * 1000}
         mock_http_client_full_logging._log_request("POST", "/v3/endpoint", None, long_body)
@@ -201,7 +204,7 @@ class TestHTTPClientResponseLogging:
 
     def test_log_response_basic(self, mock_http_client, mocker):
         """Test _log_response logs status, time, size, body."""
-        mock_log = mocker.patch("src.lib.tradestation.client.log_with_context")
+        mock_log = mocker.patch.object(client_module, "log_with_context")
 
         mock_response = MagicMock()
         mock_response.status_code = 200
@@ -221,7 +224,7 @@ class TestHTTPClientResponseLogging:
 
     def test_log_response_error_at_warning_level(self, mock_http_client, mocker):
         """Test _log_response logs errors at WARNING level."""
-        mock_log = mocker.patch("src.lib.tradestation.client.log_with_context")
+        mock_log = mocker.patch.object(client_module, "log_with_context")
 
         mock_response = MagicMock()
         mock_response.status_code = 400
@@ -241,7 +244,7 @@ class TestHTTPClientResponseLogging:
 
     def test_log_response_truncates_body_when_full_logging_disabled(self, mock_http_client, mocker):
         """Test _log_response truncates body when enable_full_logging=False."""
-        mock_log = mocker.patch("src.lib.tradestation.client.log_with_context")
+        mock_log = mocker.patch.object(client_module, "log_with_context")
 
         mock_response = MagicMock()
         mock_response.status_code = 200

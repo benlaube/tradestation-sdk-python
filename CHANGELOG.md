@@ -16,7 +16,7 @@ This changelog tracks **all notable changes** to the TradeStation SDK, including
 **Related Documents:**
 - 📖 **[README.md](README.md)** - Complete SDK documentation
 - 🗺️ **[docs/ROADMAP.md](docs/ROADMAP.md)** - Future plans and upcoming features
-- ⚠️ **[LIMITATIONS.md](LIMITATIONS.md)** - Known issues and planned fixes
+- ⚠️ **[docs/architecture/limitations.md](docs/architecture/limitations.md)** - Known issues and planned fixes
 - 🔄 **[MIGRATION.md](MIGRATION.md)** - Migration guide for version upgrades
 
 **Note:** This changelog tracks SDK-specific changes. For project-wide changes, see the root `CHANGELOG.md`.
@@ -156,7 +156,7 @@ This changelog tracks SDK-specific changes including:
 - Better error handling for token storage operations
 
 **Documentation**
-- Updated `LIMITATIONS.md` to reflect v1.0.1 improvements (items 1-3 resolved)
+- Updated `docs/architecture/limitations.md` to reflect v1.0.1 improvements (items 1-3 resolved)
 - Updated `API_REFERENCE.md` to clarify SDK API vs TradeStation API endpoints
 - Added async usage examples and configuration documentation
 - Updated `SECURITY.md` with keychain storage instructions
@@ -166,7 +166,7 @@ This changelog tracks SDK-specific changes including:
 - ✅ `client.py` - Async HTTP client support with httpx
 - ✅ `config.py` - Added async client configuration
 - ✅ `__init__.py` - SDK initialization with async support
-- ✅ `LIMITATIONS.md` - Updated to reflect fixes
+- ✅ `docs/architecture/limitations.md` - Updated to reflect fixes
 - ✅ `CHANGELOG.md` - Added v1.0.1 entry
 - ✅ `docs/API_REFERENCE.md` - Clarified scope
 - ✅ `pyproject.toml` - Version bump to 1.0.1
@@ -228,7 +228,7 @@ This changelog tracks SDK-specific changes including:
 
 **Files Modified:**
 - ✅ `client.py` - Added retry logic to HTTPClient class
-- ✅ `LIMITATIONS.md` - Updated to reflect retry logic implementation
+- ✅ `docs/architecture/limitations.md` - Updated to reflect retry logic implementation
 - ✅ `CHANGELOG.md` - This entry
 
 **Usage:**
@@ -266,12 +266,12 @@ sdk._client.enable_retry = True  # or False to disable
 - ✅ pyproject.toml - Package name and all GitHub URLs
 - ✅ setup.py - Package name and all GitHub URLs
 - ✅ README.md - Badge, install commands, GitHub URLs
-- ✅ QUICKSTART.md - Install commands, GitHub URLs
+- ✅ docs/getting-started/quickstart.md - Install commands, GitHub URLs
 - ✅ INSTALLATION.md - All pip/git commands and URLs
 - ✅ MIGRATION.md - Install commands and GitHub URLs
 - ✅ CONTRIBUTING.md - Git clone and GitHub URLs
 - ✅ DEPLOYMENT.md - Install commands and GitHub URLs
-- ✅ LIMITATIONS.md - GitHub URLs
+- ✅ docs/architecture/limitations.md - GitHub URLs
 - ✅ CHEATSHEET.md - GitHub URLs
 - ✅ RELEASE_CHECKLIST.md - Install commands and GitHub URLs
 - ✅ docs/GETTING_STARTED.md - Install commands and URLs
@@ -346,7 +346,7 @@ sdk._client.enable_retry = True  # or False to disable
 - ✅ Improved navigation with updated table of contents
 
 **New Documentation Files:**
-- ✅ Created `LIMITATIONS.md` - Comprehensive known limitations document (13+ limitations with solutions)
+- ✅ Created `docs/architecture/limitations.md` - Comprehensive known limitations document (13+ limitations with solutions)
 - ✅ Enhanced existing documentation structure
 
 ### Examples & Learning Resources
@@ -439,7 +439,7 @@ sdk._client.enable_retry = True  # or False to disable
 - `LICENSE` - MIT License file
 
 **Documentation:**
-- `LIMITATIONS.md` - Comprehensive known limitations (13+ items)
+- `docs/architecture/limitations.md` - Comprehensive known limitations (13+ items)
 - `examples/README.md` - Examples directory overview
 - `cli/README.md` - CLI tools documentation
 
@@ -462,7 +462,7 @@ sdk._client.enable_retry = True  # or False to disable
 **For New Users:**
 - Follow "Quick Start (5 Minutes)" guide in README
 - Use CLI tools to verify setup
-- Check LIMITATIONS.md for known constraints
+- Check docs/architecture/limitations.md for known constraints
 - Explore Jupyter notebooks for learning
 
 ### Dependencies Updated
