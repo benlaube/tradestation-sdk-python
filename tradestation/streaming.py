@@ -17,6 +17,8 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any, TypeVar
 
+import requests
+
 from .logger import setup_logger
 
 from .client import HTTPClient
@@ -41,6 +43,22 @@ logger = setup_logger(__name__, sdk_config.log_level)
 
 # Type variable for stream items
 T = TypeVar("T")
+
+
+def _is_recoverable_stream_error(exc: Exception) -> bool:
+    """Return True when a stream error is eligible for retry or REST fallback."""
+    return isinstance(
+        exc,
+        (
+            RecoverableError,
+            NetworkError,
+            RateLimitError,
+            requests.exceptions.RequestException,
+            TimeoutError,
+            ConnectionError,
+            OSError,
+        ),
+    )
 
 
 @dataclass
@@ -285,14 +303,8 @@ class StreamingManager:
                     logger.critical(f"Max retries ({max_retries}) reached for {stream_type} stream")
                     raise
 
-                # Check if error is recoverable
-                is_recoverable = isinstance(e, RecoverableError) or isinstance(e, (NetworkError, RateLimitError))
-                if not is_recoverable and not isinstance(e, (RecoverableError, NonRecoverableError)):
-                    # For unknown exceptions, assume recoverable (may be transient)
-                    is_recoverable = True
-
-                if not is_recoverable:
-                    logger.error(f"Non-recoverable error in {stream_type} stream: {e}")
+                if not _is_recoverable_stream_error(e):
+                    logger.error(f"Non-recoverable error in {stream_type} stream: {e}", exc_info=True)
                     raise
 
                 logger.warning(
@@ -360,9 +372,12 @@ class StreamingManager:
             except InvalidRequestError:
                 raise
             except Exception as e:
-                # If fallback is enabled, try REST polling
-                if fallback_to_polling:
-                    logger.warning(f"HTTP streaming failed: {e}, falling back to REST polling")
+                if fallback_to_polling and _is_recoverable_stream_error(e):
+                    logger.warning(
+                        "HTTP quote streaming failed for %s; falling back to REST polling",
+                        ",".join(symbols_list),
+                        exc_info=True,
+                    )
                     async for quote in self._poll_quotes_rest(symbols_list, mode, polling_interval):
                         yield quote
                 else:
@@ -420,6 +435,7 @@ class StreamingManager:
                     quote_queue.put(quote_data)
                 quote_queue.put(None)  # Signal end
             except Exception as e:
+                logger.exception("Quote stream worker failed for endpoint=%s mode=%s", endpoint, mode)
                 stream_error[0] = e
                 quote_queue.put(None)  # Signal end
 
@@ -522,7 +538,7 @@ class StreamingManager:
             except asyncio.CancelledError:
                 break
             except Exception as e:
-                logger.error(f"REST polling error: {e}")
+                logger.exception("Quote REST polling fallback failed for symbols=%s mode=%s", symbols_str, mode)
                 await asyncio.sleep(interval)  # Continue polling despite errors
 
     async def stream_bars(
@@ -648,8 +664,12 @@ class StreamingManager:
                 async for order in self._stream_orders_internal(account_id, mode):
                     yield order
             except Exception as e:
-                if fallback_to_polling:
-                    logger.warning(f"HTTP streaming failed: {e}, falling back to REST polling")
+                if fallback_to_polling and _is_recoverable_stream_error(e):
+                    logger.warning(
+                        "HTTP order streaming failed for account_id=%s; falling back to REST polling",
+                        account_id,
+                        exc_info=True,
+                    )
                     async for order in self._poll_orders_rest(account_id, mode, polling_interval):
                         yield order
                 else:
@@ -688,6 +708,7 @@ class StreamingManager:
                     order_queue.put(order_data)
                 order_queue.put(None)
             except Exception as e:
+                logger.exception("Order stream worker failed for endpoint=%s mode=%s", endpoint, mode)
                 stream_error[0] = e
                 order_queue.put(None)
 
@@ -761,7 +782,7 @@ class StreamingManager:
             except asyncio.CancelledError:
                 break
             except Exception as e:
-                logger.error(f"REST polling error: {e}")
+                logger.exception("Order REST polling fallback failed for account_id=%s mode=%s", account_id, mode)
                 await asyncio.sleep(interval)
 
     async def stream_positions(
@@ -806,8 +827,12 @@ class StreamingManager:
                 async for position in self._stream_positions_internal(account_id, mode):
                     yield position
             except Exception as e:
-                if fallback_to_polling:
-                    logger.warning(f"HTTP streaming failed: {e}, falling back to REST polling")
+                if fallback_to_polling and _is_recoverable_stream_error(e):
+                    logger.warning(
+                        "HTTP position streaming failed for account_id=%s; falling back to REST polling",
+                        account_id,
+                        exc_info=True,
+                    )
                     async for position in self._poll_positions_rest(account_id, mode, polling_interval):
                         yield position
                 else:
@@ -846,6 +871,7 @@ class StreamingManager:
                     position_queue.put(position_data)
                 position_queue.put(None)
             except Exception as e:
+                logger.exception("Position stream worker failed for endpoint=%s mode=%s", endpoint, mode)
                 stream_error[0] = e
                 position_queue.put(None)
 
@@ -922,7 +948,7 @@ class StreamingManager:
             except asyncio.CancelledError:
                 break
             except Exception as e:
-                logger.error(f"REST polling error: {e}")
+                logger.exception("Position REST polling fallback failed for account_id=%s mode=%s", account_id, mode)
                 await asyncio.sleep(interval)
 
     async def stream_balances(
@@ -997,6 +1023,7 @@ class StreamingManager:
                     balance_queue.put(balance_data)
                 balance_queue.put(None)
             except Exception as e:
+                logger.exception("Balance stream worker failed for endpoint=%s mode=%s", endpoint, mode)
                 stream_error[0] = e
                 balance_queue.put(None)
 
@@ -1119,6 +1146,7 @@ class StreamingManager:
                     order_queue.put(order_data)
                 order_queue.put(None)
             except Exception as e:
+                logger.exception("Order-by-id stream worker failed for endpoint=%s mode=%s", endpoint, mode)
                 stream_error[0] = e
                 order_queue.put(None)
 

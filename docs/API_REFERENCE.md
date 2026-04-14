@@ -2,11 +2,12 @@
 
 ## About This Document
 
-This is the **complete API reference** for all SDK classes, methods, models, and exceptions. It provides detailed parameter descriptions, return types, usage patterns, and code examples for every function in the SDK.
+This is the **long-form API reference** for SDK classes, methods, models, and exceptions. The authoritative source for the current SDK surface is [`CANONICAL_SDK_INVENTORY.md`](./CANONICAL_SDK_INVENTORY.md); use this document for deeper explanations, signatures, and examples.
 
 **Use this if:** You need to look up a specific function, understand parameters, see return types, or find detailed method documentation.
 
 **Related Documents:**
+- 🧭 **[CANONICAL_SDK_INVENTORY.md](CANONICAL_SDK_INVENTORY.md)** - Authoritative SDK method and endpoint inventory
 - 📋 **[CHEATSHEET.md](../CHEATSHEET.md)** - Quick code snippets (faster lookup)
 - 💡 **[SDK_USAGE_EXAMPLES.md](SDK_USAGE_EXAMPLES.md)** - Real-world usage examples
 - 📚 **[API_ENDPOINT_MAPPING.md](API_ENDPOINT_MAPPING.md)** - SDK functions mapped to TradeStation API endpoints
@@ -18,7 +19,7 @@ This is the **complete API reference** for all SDK classes, methods, models, and
 
 - **Status:** Active
 - **Created:** 12-05-2025
-- **Last Updated:** 12-05-2025 14:21:15 EST
+- **Last Updated:** 2026-04-14 16:39:46 EDT
 - **Version:** 1.0.0
 - **Description:** Complete API reference documentation for all SDK classes, methods, models, and exceptions with detailed parameter descriptions and usage patterns
 - **Type:** API Reference - Technical reference for developers using the SDK
@@ -28,7 +29,15 @@ This is the **complete API reference** for all SDK classes, methods, models, and
   - [`ORDER_FUNCTIONS_REFERENCE.md`](./ORDER_FUNCTIONS_REFERENCE.md) - Detailed order function documentation
   - [`SDK_USAGE_EXAMPLES.md`](./SDK_USAGE_EXAMPLES.md) - Usage examples
   - [`MODELS.md`](./MODELS.md) - Model documentation
-- **How to Use:** Reference this document when implementing SDK features, understanding method parameters, or looking up class/method documentation
+- **How to Use:** Start with `CANONICAL_SDK_INVENTORY.md` to verify the current SDK surface, then use this document for detailed signatures, examples, and model context.
+
+## Authority Note
+
+When this document and the code disagree, trust:
+
+1. [`tradestation/__init__.py`](../tradestation/__init__.py)
+2. [`CANONICAL_SDK_INVENTORY.md`](./CANONICAL_SDK_INVENTORY.md)
+3. [`tests/test_endpoints.py`](../tests/test_endpoints.py)
 
 ---
 
@@ -1414,4 +1423,3 @@ if normalized:
 ---
 
 **Last Updated:** 2025-12-05
-

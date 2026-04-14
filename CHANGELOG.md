@@ -27,6 +27,27 @@ This changelog tracks SDK-specific changes including:
 - Authentication and session management changes
 - Streaming functionality updates
 
+## 2026-04-14 - Canonical Inventory, Streaming Failure Surfacing, And Doc Normalization
+
+**Highlights**
+- Added [`docs/CANONICAL_SDK_INVENTORY.md`](docs/CANONICAL_SDK_INVENTORY.md) as the single authoritative inventory for the current `TradeStationSDK` façade, convenience functions, advanced accessors, and endpoint families.
+- Updated the major documentation entry points (`README.md`, `CHEATSHEET.md`, `FEATURES.md`, `docs/INDEX.md`, `docs/API_REFERENCE.md`, `docs/API_ENDPOINT_MAPPING.md`, `docs/SDK_FUNCTIONS_LIST.md`) to point at the canonical inventory and to clarify document authority.
+- Normalized the current package import examples from `tradestation_sdk` to `tradestation` across the maintained SDK docs and examples.
+- Removed the duplicate `orders` property from `tradestation/__init__.py` so the façade no longer advertises the same accessor twice.
+- Hardened streaming failure behavior so unexpected runtime and programming errors no longer silently downgrade to REST polling, while recoverable transport failures still retain explicit fallback behavior.
+- Added background-thread stream failure logging with stack traces for quote, order, position, balance, and order-by-ID streaming workers, plus the lower-level async stream bridge helpers.
+- Changed `get_symbol_details()` to bubble broker/runtime failures instead of returning an empty success-shaped payload.
+- Added regression coverage for `get_symbol_details()` fail-loud behavior, recoverable quote-stream fallback, unexpected quote-stream failure bubbling, and contextual order-stream worker logging.
+
+**Files Modified**
+- ✅ `tradestation/__init__.py`
+- ✅ `tradestation/market_data.py`, `tradestation/orders.py`, `tradestation/positions.py`, `tradestation/streaming.py`
+- ✅ `tests/test_market_data.py`, `tests/test_streaming.py`
+- ✅ `README.md`, `CHEATSHEET.md`, `FEATURES.md`
+- ✅ `docs/CANONICAL_SDK_INVENTORY.md` (new)
+- ✅ `docs/INDEX.md`, `docs/API_REFERENCE.md`, `docs/API_ENDPOINT_MAPPING.md`, `docs/SDK_FUNCTIONS_LIST.md`
+- ✅ Maintained docs/examples using current `from tradestation import ...` imports
+
 ---
 
 ## 2026-04-14 - Strict Pydantic Validation and Fail-Loud SDK Contracts
@@ -112,7 +133,7 @@ This changelog tracks SDK-specific changes including:
 
 **Usage:**
 ```python
-from tradestation_sdk import TradeStationSDK
+from tradestation import TradeStationSDK
 
 # Default retry behavior (3 retries, 1s initial delay)
 sdk = TradeStationSDK()
@@ -160,10 +181,10 @@ sdk._client.enable_retry = True  # or False to disable
 - ✅ examples/01_authentication.ipynb - Install command
 - ✅ __init__.py - Fixed info() method bug
 
-**Import Name Preserved:**
-- Package: `tradestation-python-sdk` (new)
-- Import: `tradestation_sdk` (unchanged)
-- All Python code continues to work without modification
+**Current Import Path:**
+- Package: `tradestation-python-sdk`
+- Import: `tradestation`
+- All maintained examples should now use `from tradestation import ...`
 
 ### File Consolidation
 

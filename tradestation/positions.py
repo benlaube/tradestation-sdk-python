@@ -281,6 +281,7 @@ class PositionOperations:
                     data_queue.put(data)
                 data_queue.put(None)
             except Exception as e:
+                logger.exception("PositionOperations stream worker failed for endpoint=%s mode=%s", endpoint, mode)
                 stream_error[0] = e
                 data_queue.put(None)
 
@@ -307,7 +308,7 @@ class PositionOperations:
 
                 yield data
             except Exception as e:
-                logger.error(f"Stream error: {e}")
+                logger.exception("PositionOperations async stream bridge failed for endpoint=%s mode=%s", endpoint, mode)
                 raise
 
     def get_todays_profit_loss(self, mode: str | None = None) -> float:

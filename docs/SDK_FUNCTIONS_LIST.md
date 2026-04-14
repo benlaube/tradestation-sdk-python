@@ -2,11 +2,12 @@
 
 ## About This Document
 
-This is a **quick reference index** of all functions available in the SDK, organized by category. Use this to quickly find function names, then refer to detailed documentation for parameters and usage.
+This is a **legacy quick-reference catalog** of SDK functions, organized by category. The authoritative source for the current public surface is now [`CANONICAL_SDK_INVENTORY.md`](./CANONICAL_SDK_INVENTORY.md). Use this document for supplemental browsing, not as the final source of truth.
 
 **Use this if:** You want to see all available functions at a glance, find functions by category, or quickly look up function names.
 
 **Related Documents:**
+- 🧭 **[CANONICAL_SDK_INVENTORY.md](CANONICAL_SDK_INVENTORY.md)** - Authoritative SDK inventory
 - 📚 **[API_REFERENCE.md](API_REFERENCE.md)** - Detailed function documentation with parameters
 - 📝 **[ORDER_FUNCTIONS_REFERENCE.md](ORDER_FUNCTIONS_REFERENCE.md)** - Detailed order function documentation
 - 💡 **[SDK_USAGE_EXAMPLES.md](SDK_USAGE_EXAMPLES.md)** - Usage examples for all functions
@@ -17,7 +18,7 @@ This is a **quick reference index** of all functions available in the SDK, organ
 
 - **Status:** Active
 - **Created:** 12-05-2025
-- **Last Updated:** 12-05-2025 14:43:09 EST
+- **Last Updated:** 2026-04-14 16:39:46 EDT
 - **Version:** 1.1.0
 - **Description:** Quick reference list of all functions available in the TradeStation SDK across all modules and endpoints, organized by category for quick lookup
 - **Type:** Function Index - Quick reference for developers looking up SDK functions
@@ -26,7 +27,11 @@ This is a **quick reference index** of all functions available in the SDK, organ
   - [`ORDER_FUNCTIONS_REFERENCE.md`](./ORDER_FUNCTIONS_REFERENCE.md) - Comprehensive order function documentation
   - [`SDK_USAGE_EXAMPLES.md`](./SDK_USAGE_EXAMPLES.md) - Usage examples for all functions
   - [`API_REFERENCE.md`](./API_REFERENCE.md) - Complete API endpoint documentation
-- **How to Use:** Use this document as a quick index to find available SDK functions by category, then reference detailed documentation for specific functions
+- **How to Use:** Use this document for broad category browsing. For the current supported façade and endpoint inventory, start with `CANONICAL_SDK_INVENTORY.md`.
+
+## Authority Note
+
+`CANONICAL_SDK_INVENTORY.md` is the authoritative inventory for the SDK façade, convenience functions, and endpoint families. This file remains useful as a long-form browsing aid, especially for lower-level operation-module methods.
 
 ---
 

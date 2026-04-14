@@ -529,6 +529,7 @@ class OrderOperations:
                     data_queue.put(data)
                 data_queue.put(None)
             except Exception as e:
+                logger.exception("OrderOperations stream worker failed for endpoint=%s mode=%s", endpoint, mode)
                 stream_error[0] = e
                 data_queue.put(None)
 
@@ -555,7 +556,7 @@ class OrderOperations:
 
                 yield data
             except Exception as e:
-                logger.error(f"Stream error: {e}")
+                logger.exception("OrderOperations async stream bridge failed for endpoint=%s mode=%s", endpoint, mode)
                 raise
 
     def get_orders_by_status(

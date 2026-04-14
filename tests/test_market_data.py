@@ -280,6 +280,33 @@ class TestMarketDataOperationsGetSymbolDetails:
         # Verify result
         assert "Symbols" in result or isinstance(result, list)
 
+    def test_get_symbol_details_api_error_raises(self, mock_http_client, mocker):
+        """Test get_symbol_details bubbles broker errors instead of returning an empty payload."""
+        mocker.patch.object(
+            mock_http_client,
+            "make_request",
+            side_effect=TradeStationAPIError(ErrorDetails(message="symbol details unavailable")),
+        )
+
+        market_data = MarketDataOperations(mock_http_client)
+
+        with pytest.raises(TradeStationAPIError) as exc_info:
+            market_data.get_symbol_details("MNQZ25", mode="PAPER")
+
+        assert exc_info.value.details.operation == "get_symbol_details"
+
+    def test_get_symbol_details_runtime_error_raises_structured_error(self, mock_http_client, mocker):
+        """Test get_symbol_details wraps unexpected runtime failures in structured SDK errors."""
+        mocker.patch.object(mock_http_client, "make_request", side_effect=RuntimeError("broken parser"))
+
+        market_data = MarketDataOperations(mock_http_client)
+
+        with pytest.raises(TradeStationAPIError) as exc_info:
+            market_data.get_symbol_details("MNQZ25", mode="PAPER")
+
+        assert exc_info.value.details.operation == "get_symbol_details"
+        assert exc_info.value.details.code == "SDK_RUNTIME_ERROR"
+
 
 # ============================================================================
 # MarketDataOperations Other Methods Tests

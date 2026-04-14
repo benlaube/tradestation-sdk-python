@@ -22,22 +22,22 @@ Command-line tools for testing and verifying SDK functionality.
 Test SDK authentication and token management.
 
 ```bash
-python cli/test_auth.py PAPER
-python cli/test_auth.py LIVE
+python tradestation/cli/test_auth.py PAPER
+python tradestation/cli/test_auth.py LIVE
 ```
 
 ### test_connection.py
 Comprehensive connection test (auth, account, balances, market data).
 
 ```bash
-python cli/test_connection.py
+python tradestation/cli/test_connection.py
 ```
 
 ### test_orders.py
 Test order placement and management (PAPER mode recommended).
 
 ```bash
-python cli/test_orders.py --mode PAPER --symbol AAPL --side BUY --quantity 10
+python tradestation/cli/test_orders.py --mode PAPER --symbol AAPL --side BUY --quantity 10
 ```
 
 ### test_streaming.py

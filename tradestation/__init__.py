@@ -1203,11 +1203,6 @@ class TradeStationSDK:
         """Get order execution operations instance."""
         return self._order_executions
 
-    @property
-    def orders(self) -> OrderOperations:
-        """Get order query operations instance."""
-        return self._orders
-
 
 # Export main SDK class and all components
 __all__ = [

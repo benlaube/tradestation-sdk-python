@@ -19,6 +19,7 @@ This is the **main entry point** for the TradeStation Python SDK documentation. 
 **Related Documents:**
 - 🚀 **[QUICKSTART.md](QUICKSTART.md)** - Get started in 2 minutes (even faster than this guide)
 - 📋 **[CHEATSHEET.md](CHEATSHEET.md)** - Quick reference for common operations
+- 🧭 **[docs/CANONICAL_SDK_INVENTORY.md](docs/CANONICAL_SDK_INVENTORY.md)** - Authoritative SDK method and endpoint inventory
 - 📦 **[INSTALLATION.md](INSTALLATION.md)** - Detailed installation instructions for all platforms
 - 📖 **[docs/GETTING_STARTED.md](docs/GETTING_STARTED.md)** - 15-minute comprehensive tutorial
 - 📚 **[docs/INDEX.md](docs/INDEX.md)** - Complete documentation index and navigation
@@ -47,7 +48,7 @@ A comprehensive, self-contained Python SDK for TradeStation API v3. This SDK pro
 | New to SDK? | Documentation | Tools & Examples |
 |------------|---------------|------------------|
 | [2-Min Quick Start](QUICKSTART.md) | [Complete README](README.md) | [Jupyter Notebooks](examples/) |
-| [15-Min Tutorial](docs/GETTING_STARTED.md) | [API Reference](docs/API_REFERENCE.md) | [CLI Tools](cli/) |
+| [15-Min Tutorial](docs/GETTING_STARTED.md) | [Canonical Inventory](docs/CANONICAL_SDK_INVENTORY.md) | [CLI Tools](tradestation/cli/) |
 | [Installation Guide](INSTALLATION.md) | [Usage Examples](docs/SDK_USAGE_EXAMPLES.md) | [Cheat Sheet](CHEATSHEET.md) |
 
 | Need Help? | Going Live? | Contributing? |
@@ -62,6 +63,7 @@ A comprehensive, self-contained Python SDK for TradeStation API v3. This SDK pro
 
 - 🚀 **[QUICKSTART.md](QUICKSTART.md)** - Get started in 2 minutes
 - 📋 **[CHEATSHEET.md](CHEATSHEET.md)** - Quick reference (print and keep!)
+- 🧭 **[docs/CANONICAL_SDK_INVENTORY.md](docs/CANONICAL_SDK_INVENTORY.md)** - Authoritative SDK inventory
 - 📦 **[INSTALLATION.md](INSTALLATION.md)** - Detailed installation guide
 - 🔄 **[MIGRATION.md](MIGRATION.md)** - Migrate from other SDKs
 - ⚠️ **[LIMITATIONS.md](LIMITATIONS.md)** - Known constraints and workarounds
@@ -401,7 +403,7 @@ import os
 os.environ['TRADESTATION_CLIENT_ID'] = 'your_client_id'
 os.environ['TRADESTATION_CLIENT_SECRET'] = 'your_client_secret'
 
-from tradestation_sdk import TradeStationSDK
+from tradestation import TradeStationSDK
 sdk = TradeStationSDK()
 ```
 
@@ -493,7 +495,7 @@ sdk._client.max_retry_delay = 120.0  # Allow up to 2min delay
 When you exceed rate limits, the SDK raises `RateLimitError`:
 
 ```python
-from tradestation_sdk import RateLimitError
+from tradestation import RateLimitError
 
 try:
     order_id, status = sdk.place_order(...)
@@ -1682,10 +1684,10 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for complete guidelines including:
 - **[04_placing_orders.ipynb](examples/04_placing_orders.ipynb)** - Order placement
 - **[quick_start.py](examples/quick_start.py)** - Standalone quick start script
 
-### CLI Tools (cli/)
+### CLI Tools (`tradestation/cli/`)
 
-- **[test_auth.py](cli/test_auth.py)** - Test authentication
-- **[test_connection.py](cli/test_connection.py)** - Comprehensive connection test
+- **[test_auth.py](tradestation/cli/test_auth.py)** - Test authentication
+- **[test_connection.py](tradestation/cli/test_connection.py)** - Comprehensive connection test
 
 ### External Resources
 
@@ -1751,7 +1753,7 @@ See [CHANGELOG.md](CHANGELOG.md) for version history and release notes.
 
 ## 📊 SDK at a Glance
 
-**📦 Installation:** `pip install tradestation-sdk`  
+**📦 Installation:** `pip install tradestation-python-sdk`
 **⏱️ Time to First Order:** 2-5 minutes  
 **📈 API Coverage:** 92% (57/62 endpoints)  
 **🧪 Test Coverage:** 90%+  

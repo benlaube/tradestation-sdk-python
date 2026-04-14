@@ -92,7 +92,7 @@ Your TradeStation SDK has been successfully transformed from an internal library
 - All GitHub URLs
 
 **Preserved:**
-- Import name: `tradestation_sdk` (unchanged)
+- Import name: `tradestation` (unchanged)
 - All Python source code (no changes needed)
 - All functionality (100% backward compatible)
 
@@ -109,7 +109,7 @@ pip install tradestation-python-sdk
 ### Import (Unchanged)
 
 ```python
-from tradestation_sdk import TradeStationSDK
+from tradestation import TradeStationSDK
 
 sdk = TradeStationSDK()
 sdk.authenticate(mode="PAPER")
@@ -228,7 +228,7 @@ info = sdk.info()
 ### Package Information
 
 **PyPI Package Name:** `tradestation-python-sdk`
-**Import Name:** `tradestation_sdk`
+**Import Name:** `tradestation`
 **Version:** 1.0.0
 **License:** MIT
 **Python:** 3.10+
@@ -254,7 +254,7 @@ pip install -e ".[examples]"
 ### Quick Start
 
 ```python
-from tradestation_sdk import TradeStationSDK
+from tradestation import TradeStationSDK
 
 sdk = TradeStationSDK()
 sdk.authenticate(mode="PAPER")
@@ -307,7 +307,7 @@ print(f"Connected: {account['account_id']}")
 - 12 root documentation files
 - 21 technical docs (docs/)
 - 6 examples (examples/)
-- 3 CLI tools (cli/)
+- 3 CLI tools (`tradestation/cli/`)
 
 **Compared to competitors:**
 - Most TradeStation SDKs: 5-10 total files
@@ -389,7 +389,7 @@ print(f"Connected: {account['account_id']}")
 ### Final Package Stats
 
 - **Package Name:** `tradestation-python-sdk` ✅
-- **Import Name:** `tradestation_sdk` ✅
+- **Import Name:** `tradestation` ✅
 - **Root .md Files:** 12 (streamlined) ✅
 - **Total Doc Files:** 42 (comprehensive) ✅
 - **Test Coverage:** 90%+ ✅
@@ -485,7 +485,7 @@ TRADESTATION_CLIENT_ID=...
 TRADESTATION_CLIENT_SECRET=...
 
 # Minute 4-5: Run script
-from tradestation_sdk import TradeStationSDK
+from tradestation import TradeStationSDK
 sdk = TradeStationSDK()
 sdk.authenticate(mode="PAPER")
 sdk.place_limit_order("AAPL", "BUY", 10, 150.00, mode="PAPER")
@@ -562,7 +562,7 @@ Your SDK now has:
 - README.md ✅ Updated
 - requirements.txt
 
-**CLI Tools (cli/ - 3 files):**
+**CLI Tools (`tradestation/cli/` - 3 files):**
 - test_auth.py
 - test_connection.py
 - README.md

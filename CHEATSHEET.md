@@ -8,6 +8,7 @@ This is a **quick reference guide** for common SDK operations. Print this out or
 
 **For more detail, see:**
 - 📖 **[README.md](README.md)** - Complete SDK documentation
+- 🧭 **[docs/CANONICAL_SDK_INVENTORY.md](docs/CANONICAL_SDK_INVENTORY.md)** - Authoritative SDK method and endpoint inventory
 - 📚 **[docs/API_REFERENCE.md](docs/API_REFERENCE.md)** - Complete API reference with all parameters
 - 💡 **[docs/SDK_USAGE_EXAMPLES.md](docs/SDK_USAGE_EXAMPLES.md)** - Detailed examples with explanations
 - 🚀 **[QUICKSTART.md](QUICKSTART.md)** - 2-minute getting started guide
@@ -22,7 +23,7 @@ Quick reference for common operations. Keep this handy!
 ## Setup
 
 ```python
-from tradestation_sdk import TradeStationSDK
+from tradestation import TradeStationSDK
 sdk = TradeStationSDK()
 sdk.authenticate(mode="PAPER")
 ```
@@ -198,7 +199,7 @@ asyncio.run(stream_example())
 ## Error Handling
 
 ```python
-from tradestation_sdk import (
+from tradestation import (
     TradeStationAPIError,
     AuthenticationError,
     RateLimitError,

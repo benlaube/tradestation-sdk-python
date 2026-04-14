@@ -20,7 +20,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from dotenv import load_dotenv
-from tradestation_sdk import TradeStationSDK
+from tradestation import TradeStationSDK
 
 
 def print_section(title):

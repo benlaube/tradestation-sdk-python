@@ -397,6 +397,7 @@ class MarketDataOperations:
                     data_queue.put(data)
                 data_queue.put(None)
             except Exception as e:
+                logger.exception("Market data stream worker failed for endpoint=%s mode=%s", endpoint, mode)
                 stream_error[0] = e
                 data_queue.put(None)
 
@@ -425,7 +426,7 @@ class MarketDataOperations:
                 yield data
 
             except Exception as e:
-                logger.error(f"Stream error: {e}")
+                logger.exception("Market data async stream bridge failed for endpoint=%s mode=%s", endpoint, mode)
                 raise
 
     def get_quote_snapshots(self, symbols: str, mode: str | None = None) -> dict[str, Any]:
@@ -532,10 +533,10 @@ class MarketDataOperations:
             if not e.details.message.startswith("Failed to get symbol details"):
                 e.details.message = f"Failed to get symbol details: {e.details.message}"
             logger.error(f"Failed to get symbol details: {e.details.to_human_readable()}", exc_info=True)
-            return {"Symbols": [], "Errors": []}
+            raise
         except Exception as e:
             logger.error(f"Failed to get symbol details: {e}", exc_info=True)
-            return {"Symbols": [], "Errors": []}
+            raise_unexpected_error(operation="get_symbol_details", endpoint=endpoint, mode=mode, exc=e)
 
     def get_crypto_symbol_names(self, mode: str | None = None) -> list[str]:
         """

@@ -6,8 +6,11 @@ Note: Tests use mocked HTTP streaming responses (newline-delimited JSON).
 """
 
 import json
+import logging
 
 import pytest
+import requests
+from tradestation.models.streaming import OrderStream, QuoteStream
 from tradestation.streaming import StreamingManager
 
 from .fixtures import api_responses
@@ -118,6 +121,59 @@ class TestStreamingManagerStreamQuotes:
             async for _ in streaming.stream_quotes("MNQZ25", mode="PAPER"):
                 break
 
+    @pytest.mark.asyncio
+    async def test_stream_quotes_falls_back_only_for_recoverable_errors(
+        self, mock_token_manager, mock_http_client, mocker, caplog
+    ):
+        """Test quote streaming only falls back to REST polling for recoverable transport failures."""
+
+        async def raise_stream_error(*args, **kwargs):
+            if False:
+                yield None
+            raise requests.exceptions.ConnectionError("stream socket closed")
+
+        async def poll_once(*args, **kwargs):
+            yield QuoteStream.model_validate(json.loads(api_responses.MOCK_STREAM_QUOTE.strip()))
+
+        caplog.set_level(logging.WARNING, logger="tradestation.streaming")
+        streaming = StreamingManager(mock_token_manager, "client_id", "client_secret", mock_http_client)
+        mocker.patch.object(streaming, "_stream_quotes_internal", side_effect=raise_stream_error)
+        mock_poll = mocker.patch.object(streaming, "_poll_quotes_rest", side_effect=poll_once)
+
+        quotes = []
+        async for quote in streaming.stream_quotes("MNQZ25", mode="PAPER"):
+            quotes.append(quote)
+            break
+
+        assert len(quotes) == 1
+        assert quotes[0].Symbol == "MNQZ25"
+        assert mock_poll.call_count == 1
+        assert "falling back to REST polling" in caplog.text
+
+    @pytest.mark.asyncio
+    async def test_stream_quotes_unexpected_errors_do_not_fallback(
+        self, mock_token_manager, mock_http_client, mocker
+    ):
+        """Test unexpected programming/runtime failures bubble instead of degrading to polling."""
+
+        async def raise_programming_error(*args, **kwargs):
+            if False:
+                yield None
+            raise RuntimeError("unexpected quote parser bug")
+
+        async def poll_once(*args, **kwargs):
+            yield QuoteStream.model_validate(json.loads(api_responses.MOCK_STREAM_QUOTE.strip()))
+
+        streaming = StreamingManager(mock_token_manager, "client_id", "client_secret", mock_http_client)
+        mocker.patch.object(streaming, "_stream_quotes_internal", side_effect=raise_programming_error)
+        mock_poll = mocker.patch.object(streaming, "_poll_quotes_rest", side_effect=poll_once)
+
+        with pytest.raises(RuntimeError):
+            async for _ in streaming.stream_quotes("MNQZ25", mode="PAPER"):
+                break
+
+        assert mock_poll.call_count == 0
+
 
 # ============================================================================
 # StreamingManager stream_orders Tests
@@ -167,6 +223,22 @@ class TestStreamingManagerStreamOrders:
 
         call_args = mock_http_client.stream_data.call_args
         assert "brokerage/stream/accounts/SIM123456/orders" in call_args[0][0]
+
+    @pytest.mark.asyncio
+    async def test_stream_orders_logs_background_worker_failures(
+        self, mock_token_manager, mock_http_client, mocker, caplog
+    ):
+        """Test background-thread order stream failures are logged with context before bubbling."""
+        mocker.patch.object(mock_http_client, "stream_data", side_effect=RuntimeError("worker exploded"))
+        caplog.set_level(logging.ERROR, logger="tradestation.streaming")
+
+        streaming = StreamingManager(mock_token_manager, "client_id", "client_secret", mock_http_client)
+
+        with pytest.raises(RuntimeError):
+            async for _ in streaming.stream_orders("SIM123456", mode="PAPER", fallback_to_polling=False):
+                break
+
+        assert "Order stream worker failed" in caplog.text
 
 
 # ============================================================================

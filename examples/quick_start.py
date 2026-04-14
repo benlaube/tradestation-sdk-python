@@ -14,7 +14,7 @@ This is a standalone example that works independently of the trading bot.
 import os
 
 from dotenv import load_dotenv
-from tradestation_sdk import AuthenticationError, TradeStationSDK
+from tradestation import AuthenticationError, TradeStationSDK
 
 
 def main():

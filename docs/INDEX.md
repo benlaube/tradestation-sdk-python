@@ -8,6 +8,7 @@ This is the **complete navigation hub** for all SDK documentation. It organizes 
 
 **Related Documents:**
 - 📖 **[README.md](../README.md)** - Main SDK documentation (start here)
+- 🧭 **[CANONICAL_SDK_INVENTORY.md](CANONICAL_SDK_INVENTORY.md)** - Authoritative SDK method and endpoint inventory
 - 🚀 **[QUICKSTART.md](../QUICKSTART.md)** - 2-minute getting started guide
 - 📚 **[GETTING_STARTED.md](GETTING_STARTED.md)** - 15-minute comprehensive tutorial
 - 📋 **[CHEATSHEET.md](../CHEATSHEET.md)** - Quick reference guide
@@ -25,7 +26,7 @@ Complete guide to all SDK documentation. Start here to find what you need!
 1. **[QUICKSTART.md](../QUICKSTART.md)** - 2-minute setup guide (copy-paste and go!)
 2. **[README.md](../README.md#quick-start-5-minutes)** - 5-minute tutorial with explanations
 3. **[examples/01_authentication.ipynb](../examples/01_authentication.ipynb)** - Interactive authentication tutorial
-4. **[cli/test_connection.py](../cli/test_connection.py)** - Verify your setup works
+4. **[tradestation/cli/test_connection.py](../tradestation/cli/test_connection.py)** - Verify your setup works
 
 **Recommended Path:**
 ```
@@ -41,6 +42,7 @@ QUICKSTART.md → README.md → Jupyter Notebooks → API Reference
 | File | Purpose | When to Use |
 |------|---------|-------------|
 | [README.md](../README.md) | Main SDK documentation | Starting point, feature overview |
+| [CANONICAL_SDK_INVENTORY.md](CANONICAL_SDK_INVENTORY.md) | Source-of-truth SDK inventory | Verify the current public surface and endpoints |
 | [QUICKSTART.md](../QUICKSTART.md) | 2-minute setup guide | Fastest path to running code |
 | [CHEATSHEET.md](../CHEATSHEET.md) | Quick reference | Keep handy while coding |
 | [FAQ & Troubleshooting](../README.md#faq--troubleshooting) | Common issues | When something doesn't work |
@@ -64,6 +66,7 @@ QUICKSTART.md → README.md → Jupyter Notebooks → API Reference
 
 | File | Description | Use For |
 |------|-------------|---------|
+| [CANONICAL_SDK_INVENTORY.md](CANONICAL_SDK_INVENTORY.md) | Canonical method inventory | Current SDK façade, convenience functions, endpoint families |
 | [API_REFERENCE.md](API_REFERENCE.md) | Complete API reference | Function signatures, parameters |
 | [SDK_USAGE_EXAMPLES.md](SDK_USAGE_EXAMPLES.md) | Code examples | Working code patterns |
 | [ORDER_FUNCTIONS_REFERENCE.md](ORDER_FUNCTIONS_REFERENCE.md) | Order functions | Order placement details |
@@ -122,16 +125,16 @@ jupyter notebook
 
 ---
 
-## 🔧 CLI Tools (cli/)
+## 🔧 CLI Tools (`tradestation/cli/`)
 
 **Command-line tools for testing and debugging:**
 
 | Tool | Purpose | Command |
 |------|---------|---------|
-| [test_auth.py](../cli/test_auth.py) | Test authentication | `python cli/test_auth.py PAPER` |
-| [test_connection.py](../cli/test_connection.py) | Full connection test | `python cli/test_connection.py` |
+| [test_auth.py](../tradestation/cli/test_auth.py) | Test authentication | `python tradestation/cli/test_auth.py PAPER` |
+| [test_connection.py](../tradestation/cli/test_connection.py) | Full connection test | `python tradestation/cli/test_connection.py` |
 
-See [cli/README.md](../cli/README.md) for complete CLI documentation.
+See the scripts in [`tradestation/cli/`](../tradestation/cli/) for complete CLI coverage.
 
 ---
 
@@ -188,12 +191,13 @@ pytest tests/test_accounts.py   # Specific module
 
 | I want to... | Go to... |
 |--------------|----------|
+| Verify whether a method or endpoint exists right now | [CANONICAL_SDK_INVENTORY.md](CANONICAL_SDK_INVENTORY.md) |
 | Set up SDK in 2 minutes | [QUICKSTART.md](../QUICKSTART.md) |
 | Learn authentication | [01_authentication.ipynb](../examples/01_authentication.ipynb) |
 | Place my first order | [04_placing_orders.ipynb](../examples/04_placing_orders.ipynb) |
 | Fix port conflict | [FAQ & Troubleshooting](../README.md#faq--troubleshooting) |
 | See code examples | [SDK_USAGE_EXAMPLES.md](SDK_USAGE_EXAMPLES.md) |
-| Find a function | [API_REFERENCE.md](API_REFERENCE.md) |
+| Find a function | [CANONICAL_SDK_INVENTORY.md](CANONICAL_SDK_INVENTORY.md) |
 | Quick reference | [CHEATSHEET.md](../CHEATSHEET.md) |
 | Understand errors | [README.md](../README.md#error-handling) |
 | Stream real-time data | [SDK_USAGE_EXAMPLES.md](SDK_USAGE_EXAMPLES.md#streaming) |
@@ -208,7 +212,7 @@ pytest tests/test_accounts.py   # Specific module
 ## 📁 Documentation Structure
 
 ```
-tradestation-sdk/
+tradestation/
 ├── README.md                    # Main documentation
 ├── QUICKSTART.md                # 2-minute setup
 ├── CHEATSHEET.md                # Quick reference
@@ -235,7 +239,7 @@ tradestation-sdk/
 │   ├── quick_start.py
 │   └── requirements.txt
 │
-├── cli/                         # CLI testing tools
+├── tradestation/cli/            # CLI testing tools
 │   ├── README.md
 │   ├── test_auth.py
 │   └── test_connection.py
@@ -253,7 +257,7 @@ tradestation-sdk/
 
 1. **Check [QUICKSTART.md](../QUICKSTART.md)** - Maybe you just need the quick start
 2. **Read [FAQ](../README.md#faq--troubleshooting)** - Common issues are documented
-3. **Run [test_connection.py](../cli/test_connection.py)** - Diagnose connection issues
+3. **Run [test_connection.py](../tradestation/cli/test_connection.py)** - Diagnose connection issues
 4. **Check [LIMITATIONS.md](../LIMITATIONS.md)** - Your issue might be a known limitation
 
 ### Still Stuck?

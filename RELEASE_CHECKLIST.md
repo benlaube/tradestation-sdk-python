@@ -128,7 +128,7 @@ jobs:
 - [ ] **Build package** - `python -m build`
 - [ ] **Check package** - `twine check dist/*`
 - [ ] **Test install locally** - `pip install dist/*.whl`
-- [ ] **Verify imports** - `python -c "import tradestation_sdk"`
+- [ ] **Verify imports** - `python -c "import tradestation"`
 - [ ] **Test CLI tools** - Run after local install
 
 ### PyPI Account Setup
@@ -145,10 +145,10 @@ jobs:
 twine upload --repository testpypi dist/*
 
 # Install from Test PyPI
-pip install --index-url https://test.pypi.org/simple/ tradestation-sdk
+pip install --index-url https://test.pypi.org/simple/ tradestation-python-sdk
 
 # Verify it works
-python -c "import tradestation_sdk; print(tradestation_sdk.__version__)"
+python -c "import tradestation; print(tradestation.__version__)"
 ```
 
 ### Publish to PyPI
@@ -161,7 +161,7 @@ python -m build
 twine upload dist/*
 ```
 
-- [ ] **Uploaded to PyPI** - https://pypi.org/project/tradestation-sdk/
+- [ ] **Uploaded to PyPI** - https://pypi.org/project/tradestation-python-sdk/
 - [ ] **Verified on PyPI** - Package page looks correct
 - [ ] **Installed from PyPI** - `pip install tradestation-python-sdk` works
 - [ ] **Tested after install** - All features work

@@ -129,7 +129,7 @@ FROM python:3.10-slim
 WORKDIR /app
 
 # Install SDK
-RUN pip install --no-cache-dir tradestation-sdk
+RUN pip install --no-cache-dir tradestation-python-sdk
 
 # Copy bot code
 COPY my_bot.py /app/
@@ -521,7 +521,7 @@ def save_state(positions, orders, balances):
 
 ```python
 # emergency_shutdown.py
-from tradestation_sdk import TradeStationSDK
+from tradestation import TradeStationSDK
 
 sdk = TradeStationSDK()
 sdk.ensure_authenticated(mode="LIVE")

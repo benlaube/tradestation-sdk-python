@@ -77,7 +77,7 @@ pip install tradestation-python-sdk
 ### Step 2: Verify Installation
 
 ```bash
-python -c "import tradestation_sdk; print(tradestation_sdk.__version__)"
+python -c "import tradestation; print(tradestation.__version__)"
 # Should print: 1.0.0
 ```
 
@@ -129,7 +129,7 @@ This bot:
 4. Places a test order (commented out for safety)
 """
 
-from tradestation_sdk import TradeStationSDK, TradeStationAPIError
+from tradestation import TradeStationSDK, TradeStationAPIError
 from dotenv import load_dotenv
 
 # Load credentials from .env
@@ -269,7 +269,7 @@ jupyter notebook
 
 ```python
 # strategy.py
-from tradestation_sdk import TradeStationSDK
+from tradestation import TradeStationSDK
 import pandas as pd
 
 sdk = TradeStationSDK()
@@ -328,7 +328,7 @@ else:
 ```python
 # stream_monitor.py
 import asyncio
-from tradestation_sdk import TradeStationSDK
+from tradestation import TradeStationSDK
 
 async def monitor_quotes():
     sdk = TradeStationSDK()
@@ -412,7 +412,7 @@ See [FAQ & Troubleshooting](README.md#faq--troubleshooting) for solutions to:
 
 1. **Run diagnostic test:**
    ```bash
-   python cli/test_connection.py
+   python tradestation/cli/test_connection.py
    ```
 
 2. **Check SDK info:**
@@ -442,7 +442,7 @@ See [FAQ & Troubleshooting](README.md#faq--troubleshooting) for solutions to:
 
 ### Learning
 - 📓 [examples/](examples/) - Jupyter notebooks
-- 🔧 [cli/](cli/) - CLI testing tools
+- 🔧 [tradestation/cli/](tradestation/cli/) - CLI testing tools
 - 🎓 [TradeStation API Docs](https://developer.tradestation.com/webapi)
 
 ### Community

@@ -48,7 +48,7 @@ pip install tradestation-python-sdk
 Update `requirements.txt`:
 ```diff
 - tradestation==0.2
-+ tradestation-sdk>=1.0.0
++ tradestation-python-sdk>=1.0.0
 ```
 
 ### Import Changes
@@ -60,7 +60,7 @@ from tradestation import Session
 
 **After:**
 ```python
-from tradestation_sdk import TradeStationSDK
+from tradestation import TradeStationSDK
 ```
 
 ### Initialization Changes
@@ -192,7 +192,7 @@ except Exception as e:
 
 **After:**
 ```python
-from tradestation_sdk import (
+from tradestation import (
     TradeStationAPIError,
     AuthenticationError,
     RateLimitError
@@ -241,7 +241,7 @@ for quote in session.stream_quotes(["AAPL"]):
 
 **After (This SDK):**
 ```python
-from tradestation_sdk import TradeStationSDK
+from tradestation import TradeStationSDK
 import asyncio
 
 # Initialize (reads from .env)
@@ -307,7 +307,7 @@ headers = {"Authorization": f"Bearer {access_token}"}
 
 **After (SDK Handles Everything):**
 ```python
-from tradestation_sdk import TradeStationSDK
+from tradestation import TradeStationSDK
 
 sdk = TradeStationSDK()
 sdk.authenticate(mode="PAPER")
@@ -389,7 +389,7 @@ order = client.submit_order(
 
 **TradeStation SDK:**
 ```python
-from tradestation_sdk import TradeStationSDK
+from tradestation import TradeStationSDK
 
 sdk = TradeStationSDK()
 sdk.authenticate(mode="PAPER")
@@ -419,7 +419,7 @@ trade = ib.placeOrder(contract, order)
 
 **TradeStation SDK:**
 ```python
-from tradestation_sdk import TradeStationSDK
+from tradestation import TradeStationSDK
 
 sdk = TradeStationSDK()
 sdk.authenticate(mode="PAPER")
@@ -461,7 +461,7 @@ order_id, status = sdk.place_order(
 - Enhanced error handling
 
 **Recommended Actions:**
-1. Update to v1.0: `pip install --upgrade tradestation-sdk`
+1. Update to v1.0: `pip install --upgrade tradestation-python-sdk`
 2. Enable automatic reconnection in streaming (enabled by default)
 3. Use convenience functions for cleaner code
 4. Review new error handling patterns
@@ -477,7 +477,7 @@ Check [CHANGELOG.md](CHANGELOG.md) for version-specific migration notes.
 Use this checklist when migrating:
 
 - [ ] Update dependencies (remove old, install new)
-- [ ] Update imports (`from tradestation_sdk import ...`)
+- [ ] Update imports (`from tradestation import ...`)
 - [ ] Set up `.env` file with credentials
 - [ ] Change authentication code (OAuth flow)
 - [ ] Update API method calls (see examples above)

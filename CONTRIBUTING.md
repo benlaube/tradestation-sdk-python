@@ -90,10 +90,10 @@ Edit `.env` with your TradeStation credentials.
 
 ```bash
 # Run authentication test
-python cli/test_auth.py PAPER
+python tradestation/cli/test_auth.py PAPER
 
 # Run comprehensive connection test
-python cli/test_connection.py
+python tradestation/cli/test_connection.py
 ```
 
 ---
@@ -120,7 +120,7 @@ Branch naming convention:
 The SDK is organized by domain:
 
 ```
-tradestation_sdk/
+tradestation/
 ├── __init__.py           # Main SDK class
 ├── session.py            # OAuth authentication
 ├── client.py             # HTTP client
@@ -253,7 +253,7 @@ Every new function must have tests covering:
 
 ```python
 import pytest
-from tradestation_sdk import TradeStationSDK
+from tradestation import TradeStationSDK
 
 @pytest.mark.unit
 class TestNewFeature:
