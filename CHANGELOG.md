@@ -32,6 +32,8 @@ This changelog tracks SDK-specific changes including:
 ## 2026-04-14 - Strict Pydantic Validation and Fail-Loud SDK Contracts
 
 **Highlights**
+- Updated the v3 account models to accept the documented `AccountDetail` payload on `GET /v3/brokerage/accounts`, preventing strict validation from breaking account-scoped stream startup in downstream applications.
+- Added regression coverage for v3 account-list payloads that include nested `AccountDetail` metadata so SDK tests now protect the live ingestion contract.
 - Added a strict shared model base and enforced `extra="forbid"` across exported SDK request/response models so unknown broker fields now fail validation instead of being silently dropped.
 - Added `SDKValidationError` plus shared validation helpers that attach operation, endpoint, mode, sanitized payload excerpts, and Pydantic validation details to every contract failure.
 - Moved the audited account, quote, order, execution, position, and streaming boundaries onto explicit model validation and `model_dump()` serialization while preserving the SDK’s public dict/list return shapes.

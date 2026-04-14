@@ -50,6 +50,16 @@ class TestAccountOperationsGetAccountInfo:
         assert result["account_id"] in ["SIM123456", "SIM789012"]
         assert len(result["accounts"]) == 2
 
+    def test_get_account_info_preserves_v3_account_detail(self, mock_http_client, mocker):
+        """Test get_account_info accepts v3 AccountDetail payloads without validation failure."""
+        mocker.patch.object(mock_http_client, "make_request", return_value=api_responses.MOCK_ACCOUNTS_LIST)
+
+        account_ops = AccountOperations(mock_http_client, default_mode="PAPER")
+        result = account_ops.get_account_info("PAPER")
+
+        assert result["accounts"][0]["AccountDetail"]["DayTradingQualified"] is True
+        assert result["accounts"][0]["AccountDetail"]["OptionApprovalLevel"] == 0
+
     def test_get_account_info_account_id_selection(self, mock_http_client, mocker):
         """Test get_account_info selects account ID correctly."""
         mocker.patch.object(mock_http_client, "make_request", return_value=api_responses.MOCK_ACCOUNTS_LIST)

@@ -15,6 +15,15 @@ MOCK_ACCOUNTS_LIST = {
             "Status": "ACTIVE",
             "Currency": "USD",
             "Alias": "Paper Trading",
+            "AccountDetail": {
+                "DayTradingQualified": True,
+                "EnrolledInRegTProgram": False,
+                "CryptoEnabled": False,
+                "IsStockLocateEligible": False,
+                "OptionApprovalLevel": 0,
+                "PatternDayTrader": False,
+                "RequiresBuyingPowerWarning": False,
+            },
         },
         {
             "AccountID": "SIM789012",

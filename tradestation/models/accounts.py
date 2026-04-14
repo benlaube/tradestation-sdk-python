@@ -14,6 +14,21 @@ from pydantic import AliasChoices, Field
 from .base import TradeStationModel, strict_model_config
 
 
+class AccountDetailPayload(TradeStationModel):
+    """Detailed account metadata returned on v3 account list responses."""
+
+    CryptoEnabled: bool | None = Field(None, description="Whether crypto trading is enabled for the account")
+    DayTradingQualified: bool | None = Field(None, description="Whether the account is qualified for day trading")
+    EnrolledInRegTProgram: bool | None = Field(None, description="Whether the account is enrolled in Reg T")
+    IsStockLocateEligible: bool | None = Field(None, description="Whether the account is eligible for stock locates")
+    OptionApprovalLevel: int | None = Field(None, description="Options approval level")
+    PatternDayTrader: bool | None = Field(None, description="Whether the account is marked as a pattern day trader")
+    RequiresBuyingPowerWarning: bool | None = Field(
+        None,
+        description="Whether the account receives buying power warning alerts",
+    )
+
+
 class AccountSummary(TradeStationModel):
     """Account summary information from TradeStation API."""
 
@@ -22,6 +37,8 @@ class AccountSummary(TradeStationModel):
     Status: str | None = Field(None, description="Account status")
     Currency: str | None = Field(None, description="Account currency")
     Alias: str | None = Field(None, description="Account alias")
+    AltID: str | None = Field(None, description="Alternate account ID, used for some regional accounts")
+    AccountDetail: AccountDetailPayload | None = Field(None, description="Optional account detail metadata")
     Equity: float | str | None = Field(None, description="Total equity")
     CashBalance: float | str | None = Field(None, description="Cash balance")
     BuyingPower: float | str | None = Field(None, description="Buying power")
@@ -43,6 +60,15 @@ class AccountSummary(TradeStationModel):
                 "Status": "ACTIVE",
                 "Currency": "USD",
                 "Alias": "Paper",
+                "AccountDetail": {
+                    "DayTradingQualified": True,
+                    "EnrolledInRegTProgram": False,
+                    "CryptoEnabled": False,
+                    "IsStockLocateEligible": False,
+                    "OptionApprovalLevel": 0,
+                    "PatternDayTrader": False,
+                    "RequiresBuyingPowerWarning": False,
+                },
             }
         }
     )
@@ -103,3 +129,6 @@ class DetailedBalancesResponse(TradeStationModel):
 
     Balances: list[BODBalance] = Field(default_factory=list, description="List of balance records")
     Errors: list[dict[str, Any]] = Field(default_factory=list, description="Unstructured API errors")
+
+
+AccountDetail = AccountDetailPayload

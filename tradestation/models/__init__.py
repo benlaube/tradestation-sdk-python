@@ -22,6 +22,7 @@ Dependencies: pydantic
 
 from .accounts import (
     AccountBalancesResponse,
+    AccountDetail,
     AccountSummary,
     BalanceDetail,
     BODBalance,
@@ -82,6 +83,7 @@ __all__ = [
     "StreamErrorResponse",
     "MarketFlags",
     # Accounts / Balances
+    "AccountDetail",
     "AccountSummary",
     "BalanceDetail",
     "AccountBalancesResponse",
