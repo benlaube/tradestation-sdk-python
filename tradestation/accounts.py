@@ -67,7 +67,8 @@ class AccountOperations:
 
         Raises:
             TradeStationAPIError: When API responds with an error status.
-            Exception: For unexpected errors (logged and returned as empty dict).
+            InvalidRequestError: When no usable TradeStation account is available.
+            Exception: For unexpected errors.
 
         Dependencies: HTTPClient.make_request
         """
@@ -86,8 +87,15 @@ class AccountOperations:
             accounts = accounts_parsed.Accounts
 
             if not accounts:
-                logger.warning("No accounts found")
-                return {}
+                raise InvalidRequestError(
+                    ErrorDetails(
+                        code="ACCOUNT_UNAVAILABLE",
+                        message="No TradeStation accounts were returned for the authenticated user",
+                        request_endpoint="brokerage/accounts",
+                        mode=mode,
+                        operation="get_account_info",
+                    )
+                )
 
             # Convert Pydantic models to dicts for compatibility
             accounts_dicts = [dump_model(account) for account in accounts]
@@ -265,10 +273,17 @@ class AccountOperations:
             return balances
 
         except requests.HTTPError as e:
-            # Handle 404 errors gracefully (account doesn't exist)
             if hasattr(e, "response") and e.response.status_code == 404:
-                logger.debug(f"Account not found in {mode or 'default'} mode (404) - balance unavailable")
-                return {}
+                raise InvalidRequestError(
+                    ErrorDetails(
+                        code="ACCOUNT_NOT_FOUND",
+                        message=f"TradeStation account '{account_id}' was not found for {mode or self.default_mode} mode",
+                        request_endpoint=f"brokerage/accounts/{account_id}" if account_id else "brokerage/accounts",
+                        response_status=404,
+                        mode=mode,
+                        operation="get_account_balances",
+                    )
+                ) from e
             logger.error(f"HTTP error getting account balances: {e}")
             raise_unexpected_error(
                 operation="get_account_balances",
@@ -278,10 +293,18 @@ class AccountOperations:
             )
         except TradeStationAPIError as e:
             e.details.operation = "get_account_balances"
-            # Handle 404 errors gracefully (account doesn't exist)
             if e.details.response_status == 404:
-                logger.debug(f"Account not found in {mode or 'default'} mode - balance unavailable")
-                return {}
+                raise InvalidRequestError(
+                    ErrorDetails(
+                        code="ACCOUNT_NOT_FOUND",
+                        message=f"TradeStation account '{account_id}' was not found for {mode or self.default_mode} mode",
+                        request_endpoint=e.details.request_endpoint or f"brokerage/accounts/{account_id}",
+                        response_status=404,
+                        response_body=e.details.response_body,
+                        mode=mode,
+                        operation="get_account_balances",
+                    )
+                ) from e
             if not e.details.message.startswith("Failed to get account balances"):
                 e.details.message = f"Failed to get account balances: {e.details.message}"
             logger.error(f"Failed to get account balances: {e.details.to_human_readable()}")
@@ -325,8 +348,15 @@ class AccountOperations:
                 account_info = self.get_account_info(mode)
                 account_id = account_info.get("account_id") or self.account_id
                 if not account_id:
-                    logger.error(f"No account ID available for {mode} mode - cannot fetch detailed balances")
-                    return {"Balances": [], "Errors": []}
+                    raise InvalidRequestError(
+                        ErrorDetails(
+                            code="ACCOUNT_ID_UNAVAILABLE",
+                            message=f"No account ID is available for {mode} mode; cannot fetch detailed balances",
+                            request_endpoint="brokerage/accounts/{accounts}/balances",
+                            mode=mode,
+                            operation="get_account_balances_detailed",
+                        )
+                    )
                 account_ids = account_id
 
             # TradeStation API v3 endpoint: brokerage/accounts/{accounts}/balances
@@ -397,8 +427,15 @@ class AccountOperations:
                 account_info = self.get_account_info(mode)
                 account_id = account_info.get("account_id") or self.account_id
                 if not account_id:
-                    logger.error(f"No account ID available for {mode} mode - cannot fetch BOD balances")
-                    return {"BODBalances": [], "Errors": []}
+                    raise InvalidRequestError(
+                        ErrorDetails(
+                            code="ACCOUNT_ID_UNAVAILABLE",
+                            message=f"No account ID is available for {mode} mode; cannot fetch BOD balances",
+                            request_endpoint="brokerage/accounts/{accounts}/bodbalances",
+                            mode=mode,
+                            operation="get_account_balances_bod",
+                        )
+                    )
                 account_ids = account_id
 
             # TradeStation API v3 endpoint: brokerage/accounts/{accounts}/bodbalances

@@ -5,6 +5,7 @@ Tests for AccountOperations class including account info and balance queries.
 """
 
 import pytest
+from tradestation.exceptions import ErrorDetails, InvalidRequestError, TradeStationAPIError
 from tradestation.accounts import AccountOperations
 
 from .fixtures import api_responses
@@ -73,13 +74,22 @@ class TestAccountOperationsGetAccountInfo:
 
     def test_get_account_info_error_handling(self, mock_http_client, mocker):
         """Test get_account_info fails loud on broker errors."""
-        from tradestation.exceptions import TradeStationAPIError
-
         mocker.patch.object(mock_http_client, "make_request", side_effect=TradeStationAPIError("API Error"))
 
         account_ops = AccountOperations(mock_http_client, default_mode="PAPER")
         with pytest.raises(TradeStationAPIError):
             account_ops.get_account_info("PAPER")
+
+    def test_get_account_info_no_accounts_raises(self, mock_http_client, mocker):
+        """Test get_account_info fails loud when no accounts are returned."""
+        mocker.patch.object(mock_http_client, "make_request", return_value={"Accounts": []})
+
+        account_ops = AccountOperations(mock_http_client, default_mode="PAPER")
+
+        with pytest.raises(InvalidRequestError) as exc_info:
+            account_ops.get_account_info("PAPER")
+
+        assert exc_info.value.details.operation == "get_account_info"
 
 
 # ============================================================================
@@ -226,6 +236,30 @@ class TestAccountOperationsGetAccountBalances:
         # Second call: account detail with account ID
         mock_request.assert_any_call("GET", "brokerage/accounts/SIM789012", mode="PAPER")
 
+    def test_get_account_balances_404_raises(self, mock_http_client, mocker):
+        """Test get_account_balances fails loud when the target account is not found."""
+        mocker.patch.object(
+            mock_http_client,
+            "make_request",
+            side_effect=[
+                api_responses.MOCK_ACCOUNTS_LIST,
+                TradeStationAPIError(
+                    ErrorDetails(
+                        message="account not found",
+                        response_status=404,
+                        request_endpoint="brokerage/accounts/SIM123456",
+                    )
+                ),
+            ],
+        )
+
+        account_ops = AccountOperations(mock_http_client, account_id="SIM123456", default_mode="PAPER")
+
+        with pytest.raises(InvalidRequestError) as exc_info:
+            account_ops.get_account_balances("PAPER", "SIM123456")
+
+        assert exc_info.value.details.code == "ACCOUNT_NOT_FOUND"
+
 
 # ============================================================================
 # AccountOperations get_account_balances_detailed Tests
@@ -261,6 +295,17 @@ class TestAccountOperationsGetAccountBalancesDetailed:
 
         # Verify multiple accounts were requested
         assert result is not None
+
+    def test_get_account_balances_detailed_requires_resolved_account(self, mock_http_client, mocker):
+        """Test detailed balances fail loud when no account can be resolved."""
+        mocker.patch.object(mock_http_client, "make_request", return_value={"Accounts": []})
+
+        account_ops = AccountOperations(mock_http_client, default_mode="PAPER")
+
+        with pytest.raises(InvalidRequestError) as exc_info:
+            account_ops.get_account_balances_detailed(None, "PAPER")
+
+        assert exc_info.value.details.operation == "get_account_balances_detailed"
 
 
 # ============================================================================
@@ -298,6 +343,17 @@ class TestAccountOperationsGetAccountBalancesBOD:
 
         # Verify BOD balance data is present
         assert result is not None
+
+    def test_get_account_balances_bod_requires_resolved_account(self, mock_http_client, mocker):
+        """Test BOD balances fail loud when no account can be resolved."""
+        mocker.patch.object(mock_http_client, "make_request", return_value={"Accounts": []})
+
+        account_ops = AccountOperations(mock_http_client, default_mode="PAPER")
+
+        with pytest.raises(InvalidRequestError) as exc_info:
+            account_ops.get_account_balances_bod(None, "PAPER")
+
+        assert exc_info.value.details.operation == "get_account_balances_bod"
 
 
 # ============================================================================

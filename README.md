@@ -611,6 +611,7 @@ All exceptions include structured `ErrorDetails` with:
 - Unknown broker fields are treated as schema drift and raise `SDKValidationError`.
 - Validation errors include sanitized payload excerpts and Pydantic error details.
 - Audited SDK boundaries now fail loud instead of silently returning `{}`, `[]`, or raw fallback payloads on parse failures.
+- Convenience helpers now fail loud on malformed ID tokens, unresolved account selection, invalid local inputs, and broker/runtime errors instead of masking those failures as empty results.
 
 ### Example Error Handling
 

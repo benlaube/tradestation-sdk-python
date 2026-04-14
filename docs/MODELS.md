@@ -44,10 +44,14 @@ The SDK now treats Pydantic models as an enforced contract boundary, not just do
 ### Scope Hardened in This Pass
 
 - Accounts
+- Account discovery and balance convenience helpers
 - Quote snapshots
+- Market-data convenience helpers
 - Positions
+- Position convenience helpers that depend on order history / flattening
 - Order history/current order lookups
 - Order executions and placement request construction
+- Session ID-token decoding
 - Streaming quote/order/position/balance parsing
 
 ### Compatibility Notes

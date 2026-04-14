@@ -5,6 +5,7 @@ Tests for MarketDataOperations class including historical bars, symbol search, q
 """
 
 import pytest
+from tradestation.exceptions import ErrorDetails, TradeStationAPIError
 from tradestation.market_data import MarketDataOperations
 
 from .fixtures import api_responses
@@ -136,6 +137,21 @@ class TestMarketDataOperationsSearchSymbols:
         assert call_args[1]["params"]["category"] == "Future"
         assert call_args[1]["params"]["assetType"] == "Index"
 
+    def test_search_symbols_api_error_raises(self, mock_http_client, mocker):
+        """Test search_symbols bubbles broker errors instead of returning an empty list."""
+        mocker.patch.object(
+            mock_http_client,
+            "make_request",
+            side_effect=TradeStationAPIError(ErrorDetails(message="upstream search failure")),
+        )
+
+        market_data = MarketDataOperations(mock_http_client)
+
+        with pytest.raises(TradeStationAPIError) as exc_info:
+            market_data.search_symbols("MNQ", category="Future", mode="PAPER")
+
+        assert exc_info.value.details.operation == "search_symbols"
+
 
 # ============================================================================
 # MarketDataOperations get_futures_index_symbols Tests
@@ -172,6 +188,21 @@ class TestMarketDataOperationsGetFuturesIndexSymbols:
 
         # Verify symbols are returned
         assert result is not None
+
+    def test_get_futures_index_symbols_raises_when_all_queries_fail(self, mock_http_client, mocker):
+        """Test get_futures_index_symbols raises if every underlying API call fails."""
+        mocker.patch.object(
+            mock_http_client,
+            "make_request",
+            side_effect=TradeStationAPIError(ErrorDetails(message="all symbol searches failed")),
+        )
+
+        market_data = MarketDataOperations(mock_http_client)
+
+        with pytest.raises(TradeStationAPIError) as exc_info:
+            market_data.get_futures_index_symbols("PAPER")
+
+        assert exc_info.value.details.operation == "get_futures_index_symbols"
 
 
 # ============================================================================
@@ -271,6 +302,21 @@ class TestMarketDataOperationsOtherMethods:
         assert "marketdata/symbollists/cryptopairs/symbolnames" in call_args[0][1]
         assert result is not None
 
+    def test_get_crypto_symbol_names_api_error_raises(self, mock_http_client, mocker):
+        """Test get_crypto_symbol_names fails loud on broker errors."""
+        mocker.patch.object(
+            mock_http_client,
+            "make_request",
+            side_effect=TradeStationAPIError(ErrorDetails(message="crypto symbols unavailable")),
+        )
+
+        market_data = MarketDataOperations(mock_http_client)
+
+        with pytest.raises(TradeStationAPIError) as exc_info:
+            market_data.get_crypto_symbol_names("PAPER")
+
+        assert exc_info.value.details.operation == "get_crypto_symbol_names"
+
     def test_get_option_expirations(self, mock_http_client, mocker):
         """Test get_option_expirations returns option expirations."""
         mocker.patch.object(mock_http_client, "make_request", return_value=api_responses.MOCK_OPTION_EXPIRATIONS)
@@ -281,6 +327,21 @@ class TestMarketDataOperationsOtherMethods:
         call_args = mock_http_client.make_request.call_args
         assert "marketdata/options/expirations/SPY" in call_args[0][1]
         assert result is not None
+
+    def test_get_option_expirations_api_error_raises(self, mock_http_client, mocker):
+        """Test get_option_expirations fails loud on broker errors."""
+        mocker.patch.object(
+            mock_http_client,
+            "make_request",
+            side_effect=TradeStationAPIError(ErrorDetails(message="expiration query failed")),
+        )
+
+        market_data = MarketDataOperations(mock_http_client)
+
+        with pytest.raises(TradeStationAPIError) as exc_info:
+            market_data.get_option_expirations("SPY", mode="PAPER")
+
+        assert exc_info.value.details.operation == "get_option_expirations"
 
     def test_get_option_risk_reward(self, mock_http_client, mocker):
         """Test get_option_risk_reward returns risk/reward data."""
@@ -306,6 +367,21 @@ class TestMarketDataOperationsOtherMethods:
         assert "marketdata/options/spreadtypes" in call_args[0][1]
         assert result is not None
 
+    def test_get_option_spread_types_api_error_raises(self, mock_http_client, mocker):
+        """Test get_option_spread_types fails loud on broker errors."""
+        mocker.patch.object(
+            mock_http_client,
+            "make_request",
+            side_effect=TradeStationAPIError(ErrorDetails(message="spread types unavailable")),
+        )
+
+        market_data = MarketDataOperations(mock_http_client)
+
+        with pytest.raises(TradeStationAPIError) as exc_info:
+            market_data.get_option_spread_types("PAPER")
+
+        assert exc_info.value.details.operation == "get_option_spread_types"
+
     def test_get_option_strikes(self, mock_http_client, mocker):
         """Test get_option_strikes returns option strikes."""
         mocker.patch.object(mock_http_client, "make_request", return_value=api_responses.MOCK_OPTION_STRIKES)
@@ -317,3 +393,18 @@ class TestMarketDataOperationsOtherMethods:
         assert "marketdata/options/strikes/SPY" in call_args[0][1]
         assert call_args[1]["params"]["expiration"] == "2025-12-19"
         assert result is not None
+
+    def test_get_option_strikes_api_error_raises(self, mock_http_client, mocker):
+        """Test get_option_strikes fails loud on broker errors."""
+        mocker.patch.object(
+            mock_http_client,
+            "make_request",
+            side_effect=TradeStationAPIError(ErrorDetails(message="strike lookup failed")),
+        )
+
+        market_data = MarketDataOperations(mock_http_client)
+
+        with pytest.raises(TradeStationAPIError) as exc_info:
+            market_data.get_option_strikes("SPY", "2025-12-19", mode="PAPER")
+
+        assert exc_info.value.details.operation == "get_option_strikes"

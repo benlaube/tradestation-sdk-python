@@ -36,14 +36,16 @@ This changelog tracks SDK-specific changes including:
 - Added `SDKValidationError` plus shared validation helpers that attach operation, endpoint, mode, sanitized payload excerpts, and Pydantic validation details to every contract failure.
 - Moved the audited account, quote, order, execution, position, and streaming boundaries onto explicit model validation and `model_dump()` serialization while preserving the SDK’s public dict/list return shapes.
 - Removed silent parse downgrades in the audited SDK paths so validation/runtime failures now bubble up to callers with descriptive structured errors.
+- Extended the fail-loud contract to remaining convenience helpers in `accounts.py`, `market_data.py`, `order_executions.py`, `positions.py`, and `session.py` so missing account resolution, malformed ID tokens, invalid local inputs, and broker/runtime failures no longer collapse into empty `{}` or `[]` results.
 - Added regression tests and CI coverage for model policy enforcement, validation failures, and compatibility of public return shapes.
 
 **Files Modified**
 - ✅ `tradestation/models/base.py` (new strict model base)
 - ✅ `tradestation/validation.py` (new validation helper layer)
 - ✅ `tradestation/exceptions.py`
-- ✅ `tradestation/accounts.py`, `market_data.py`, `orders.py`, `order_executions.py`, `positions.py`, `streaming.py`
+- ✅ `tradestation/accounts.py`, `market_data.py`, `orders.py`, `order_executions.py`, `positions.py`, `session.py`, `streaming.py`
 - ✅ `tradestation/models/*.py`
+- ✅ `tests/test_accounts.py`, `test_market_data.py`, `test_order_executions.py`, `test_positions.py`, `test_session.py`
 - ✅ `tests/test_pydantic_contract.py` (new)
 - ✅ `.github/workflows/sdk-tests.yml` (new)
 - ✅ `README.md`, `docs/MODELS.md`, `CHANGELOG.md`

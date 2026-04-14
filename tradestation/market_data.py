@@ -188,10 +188,10 @@ class MarketDataOperations:
             if not e.details.message.startswith("Failed to search symbols"):
                 e.details.message = f"Failed to search symbols: {e.details.message}"
             logger.error(f"Failed to search symbols: {e.details.to_human_readable()}")
-            return []
+            raise
         except Exception as e:
             logger.error(f"Failed to search symbols: {e}", exc_info=True)
-            return []
+            raise_unexpected_error(operation="search_symbols", endpoint=endpoint, mode=mode, exc=e)
 
     def get_futures_index_symbols(self, mode: str | None = None) -> list[dict[str, Any]]:
         """
@@ -209,6 +209,7 @@ class MarketDataOperations:
         # TradeStation API requires a pattern parameter - cannot call without pattern
         # Query each common base symbol and aggregate results
         all_symbols = []
+        last_error: Exception | None = None
         common_futures = ["MNQ", "MES", "MYM", "M2K", "NQ", "ES", "YM", "RTY"]
 
         for base_symbol in common_futures:
@@ -236,7 +237,12 @@ class MarketDataOperations:
                         if symbol not in all_symbols:
                             all_symbols.append(symbol)
 
+            except TradeStationAPIError as e:
+                last_error = e
+                logger.debug(f"Failed to fetch symbols for pattern '{base_symbol}': {e}")
+                continue
             except Exception as e:
+                last_error = e
                 logger.debug(f"Failed to fetch symbols for pattern '{base_symbol}': {e}")
                 continue
 
@@ -250,6 +256,19 @@ class MarketDataOperations:
         all_symbols = list(seen_symbols.values())
 
         if not all_symbols:
+            if last_error is not None:
+                if isinstance(last_error, TradeStationAPIError):
+                    last_error.details.operation = "get_futures_index_symbols"
+                    if not last_error.details.message.startswith("Failed to get futures index symbols"):
+                        last_error.details.message = f"Failed to get futures index symbols: {last_error.details.message}"
+                    logger.error(f"Failed to get futures index symbols: {last_error.details.to_human_readable()}")
+                    raise last_error
+                raise_unexpected_error(
+                    operation="get_futures_index_symbols",
+                    endpoint=endpoint,
+                    mode=mode,
+                    exc=last_error,
+                )
             logger.warning("Failed to fetch futures symbols from API, returning empty list")
             return []
 
@@ -550,9 +569,15 @@ class MarketDataOperations:
 
             return symbol_names
 
+        except TradeStationAPIError as e:
+            e.details.operation = "get_crypto_symbol_names"
+            if not e.details.message.startswith("Failed to get crypto symbol names"):
+                e.details.message = f"Failed to get crypto symbol names: {e.details.message}"
+            logger.error(f"Failed to get crypto symbol names: {e.details.to_human_readable()}")
+            raise
         except Exception as e:
             logger.error(f"Failed to get crypto symbol names: {e}", exc_info=True)
-            return []
+            raise_unexpected_error(operation="get_crypto_symbol_names", endpoint=endpoint, mode=mode, exc=e)
 
     def get_option_expirations(
         self, underlying: str, mode: str | None = None, strike_price: float | None = None
@@ -602,9 +627,15 @@ class MarketDataOperations:
 
             return expirations
 
+        except TradeStationAPIError as e:
+            e.details.operation = "get_option_expirations"
+            if not e.details.message.startswith("Failed to get option expirations"):
+                e.details.message = f"Failed to get option expirations: {e.details.message}"
+            logger.error(f"Failed to get option expirations: {e.details.to_human_readable()}")
+            raise
         except Exception as e:
             logger.error(f"Failed to get option expirations: {e}", exc_info=True)
-            return []
+            raise_unexpected_error(operation="get_option_expirations", endpoint=endpoint, mode=mode, exc=e)
 
     def get_option_risk_reward(self, request: dict[str, Any], mode: str | None = None) -> dict[str, Any]:
         """
@@ -636,7 +667,7 @@ class MarketDataOperations:
 
         except Exception as e:
             logger.error(f"Failed to calculate option risk/reward: {e}", exc_info=True)
-            raise
+            raise_unexpected_error(operation="get_option_risk_reward", endpoint=endpoint, mode=mode, exc=e)
 
     def get_option_spread_types(self, mode: str | None = None) -> list[dict[str, Any]]:
         """
@@ -668,9 +699,15 @@ class MarketDataOperations:
 
             return spread_types
 
+        except TradeStationAPIError as e:
+            e.details.operation = "get_option_spread_types"
+            if not e.details.message.startswith("Failed to get option spread types"):
+                e.details.message = f"Failed to get option spread types: {e.details.message}"
+            logger.error(f"Failed to get option spread types: {e.details.to_human_readable()}")
+            raise
         except Exception as e:
             logger.error(f"Failed to get option spread types: {e}", exc_info=True)
-            return []
+            raise_unexpected_error(operation="get_option_spread_types", endpoint=endpoint, mode=mode, exc=e)
 
     def get_option_strikes(
         self,
@@ -751,9 +788,15 @@ class MarketDataOperations:
 
             return strikes
 
+        except TradeStationAPIError as e:
+            e.details.operation = "get_option_strikes"
+            if not e.details.message.startswith("Failed to get option strikes"):
+                e.details.message = f"Failed to get option strikes: {e.details.message}"
+            logger.error(f"Failed to get option strikes: {e.details.to_human_readable()}")
+            raise
         except Exception as e:
             logger.error(f"Failed to get option strikes: {e}", exc_info=True)
-            return []
+            raise_unexpected_error(operation="get_option_strikes", endpoint=endpoint, mode=mode, exc=e)
 
     async def stream_option_chains(
         self,

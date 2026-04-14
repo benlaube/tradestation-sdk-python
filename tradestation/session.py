@@ -35,7 +35,7 @@ import jwt
 from .logger import setup_logger
 
 from .config import sdk_config
-from .exceptions import AuthenticationError, TokenExpiredError
+from .exceptions import AuthenticationError, ErrorDetails, InvalidTokenError, TokenExpiredError
 
 logger = setup_logger(__name__, sdk_config.log_level)
 
@@ -679,14 +679,23 @@ class Session:
 
         Returns:
             Dictionary with user info (name, email, etc.) or empty dict if no ID token
+
+        Raises:
+            InvalidTokenError: When an ID token is present but malformed or undecodable.
         """
         if self.id_token is None:
             return {}
         try:
             return jwt.decode(self.id_token, options={"verify_signature": False})
         except Exception as e:
-            logger.warning(f"Failed to decode ID token: {e}")
-            return {}
+            logger.error("Failed to decode ID token", exc_info=True)
+            raise InvalidTokenError(
+                ErrorDetails(
+                    code="INVALID_ID_TOKEN",
+                    message=f"Failed to decode ID token: {e}",
+                    operation="user_info",
+                )
+            ) from e
 
     def serialize(self) -> str:
         """

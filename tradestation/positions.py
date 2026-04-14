@@ -16,11 +16,23 @@ from .logger import setup_logger
 from .accounts import AccountOperations
 from .client import HTTPClient
 from .config import sdk_config
-from .exceptions import TradeStationAPIError
+from .exceptions import ErrorDetails, InvalidRequestError, TradeStationAPIError
 from .models import PositionsResponse
 from .validation import dump_model, raise_unexpected_error, validate_model
 
 logger = setup_logger(__name__, sdk_config.log_level)
+
+
+def _raise_invalid_request(operation: str, message: str, mode: str | None = None) -> None:
+    """Raise a structured invalid-request error for local position-operation failures."""
+    raise InvalidRequestError(
+        ErrorDetails(
+            code="INVALID_REQUEST",
+            message=message,
+            mode=mode,
+            operation=operation,
+        )
+    )
 
 
 class PositionOperations:
@@ -152,8 +164,11 @@ class PositionOperations:
         if mode is None:
             mode = self.default_mode
         if order_operations is None:
-            logger.error("flatten_position requires order_operations parameter")
-            return []
+            _raise_invalid_request(
+                "flatten_position",
+                "flatten_position requires an order_operations dependency to place offsetting orders",
+                mode,
+            )
 
         if symbol:
             # Flatten single symbol
@@ -170,7 +185,14 @@ class PositionOperations:
 
             if order_id:
                 return [{"order_id": order_id, "symbol": symbol, "side": side, "quantity": quantity, "status": status}]
-            return []
+            raise InvalidRequestError(
+                ErrorDetails(
+                    code="ORDER_PLACEMENT_FAILED",
+                    message=f"Flatten order for {symbol} did not return an order ID",
+                    mode=mode,
+                    operation="flatten_position",
+                )
+            )
         # Flatten all positions
         all_positions = self.get_all_positions(mode)
         if not all_positions:
@@ -192,6 +214,15 @@ class PositionOperations:
             if order_id:
                 flattened.append(
                     {"order_id": order_id, "symbol": pos_symbol, "side": side, "quantity": quantity, "status": status}
+                )
+            else:
+                raise InvalidRequestError(
+                    ErrorDetails(
+                        code="ORDER_PLACEMENT_FAILED",
+                        message=f"Flatten order for {pos_symbol} did not return an order ID",
+                        mode=mode,
+                        operation="flatten_position",
+                    )
                 )
 
         if flattened:
@@ -346,8 +377,11 @@ class PositionOperations:
             from datetime import datetime
 
             if order_operations is None:
-                logger.error("get_todays_trades requires order_operations parameter")
-                return []
+                _raise_invalid_request(
+                    "get_todays_trades",
+                    "get_todays_trades requires an order_operations dependency to query order history",
+                    mode,
+                )
 
             if mode is None:
                 mode = self.default_mode
@@ -368,9 +402,15 @@ class PositionOperations:
             logger.info(f"Found {len(filled_trades)} filled trade(s) today")
             return filled_trades
 
+        except TradeStationAPIError as e:
+            e.details.operation = "get_todays_trades"
+            if not e.details.message.startswith("Failed to get today's trades"):
+                e.details.message = f"Failed to get today's trades: {e.details.message}"
+            logger.error(f"Failed to get today's trades: {e.details.to_human_readable()}", exc_info=True)
+            raise
         except Exception as e:
             logger.error(f"Failed to get today's trades: {e}", exc_info=True)
-            return []
+            raise_unexpected_error(operation="get_todays_trades", endpoint="orderexecution/orders", mode=mode, exc=e)
 
     def get_unrealized_profit_loss(self, mode: str | None = None) -> float:
         """

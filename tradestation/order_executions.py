@@ -15,11 +15,23 @@ from .logger import setup_logger
 from .accounts import AccountOperations
 from .client import HTTPClient
 from .config import sdk_config
-from .exceptions import TradeStationAPIError
+from .exceptions import ErrorDetails, InvalidRequestError, TradeStationAPIError
 from .models import OrdersResponse, TradeStationExecutionResponse, TradeStationOrderRequest
 from .validation import dump_model, raise_unexpected_error, validate_model
 
 logger = setup_logger(__name__, sdk_config.log_level)
+
+
+def _raise_invalid_request(operation: str, message: str, mode: str | None = None) -> None:
+    """Raise a structured invalid-request error for local input validation failures."""
+    raise InvalidRequestError(
+        ErrorDetails(
+            code="INVALID_REQUEST",
+            message=message,
+            mode=mode,
+            operation=operation,
+        )
+    )
 
 
 class OrderExecutionOperations:
@@ -493,27 +505,37 @@ class OrderExecutionOperations:
         """
         # Validate symbol
         if not symbol or not isinstance(symbol, str):
-            logger.error(
-                f"❌ symbol must be a non-empty string, got {type(symbol).__name__ if symbol is not None else 'None'}"
+            value_type = type(symbol).__name__ if symbol is not None else "None"
+            _raise_invalid_request(
+                "cancel_all_orders_for_symbol",
+                f"symbol must be a non-empty string, got {value_type}",
+                mode,
             )
-            return []
         symbol = symbol.strip()
         if not symbol:
-            logger.error("❌ symbol cannot be empty or whitespace only")
-            return []
+            _raise_invalid_request("cancel_all_orders_for_symbol", "symbol cannot be empty or whitespace only", mode)
         if len(symbol) > 50:
-            logger.error(f"❌ symbol seems too long ({len(symbol)} characters). Maximum recommended: 50 characters")
-            return []
+            _raise_invalid_request(
+                "cancel_all_orders_for_symbol",
+                f"symbol seems too long ({len(symbol)} characters). Maximum recommended: 50 characters",
+                mode,
+            )
 
         # Validate mode if provided
         if mode is not None:
             if not isinstance(mode, str):
-                logger.error(f"❌ mode must be 'PAPER' or 'LIVE', got {type(mode).__name__}")
-                return []
+                _raise_invalid_request(
+                    "cancel_all_orders_for_symbol",
+                    f"mode must be 'PAPER' or 'LIVE', got {type(mode).__name__}",
+                    mode,
+                )
             mode_upper = mode.upper().strip()
             if mode_upper not in ["PAPER", "LIVE"]:
-                logger.error(f"❌ mode must be 'PAPER' or 'LIVE', got '{mode}'")
-                return []
+                _raise_invalid_request(
+                    "cancel_all_orders_for_symbol",
+                    f"mode must be 'PAPER' or 'LIVE', got '{mode}'",
+                    mode,
+                )
             mode = mode_upper
 
         if mode is None:
@@ -526,8 +548,11 @@ class OrderExecutionOperations:
         account_id = account_info.get("account_id") or self.account_id
 
         if not account_id:
-            logger.error(f"No account ID available for {mode} mode - cannot cancel orders")
-            return []
+            _raise_invalid_request(
+                "cancel_all_orders_for_symbol",
+                f"No account ID available for {mode} mode - cannot cancel orders",
+                mode,
+            )
 
         # Get current orders for the account
         # We need to import OrderOperations or access it differently
@@ -568,10 +593,10 @@ class OrderExecutionOperations:
             if not e.details.message.startswith("Failed to cancel orders for symbol"):
                 e.details.message = f"Failed to cancel orders for symbol: {e.details.message}"
             logger.error(f"Failed to cancel orders for symbol {symbol}: {e.details.to_human_readable()}")
-            return []
+            raise
         except Exception as e:
             logger.error(f"Failed to cancel orders for symbol {symbol}: {e}", exc_info=True)
-            return []
+            raise_unexpected_error(operation="cancel_all_orders_for_symbol", endpoint=endpoint, mode=mode, exc=e)
 
     def cancel_all_orders(self, account_ids: str | None = None, mode: str | None = None) -> list[dict[str, Any]]:
         """
@@ -593,12 +618,14 @@ class OrderExecutionOperations:
         # Validate mode if provided
         if mode is not None:
             if not isinstance(mode, str):
-                logger.error(f"❌ mode must be 'PAPER' or 'LIVE', got {type(mode).__name__}")
-                return []
+                _raise_invalid_request(
+                    "cancel_all_orders",
+                    f"mode must be 'PAPER' or 'LIVE', got {type(mode).__name__}",
+                    mode,
+                )
             mode_upper = mode.upper().strip()
             if mode_upper not in ["PAPER", "LIVE"]:
-                logger.error(f"❌ mode must be 'PAPER' or 'LIVE', got '{mode}'")
-                return []
+                _raise_invalid_request("cancel_all_orders", f"mode must be 'PAPER' or 'LIVE', got '{mode}'", mode)
             mode = mode_upper
 
         if mode is None:
@@ -609,8 +636,11 @@ class OrderExecutionOperations:
         account_id = account_info.get("account_id") or self.account_id
 
         if not account_id:
-            logger.error(f"No account ID available for {mode} mode - cannot cancel orders")
-            return []
+            _raise_invalid_request(
+                "cancel_all_orders",
+                f"No account ID available for {mode} mode - cannot cancel orders",
+                mode,
+            )
 
         # Get current orders for the account
         try:
@@ -645,10 +675,10 @@ class OrderExecutionOperations:
             if not e.details.message.startswith("Failed to cancel all orders"):
                 e.details.message = f"Failed to cancel all orders: {e.details.message}"
             logger.error(f"Failed to cancel all orders: {e.details.to_human_readable()}")
-            return []
+            raise
         except Exception as e:
             logger.error(f"Failed to cancel all orders: {e}", exc_info=True)
-            return []
+            raise_unexpected_error(operation="cancel_all_orders", endpoint=endpoint, mode=mode, exc=e)
 
     def replace_order(
         self,
@@ -1027,27 +1057,32 @@ class OrderExecutionOperations:
         """
         # Validate order_id
         if not order_id or not isinstance(order_id, str):
-            logger.error(
-                f"❌ order_id must be a non-empty string, got {type(order_id).__name__ if order_id is not None else 'None'}"
+            _raise_invalid_request(
+                "get_order_executions",
+                f"order_id must be a non-empty string, got {type(order_id).__name__ if order_id is not None else 'None'}",
+                mode,
             )
-            return []
         order_id = order_id.strip()
         if not order_id:
-            logger.error("❌ order_id cannot be empty or whitespace only")
-            return []
+            _raise_invalid_request("get_order_executions", "order_id cannot be empty or whitespace only", mode)
         if len(order_id) > 50:
-            logger.error(f"❌ order_id seems too long ({len(order_id)} characters). Maximum recommended: 50 characters")
-            return []
+            _raise_invalid_request(
+                "get_order_executions",
+                f"order_id seems too long ({len(order_id)} characters). Maximum recommended length is 50",
+                mode,
+            )
 
         # Validate mode if provided
         if mode is not None:
             if not isinstance(mode, str):
-                logger.error(f"❌ mode must be 'PAPER' or 'LIVE', got {type(mode).__name__}")
-                return []
+                _raise_invalid_request(
+                    "get_order_executions",
+                    f"mode must be 'PAPER' or 'LIVE', got {type(mode).__name__}",
+                    mode,
+                )
             mode_upper = mode.upper().strip()
             if mode_upper not in ["PAPER", "LIVE"]:
-                logger.error(f"❌ mode must be 'PAPER' or 'LIVE', got '{mode}'")
-                return []
+                _raise_invalid_request("get_order_executions", f"mode must be 'PAPER' or 'LIVE', got '{mode}'", mode)
             mode = mode_upper
 
         try:
@@ -1340,10 +1375,10 @@ class OrderExecutionOperations:
             if not e.details.message.startswith("Failed to get activation triggers"):
                 e.details.message = f"Failed to get activation triggers: {e.details.message}"
             logger.error(f"Failed to get activation triggers: {e.details.to_human_readable()}", exc_info=True)
-            return []
+            raise
         except Exception as e:
             logger.error(f"Failed to get activation triggers: {e}", exc_info=True)
-            return []
+            raise_unexpected_error(operation="get_activation_triggers", endpoint=endpoint, mode=mode, exc=e)
 
     def get_routes(self, mode: str | None = None) -> list[dict[str, Any]]:
         """
@@ -1382,10 +1417,10 @@ class OrderExecutionOperations:
             if not e.details.message.startswith("Failed to get routing options"):
                 e.details.message = f"Failed to get routing options: {e.details.message}"
             logger.error(f"Failed to get routing options: {e.details.to_human_readable()}", exc_info=True)
-            return []
+            raise
         except Exception as e:
             logger.error(f"Failed to get routing options: {e}", exc_info=True)
-            return []
+            raise_unexpected_error(operation="get_routes", endpoint=endpoint, mode=mode, exc=e)
 
     # Convenience Functions for Common Order Types
 
