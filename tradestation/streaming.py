@@ -15,7 +15,7 @@ import asyncio
 from collections.abc import AsyncGenerator, Callable
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import TypeVar
+from typing import Any, TypeVar
 
 from .logger import setup_logger
 
@@ -502,6 +502,87 @@ class StreamingManager:
             except Exception as e:
                 logger.error(f"REST polling error: {e}")
                 await asyncio.sleep(interval)  # Continue polling despite errors
+
+    async def stream_bars(
+        self,
+        symbol: str,
+        interval: int,
+        unit: str,
+        mode: str | None = None,
+        max_retries: int = 10,
+        retry_delay: float = 1.0,
+        max_retry_delay: float = 60.0,
+        auto_reconnect: bool = True,
+        # Note: Bars typically don't fail back to polling easily due to continuity requirements
+    ) -> AsyncGenerator[Any, None]:
+        """
+        Stream bars via TradeStation HTTP Streaming API.
+
+        Args:
+            symbol: Symbol to stream (e.g. "MNQZ25")
+            interval: Bar interval (e.g. 1)
+            unit: Bar unit (e.g. "Minute")
+            mode: "PAPER" or "LIVE"
+        """
+        if mode is None:
+            mode = sdk_config.trading_mode
+
+        async def _get_stream():
+            if not self._api_client:
+                self._api_client = HTTPClient(self.token_manager)
+            
+            # Endpoint: marketdata/stream/barcharts/{symbol}/{interval}/{unit}
+            endpoint = f"marketdata/stream/barcharts/{symbol}/{interval}/{unit}"
+            logger.info(f"Starting bar stream for {symbol} ({interval} {unit}) via HTTP Streaming")
+
+            # We reuse the internal threading logic here inline or refactor. 
+            # For speed, I'll inline the thread runner pattern used in stream_quotes_internal
+            import queue
+            import threading
+            
+            bar_queue = queue.Queue()
+            stream_error = [None]
+
+            def run_stream():
+                try:
+                    for bar_data in self._api_client.stream_data(endpoint, mode=mode):
+                        bar_queue.put(bar_data)
+                    bar_queue.put(None)
+                except Exception as e:
+                    stream_error[0] = e
+                    bar_queue.put(None)
+
+            stream_thread = threading.Thread(target=run_stream, daemon=True)
+            stream_thread.start()
+
+            while True:
+                try:
+                    bar_data = bar_queue.get(timeout=1.0)
+                except queue.Empty:
+                    if stream_error[0]: raise stream_error[0]
+                    await asyncio.sleep(0.01)
+                    continue
+
+                if bar_data is None:
+                    if stream_error[0]: raise stream_error[0]
+                    break
+                
+                if isinstance(bar_data, dict) and ("StreamStatus" in bar_data or "Heartbeat" in bar_data):
+                    continue
+
+                # Yield raw dict, let service parse it to BarEvent
+                yield bar_data
+
+        async for bar in self._with_retry(
+            stream_type="bars",
+            stream_func=_get_stream,
+            max_retries=max_retries,
+            retry_delay=retry_delay,
+            max_retry_delay=max_retry_delay,
+            auto_reconnect=auto_reconnect,
+            mode=mode,
+        ):
+            yield bar
 
     async def stream_orders(
         self,

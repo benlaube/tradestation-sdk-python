@@ -53,6 +53,34 @@ Dynamic: requires-python
 **Python:** 3.10+  
 **License:** MIT
 
+## About This Document
+
+This is the **main entry point** for the TradeStation Python SDK documentation. It provides:
+- Complete SDK overview and feature list
+- Quick start guide (5 minutes)
+- Comprehensive API reference links
+- FAQ and troubleshooting
+- Links to all other documentation
+
+**Start here if:** You're new to the SDK or want a complete overview.
+
+**Related Documents:**
+- 🚀 **[QUICKSTART.md](QUICKSTART.md)** - Get started in 2 minutes (even faster than this guide)
+- 📋 **[CHEATSHEET.md](CHEATSHEET.md)** - Quick reference for common operations
+- 📦 **[INSTALLATION.md](INSTALLATION.md)** - Detailed installation instructions for all platforms
+- 📖 **[docs/GETTING_STARTED.md](docs/GETTING_STARTED.md)** - 15-minute comprehensive tutorial
+- 📚 **[docs/INDEX.md](docs/INDEX.md)** - Complete documentation index and navigation
+- ⚠️ **[LIMITATIONS.md](LIMITATIONS.md)** - Known constraints and workarounds
+- 🔒 **[SECURITY.md](SECURITY.md)** - Security best practices
+- 🚀 **[DEPLOYMENT.md](DEPLOYMENT.md)** - Production deployment guide
+- 🔄 **[MIGRATION.md](MIGRATION.md)** - Migrate from other SDKs
+- 🤝 **[CONTRIBUTING.md](CONTRIBUTING.md)** - Contribution guidelines
+- 📝 **[CHANGELOG.md](CHANGELOG.md)** - Version history and changes
+- 🎯 **[FEATURES.md](FEATURES.md)** - Complete feature overview
+- 🗺️ **[docs/ROADMAP.md](docs/ROADMAP.md)** - Future development plans
+
+---
+
 A comprehensive, self-contained Python SDK for TradeStation API v3. This SDK provides complete access to TradeStation's REST API and HTTP Streaming endpoints without external dependencies.
 
 [![PyPI](https://img.shields.io/badge/pypi-tradestation--python--sdk-blue)](https://pypi.org/project/tradestation-python-sdk/)
@@ -145,7 +173,7 @@ This SDK was created to:
 - **HTTP Streaming** - Real-time data via HTTP Streaming (NDJSON)
 - **Type-Safe Models** - Pydantic models for all API requests and responses
 - **Streaming Models** - Separate models for streaming responses (different from REST)
-- **Error Handling** - Custom exceptions with retry logic and error categorization
+- **Error Handling** - Custom exceptions with automatic retry logic and error categorization
 - **Data Normalization** - Mappers to normalize API responses to consistent format
 
 ### ✅ Supported Operations
@@ -222,6 +250,16 @@ If you're using this SDK as part of the trading bot project, dependencies are ma
 ```bash
 pip install -r requirements.txt
 ```
+
+### Use as Git Submodule (Vendored)
+For monorepos or to pin the SDK to a specific commit without publishing to PyPI:
+
+```bash
+git submodule add -b main git@github.com:<your-org>/tradestation-python-sdk.git libs/tradestation-sdk
+pip install -e ./libs/tradestation-sdk
+```
+
+See [docs/SUBMODULE_INTEGRATION.md](docs/SUBMODULE_INTEGRATION.md) for the full workflow, CI tips, and update/rollback steps.
 
 **Required Dependencies:**
 - `httpx>=0.27.2` - HTTP client for API requests and streaming
@@ -481,28 +519,19 @@ async for quote in sdk.streaming.stream_quotes(["AAPL"], mode="PAPER"):
     print(f"Last: {quote.Last}")
 ```
 
-**4. Implement Retry Logic with Backoff**
+**4. Retry Logic (Built-in)**
 ```python
-from tradestation_sdk import RateLimitError
-import time
+# Retry logic is now built-in! All REST API methods automatically retry recoverable errors.
+# No manual retry wrapper needed for most cases.
 
-def place_order_with_retry(sdk, symbol, side, quantity, max_retries=3):
-    for attempt in range(max_retries):
-        try:
-            order_id, status = sdk.place_order(
-                symbol=symbol,
-                side=side,
-                quantity=quantity,
-                mode="PAPER"
-            )
-            return order_id, status
-        except RateLimitError as e:
-            if attempt < max_retries - 1:
-                wait_time = 2 ** attempt  # Exponential backoff: 1s, 2s, 4s
-                print(f"Rate limit hit. Retrying in {wait_time}s...")
-                time.sleep(wait_time)
-            else:
-                raise
+# Default: 3 retries with exponential backoff (1s, 2s, 4s)
+order_id, status = sdk.place_order("MNQZ25", "BUY", 2, mode="PAPER")
+# Automatically retries on network errors, rate limits, server errors
+
+# Custom retry configuration (if needed)
+sdk._client.max_retries = 5  # Increase max retries
+sdk._client.retry_delay = 2.0  # Start with 2s delay
+sdk._client.max_retry_delay = 120.0  # Allow up to 2min delay
 ```
 
 ### Rate Limit Errors
@@ -543,10 +572,11 @@ except RateLimitError as e:
    - **Mitigation:** Planned for v1.1 (auto-port selection)
    - **Workaround:** Change port in `.env` or kill process on port 8888
 
-3. **No Built-in Retry Logic for Orders**
-   - **Issue:** Transient order failures require manual retry
-   - **Mitigation:** Use retry wrapper (see examples above)
-   - **Planned:** v1.2 (configurable retry with exponential backoff)
+3. **Built-in Retry Logic for REST API** ✅ **Implemented in v1.0.0**
+   - **Status:** All REST API methods now have automatic retry with exponential backoff
+   - **Features:** Retries recoverable errors (network, rate limits, server errors)
+   - **Configuration:** Customizable max_retries, retry_delay, max_retry_delay
+   - **Note:** Streaming methods already had retry logic; now REST API methods match
 
 4. **Streaming Reconnection Improvements**
    - **Status:** Automatic reconnection added in v1.0.0 ✅
@@ -1752,4 +1782,3 @@ See [CHANGELOG.md](CHANGELOG.md) for version history and release notes.
 
 **Last Updated:** 2025-12-07  
 **SDK Version:** 1.0.0
-

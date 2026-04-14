@@ -9,9 +9,9 @@ from typing import Any
 from unittest.mock import MagicMock
 
 import pytest
-from src.lib.tradestation import TradeStationSDK
-from src.lib.tradestation.client import HTTPClient
-from src.lib.tradestation.session import TokenManager
+from tradestation import TradeStationSDK, TradeStationSDKConfig
+from tradestation.client import HTTPClient
+from tradestation.session import TokenManager
 
 from .fixtures import api_responses, mock_requests
 
@@ -118,56 +118,48 @@ def mock_http_client_full_logging(mock_token_manager, mocker):
 
 
 @pytest.fixture
-def sdk_instance(mocker):
+def sdk_instance(mocker, mock_token_manager, mock_http_client):
     """
     TradeStationSDK instance with all dependencies mocked.
 
     Returns:
         TradeStationSDK instance with mocked HTTP client and token manager
     """
-    # Mock secrets
-    mock_secrets = MagicMock()
-    mock_secrets.client_id = "test_client_id"
-    mock_secrets.client_secret = "test_client_secret"
-    mock_secrets.redirect_uri = "http://localhost:8888"
-    mock_secrets.account_id = "SIM123456"
-    mock_secrets.trading_mode = "PAPER"
-    mock_secrets.log_level = "DEBUG"
-
-    mocker.patch("config.secrets.secrets", mock_secrets)
-
-    # Mock logger
-    mocker.patch("src.lib.tradestation.setup_logger")
-
-    # Create SDK instance
-    sdk = TradeStationSDK(enable_full_logging=False)
+    sdk = TradeStationSDK(
+        config=TradeStationSDKConfig(
+            client_id="test_client_id",
+            client_secret="test_client_secret",
+            redirect_uri="http://localhost:8888",
+            account_id="SIM123456",
+            trading_mode="PAPER",
+            log_level="DEBUG",
+        ),
+        enable_full_logging=False,
+    )
 
     # Mock token manager
-    sdk._token_manager = mock_token_manager(mocker)
-
-    # Mock HTTP client
-    sdk._client = mock_http_client(sdk._token_manager, mocker)
+    sdk._token_manager = mock_token_manager
+    sdk._client = mock_http_client
 
     return sdk
 
 
 @pytest.fixture
-def sdk_instance_full_logging(mocker):
+def sdk_instance_full_logging(mocker, mock_token_manager, mock_http_client_full_logging):
     """TradeStationSDK instance with full logging enabled."""
-    mock_secrets = MagicMock()
-    mock_secrets.client_id = "test_client_id"
-    mock_secrets.client_secret = "test_client_secret"
-    mock_secrets.redirect_uri = "http://localhost:8888"
-    mock_secrets.account_id = "SIM123456"
-    mock_secrets.trading_mode = "PAPER"
-    mock_secrets.log_level = "DEBUG"
-
-    mocker.patch("config.secrets.secrets", mock_secrets)
-    mocker.patch("src.lib.tradestation.setup_logger")
-
-    sdk = TradeStationSDK(enable_full_logging=True)
-    sdk._token_manager = mock_token_manager(mocker)
-    sdk._client = mock_http_client_full_logging(sdk._token_manager, mocker)
+    sdk = TradeStationSDK(
+        config=TradeStationSDKConfig(
+            client_id="test_client_id",
+            client_secret="test_client_secret",
+            redirect_uri="http://localhost:8888",
+            account_id="SIM123456",
+            trading_mode="PAPER",
+            log_level="DEBUG",
+        ),
+        enable_full_logging=True,
+    )
+    sdk._token_manager = mock_token_manager
+    sdk._client = mock_http_client_full_logging
 
     return sdk
 
@@ -270,7 +262,7 @@ def mock_requests_success(mock_requests_lib):
 @pytest.fixture
 def mock_logger(mocker):
     """Mock logger for log verification."""
-    return mocker.patch("src.lib.tradestation.client.logger")
+    return mocker.patch("tradestation.client.logger")
 
 
 # ============================================================================

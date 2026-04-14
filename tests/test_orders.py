@@ -5,7 +5,7 @@ Tests for OrderOperations class including order history, current orders, and ord
 """
 
 import pytest
-from src.lib.tradestation.orders import OrderOperations
+from tradestation.orders import OrderOperations
 
 from .fixtures import api_responses
 

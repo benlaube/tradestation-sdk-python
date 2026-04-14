@@ -9,8 +9,8 @@ import json
 from unittest.mock import MagicMock
 
 import pytest
-from src.lib.tradestation.exceptions import AuthenticationError
-from src.lib.tradestation.session import TokenManager
+from tradestation.exceptions import AuthenticationError
+from tradestation.session import TokenManager
 
 from .fixtures import api_responses
 
@@ -35,9 +35,9 @@ class TestTokenManagerTokenManagement:
         token_file.write_text(json.dumps(token_data))
 
         # Mock TOKEN_FILE_PAPER path
-        mocker.patch("src.lib.tradestation.session.TOKEN_FILE_PAPER", token_file)
-        mocker.patch("src.lib.tradestation.session.TOKEN_FILE_LIVE", tmp_path / "tokens_live.json")
-        mocker.patch("config.secrets.secrets.trading_mode", "PAPER")
+        mocker.patch("tradestation.session.TOKEN_FILE_PAPER", token_file)
+        mocker.patch("tradestation.session.TOKEN_FILE_LIVE", tmp_path / "tokens_live.json")
+        mocker.patch("tradestation.session.sdk_config.trading_mode", "PAPER")
 
         tm = TokenManager("client_id", "client_secret", "http://localhost:8888")
 
@@ -55,9 +55,9 @@ class TestTokenManagerTokenManagement:
         }
         token_file.write_text(json.dumps(token_data))
 
-        mocker.patch("src.lib.tradestation.session.TOKEN_FILE_PAPER", tmp_path / "tokens_paper.json")
-        mocker.patch("src.lib.tradestation.session.TOKEN_FILE_LIVE", token_file)
-        mocker.patch("config.secrets.secrets.trading_mode", "LIVE")
+        mocker.patch("tradestation.session.TOKEN_FILE_PAPER", tmp_path / "tokens_paper.json")
+        mocker.patch("tradestation.session.TOKEN_FILE_LIVE", token_file)
+        mocker.patch("tradestation.session.sdk_config.trading_mode", "LIVE")
 
         tm = TokenManager("client_id", "client_secret", "http://localhost:8888")
 
@@ -69,9 +69,9 @@ class TestTokenManagerTokenManagement:
         """Test token saving to file."""
         token_file = tmp_path / "tokens_paper.json"
 
-        mocker.patch("src.lib.tradestation.session.TOKEN_FILE_PAPER", token_file)
-        mocker.patch("src.lib.tradestation.session.TOKEN_FILE_LIVE", tmp_path / "tokens_live.json")
-        mocker.patch("config.secrets.secrets.trading_mode", "PAPER")
+        mocker.patch("tradestation.session.TOKEN_FILE_PAPER", token_file)
+        mocker.patch("tradestation.session.TOKEN_FILE_LIVE", tmp_path / "tokens_live.json")
+        mocker.patch("tradestation.session.sdk_config.trading_mode", "PAPER")
 
         tm = TokenManager("client_id", "client_secret", "http://localhost:8888")
         tm._tokens["PAPER"]["access_token"] = "saved_token"
@@ -91,9 +91,9 @@ class TestTokenManagerTokenManagement:
         paper_file = tmp_path / "tokens_paper.json"
         live_file = tmp_path / "tokens_live.json"
 
-        mocker.patch("src.lib.tradestation.session.TOKEN_FILE_PAPER", paper_file)
-        mocker.patch("src.lib.tradestation.session.TOKEN_FILE_LIVE", live_file)
-        mocker.patch("config.secrets.secrets.trading_mode", "PAPER")
+        mocker.patch("tradestation.session.TOKEN_FILE_PAPER", paper_file)
+        mocker.patch("tradestation.session.TOKEN_FILE_LIVE", live_file)
+        mocker.patch("tradestation.session.sdk_config.trading_mode", "PAPER")
 
         tm = TokenManager("client_id", "client_secret", "http://localhost:8888")
 
@@ -116,7 +116,7 @@ class TestTokenManagerTokenManagement:
 
     def test_get_tokens_returns_correct_mode(self, mocker):
         """Test get_tokens returns tokens for specified mode."""
-        mocker.patch("config.secrets.secrets.trading_mode", "PAPER")
+        mocker.patch("tradestation.session.sdk_config.trading_mode", "PAPER")
 
         tm = TokenManager("client_id", "client_secret", "http://localhost:8888")
         tm._tokens["PAPER"]["access_token"] = "paper_token"
@@ -130,7 +130,7 @@ class TestTokenManagerTokenManagement:
 
     def test_get_tokens_uses_default_mode(self, mocker):
         """Test get_tokens uses secrets.trading_mode when mode is None."""
-        mocker.patch("config.secrets.secrets.trading_mode", "PAPER")
+        mocker.patch("tradestation.session.sdk_config.trading_mode", "PAPER")
 
         tm = TokenManager("client_id", "client_secret", "http://localhost:8888")
         tm._tokens["PAPER"]["access_token"] = "paper_token"
@@ -150,15 +150,18 @@ class TestTokenManagerAuthentication:
 
     def test_authenticate_for_paper_mode(self, mocker):
         """Test authentication for PAPER mode."""
-        mocker.patch("config.secrets.secrets.trading_mode", "PAPER")
+        mocker.patch("tradestation.session.sdk_config.trading_mode", "PAPER")
         mocker.patch("webbrowser.open")
         mocker.patch("threading.Thread")
-        mocker.patch("src.lib.tradestation.session.HTTPServer")
+        mocker.patch("tradestation.session.HTTPServer")
 
         # Mock OAuth callback handler to simulate receiving auth code
-        from src.lib.tradestation.session import OAuthCallbackHandler
+        from tradestation.session import OAuthCallbackHandler
 
-        OAuthCallbackHandler.auth_code = "mock_auth_code_123"
+        def inject_auth_code(_seconds):
+            OAuthCallbackHandler.auth_code = "mock_auth_code_123"
+
+        mocker.patch("time.sleep", side_effect=inject_auth_code)
 
         # Mock httpx.post for token exchange
         mock_response = MagicMock()
@@ -167,7 +170,7 @@ class TestTokenManagerAuthentication:
 
         mocker.patch("httpx.post", return_value=mock_response)
         mocker.patch("time.time", return_value=1000)
-        mocker.patch("src.lib.tradestation.session.TokenManager._save_tokens")
+        mocker.patch("tradestation.session.TokenManager._save_tokens")
 
         tm = TokenManager("client_id", "client_secret", "http://localhost:8888")
         tm.authenticate("PAPER")
@@ -180,14 +183,17 @@ class TestTokenManagerAuthentication:
 
     def test_authenticate_for_live_mode(self, mocker):
         """Test authentication for LIVE mode."""
-        mocker.patch("config.secrets.secrets.trading_mode", "LIVE")
+        mocker.patch("tradestation.session.sdk_config.trading_mode", "LIVE")
         mocker.patch("webbrowser.open")
         mocker.patch("threading.Thread")
-        mocker.patch("src.lib.tradestation.session.HTTPServer")
+        mocker.patch("tradestation.session.HTTPServer")
 
-        from src.lib.tradestation.session import OAuthCallbackHandler
+        from tradestation.session import OAuthCallbackHandler
 
-        OAuthCallbackHandler.auth_code = "mock_auth_code_456"
+        def inject_auth_code(_seconds):
+            OAuthCallbackHandler.auth_code = "mock_auth_code_456"
+
+        mocker.patch("time.sleep", side_effect=inject_auth_code)
 
         mock_response = MagicMock()
         mock_response.status_code = 200
@@ -195,7 +201,7 @@ class TestTokenManagerAuthentication:
 
         mocker.patch("httpx.post", return_value=mock_response)
         mocker.patch("time.time", return_value=1000)
-        mocker.patch("src.lib.tradestation.session.TokenManager._save_tokens")
+        mocker.patch("tradestation.session.TokenManager._save_tokens")
 
         tm = TokenManager("client_id", "client_secret", "http://localhost:8888")
         tm.authenticate("LIVE")
@@ -206,14 +212,17 @@ class TestTokenManagerAuthentication:
 
     def test_authenticate_token_exchange_failure(self, mocker):
         """Test authentication raises error when token exchange fails."""
-        mocker.patch("config.secrets.secrets.trading_mode", "PAPER")
+        mocker.patch("tradestation.session.sdk_config.trading_mode", "PAPER")
         mocker.patch("webbrowser.open")
         mocker.patch("threading.Thread")
-        mocker.patch("src.lib.tradestation.session.HTTPServer")
+        mocker.patch("tradestation.session.HTTPServer")
 
-        from src.lib.tradestation.session import OAuthCallbackHandler
+        from tradestation.session import OAuthCallbackHandler
 
-        OAuthCallbackHandler.auth_code = "mock_auth_code"
+        def inject_auth_code(_seconds):
+            OAuthCallbackHandler.auth_code = "mock_auth_code"
+
+        mocker.patch("time.sleep", side_effect=inject_auth_code)
 
         # Mock failed token exchange
         mock_response = MagicMock()
@@ -229,7 +238,7 @@ class TestTokenManagerAuthentication:
 
     def test_ensure_authenticated_auto_refreshes_expired_tokens(self, mocker):
         """Test ensure_authenticated auto-refreshes expired tokens."""
-        mocker.patch("config.secrets.secrets.trading_mode", "PAPER")
+        mocker.patch("tradestation.session.sdk_config.trading_mode", "PAPER")
         mocker.patch("time.time", return_value=2000)  # Current time
 
         tm = TokenManager("client_id", "client_secret", "http://localhost:8888")
@@ -246,7 +255,7 @@ class TestTokenManagerAuthentication:
 
     def test_ensure_authenticated_authenticates_if_no_token(self, mocker):
         """Test ensure_authenticated authenticates if no token exists."""
-        mocker.patch("config.secrets.secrets.trading_mode", "PAPER")
+        mocker.patch("tradestation.session.sdk_config.trading_mode", "PAPER")
 
         tm = TokenManager("client_id", "client_secret", "http://localhost:8888")
         tm._tokens["PAPER"]["access_token"] = None
@@ -271,9 +280,9 @@ class TestTokenManagerTokenRefresh:
 
     def test_successful_token_refresh(self, mocker):
         """Test successful token refresh."""
-        mocker.patch("config.secrets.secrets.trading_mode", "PAPER")
+        mocker.patch("tradestation.session.sdk_config.trading_mode", "PAPER")
         mocker.patch("time.time", return_value=1000)
-        mocker.patch("src.lib.tradestation.session.TokenManager._save_tokens")
+        mocker.patch("tradestation.session.TokenManager._save_tokens")
 
         tm = TokenManager("client_id", "client_secret", "http://localhost:8888")
         tm._tokens["PAPER"]["refresh_token"] = "old_refresh_token"
@@ -293,9 +302,9 @@ class TestTokenManagerTokenRefresh:
         assert tokens["refresh_token"] == "new_refresh_token_67890"
         assert tm._last_mode == "PAPER"
 
-    def test_refresh_failure_triggers_re_authentication(self, mocker):
-        """Test refresh failure triggers re-authentication."""
-        mocker.patch("config.secrets.secrets.trading_mode", "PAPER")
+    def test_refresh_failure_raises_authentication_error(self, mocker):
+        """Test refresh failure is surfaced as an authentication error."""
+        mocker.patch("tradestation.session.sdk_config.trading_mode", "PAPER")
 
         tm = TokenManager("client_id", "client_secret", "http://localhost:8888")
         tm._tokens["PAPER"]["refresh_token"] = "invalid_refresh_token"
@@ -310,16 +319,16 @@ class TestTokenManagerTokenRefresh:
         # Mock authenticate
         mock_authenticate = mocker.patch.object(tm, "authenticate")
 
-        tm.refresh_access_token("PAPER")
+        with pytest.raises(AuthenticationError):
+            tm.refresh_access_token("PAPER")
 
-        # Verify authenticate was called
-        mock_authenticate.assert_called_once_with("PAPER")
+        mock_authenticate.assert_not_called()
 
     def test_refresh_token_rotation(self, mocker):
         """Test refresh token rotation (new refresh token provided)."""
-        mocker.patch("config.secrets.secrets.trading_mode", "PAPER")
+        mocker.patch("tradestation.session.sdk_config.trading_mode", "PAPER")
         mocker.patch("time.time", return_value=1000)
-        mocker.patch("src.lib.tradestation.session.TokenManager._save_tokens")
+        mocker.patch("tradestation.session.TokenManager._save_tokens")
 
         tm = TokenManager("client_id", "client_secret", "http://localhost:8888")
         tm._tokens["PAPER"]["refresh_token"] = "old_refresh_token"
@@ -346,7 +355,7 @@ class TestTokenManagerTokenRefresh:
 
     def test_refresh_without_refresh_token(self, mocker):
         """Test refresh without refresh token triggers authentication."""
-        mocker.patch("config.secrets.secrets.trading_mode", "PAPER")
+        mocker.patch("tradestation.session.sdk_config.trading_mode", "PAPER")
 
         tm = TokenManager("client_id", "client_secret", "http://localhost:8888")
         tm._tokens["PAPER"]["refresh_token"] = None
@@ -361,7 +370,7 @@ class TestTokenManagerTokenRefresh:
 
     def test_token_expiration_handling(self, mocker):
         """Test token expiration is handled correctly."""
-        mocker.patch("config.secrets.secrets.trading_mode", "PAPER")
+        mocker.patch("tradestation.session.sdk_config.trading_mode", "PAPER")
         mocker.patch("time.time", return_value=2000)  # Current time
 
         tm = TokenManager("client_id", "client_secret", "http://localhost:8888")

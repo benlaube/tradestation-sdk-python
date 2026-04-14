@@ -5,7 +5,7 @@ Tests for MarketDataOperations class including historical bars, symbol search, q
 """
 
 import pytest
-from src.lib.tradestation.market_data import MarketDataOperations
+from tradestation.market_data import MarketDataOperations
 
 from .fixtures import api_responses
 

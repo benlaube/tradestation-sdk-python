@@ -69,6 +69,7 @@ class OrderExecutionOperations:
         trail_amount: float | None = None,
         trail_percent: float | None = None,
         mode: str | None = None,
+        account_id: str | None = None,
     ) -> tuple[str | None, str]:
         """
         Place an order with support for multiple order types (TradeStation API v3).
@@ -87,6 +88,7 @@ class OrderExecutionOperations:
                 For MNQ: 1 point = $2.00, so trail_amount=1.5 means $3.00 trail
             trail_percent: Trail percentage for TrailingStop orders (optional, e.g., 1.0 for 1%)
             mode: "PAPER" or "LIVE". If None, uses sdk_config.trading_mode
+            account_id: Optional explicit TradeStation account ID for this order.
 
         Returns:
             Tuple of (order_id, status_message) for compatibility with trade_service
@@ -190,8 +192,14 @@ class OrderExecutionOperations:
             return None, f"ERROR: time_in_force must be one of {VALID_TIME_IN_FORCE}, got '{time_in_force}'"
 
         # Get account ID for the specified mode
-        account_info = self.accounts.get_account_info(mode)
-        account_id = account_info.get("account_id") or self.account_id
+        if account_id is not None:
+            account_id = account_id.strip()
+        if not account_id:
+            account_info = self.accounts.get_account_info(mode)
+            account_id = account_info.get("account_id") or self.account_id
+        if not account_id:
+            logger.error(f"❌ No account ID available for {mode} mode")
+            return None, "ERROR: No account ID available"
 
         endpoint = "orderexecution/orders"
 
@@ -637,6 +645,7 @@ class OrderExecutionOperations:
         trail_amount: float | None = None,
         trail_percent: float | None = None,
         mode: str | None = None,
+        account_id: str | None = None,
     ) -> tuple[str | None, str]:
         """
         Replace an order by canceling the old one and placing a new one.
@@ -656,6 +665,7 @@ class OrderExecutionOperations:
             trail_amount: Trail amount for trailing stop (optional)
             trail_percent: Trail percentage for trailing stop (optional)
             mode: "PAPER" or "LIVE". If None, uses sdk_config.trading_mode
+            account_id: Optional explicit TradeStation account ID for the new order.
 
         Returns:
             Tuple of (new_order_id, status_message)
@@ -709,6 +719,7 @@ class OrderExecutionOperations:
             symbol=symbol,
             side=side,
             quantity=quantity,
+            account_id=account_id,
             order_type=order_type,
             limit_price=limit_price,
             stop_price=stop_price,

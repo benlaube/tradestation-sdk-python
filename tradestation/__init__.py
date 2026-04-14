@@ -14,7 +14,7 @@ from .logger import setup_logger
 # Import operation modules
 from .accounts import AccountOperations
 from .client import HTTPClient, get_base_url
-from .config import sdk_config
+from .config import TradeStationSDKConfig, sdk_config
 from .exceptions import (
     AuthenticationError,
     InvalidRequestError,
@@ -94,7 +94,11 @@ class TradeStationSDK:
     - Exposes streaming managers for HTTP streaming and optional SDK websockets
     """
 
-    def __init__(self, enable_full_logging: bool = False):
+    def __init__(
+        self,
+        config: TradeStationSDKConfig | None = None,
+        enable_full_logging: bool = False,
+    ):
         """
         Bootstrap the SDK with shared dependencies and operation modules.
 
@@ -108,13 +112,17 @@ class TradeStationSDK:
             - Binds Account/MarketData/Orders/Positions/Executions modules
             - Sets default trading mode from `sdk_config.trading_mode`
         """
-        self.client_id = sdk_config.client_id
-        self.client_secret = sdk_config.client_secret
-        self.redirect_uri = sdk_config.redirect_uri
-        self.account_id = sdk_config.account_id
+        runtime_config = config.clone() if config is not None else sdk_config.refresh_from_env().clone()
+        sdk_config.apply(runtime_config)
+
+        self.config = runtime_config
+        self.client_id = runtime_config.client_id
+        self.client_secret = runtime_config.client_secret
+        self.redirect_uri = runtime_config.redirect_uri
+        self.account_id = runtime_config.account_id
         # Store default mode - initialized from secrets, but can be updated from last authenticated mode
         # Users authenticate one mode at a time, so we can use the last authenticated mode as default
-        self.default_mode = sdk_config.trading_mode
+        self.default_mode = runtime_config.trading_mode
 
         # Base URLs for both modes
         self.paper_base_url = "https://sim-api.tradestation.com/v3"
@@ -454,6 +462,7 @@ class TradeStationSDK:
         trail_amount: float | None = None,
         trail_percent: float | None = None,
         mode: str | None = None,
+        account_id: str | None = None,
     ) -> tuple[str | None, str]:
         """
         Cancel an existing order and submit a replacement in one call.
@@ -470,6 +479,7 @@ class TradeStationSDK:
             trail_amount: Price trail amount (for trailing stops).
             trail_percent: Percentage trail (for trailing stops).
             mode: Trading mode.
+            account_id: Optional explicit account ID for the replacement order.
 
         Returns:
             Tuple of (new_order_id, status_message).
@@ -486,6 +496,7 @@ class TradeStationSDK:
             trail_amount,
             trail_percent,
             mode,
+            account_id,
         )
 
     # Order execution methods - delegate to OrderExecutionOperations
@@ -502,6 +513,7 @@ class TradeStationSDK:
         trail_amount: float | None = None,
         trail_percent: float | None = None,
         mode: str | None = None,
+        account_id: str | None = None,
     ) -> tuple:
         """
         Place a single-leg order with optional wait-for-fill workflow.
@@ -518,6 +530,7 @@ class TradeStationSDK:
             trail_amount: Trailing amount in price units.
             trail_percent: Trailing percentage.
             mode: Trading mode.
+            account_id: Optional explicit account ID for the order.
 
         Returns:
             Tuple of (order_id, status_message).
@@ -534,6 +547,7 @@ class TradeStationSDK:
             trail_amount,
             trail_percent,
             mode,
+            account_id,
         )
 
     def cancel_order(self, order_id: str, mode: str | None = None) -> tuple:

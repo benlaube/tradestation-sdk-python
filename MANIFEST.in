@@ -11,8 +11,8 @@ include setup.py
 # Include examples
 recursive-include examples *.py *.ipynb *.md
 
-# Include CLI tools
-recursive-include cli *.py *.md
+# Include package CLI tools
+recursive-include tradestation/cli *.py *.md
 
 # Include documentation
 recursive-include docs *.md *.json
@@ -20,8 +20,8 @@ recursive-include docs *.md *.json
 # Include test fixtures
 recursive-include tests/fixtures *.py
 
-# Include models
-recursive-include models *.py
+# Include package sources
+recursive-include tradestation *.py *.md
 
 # Exclude compiled Python files
 global-exclude *.pyc

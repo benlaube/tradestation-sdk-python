@@ -6,7 +6,7 @@ executions, confirmations, and group orders (OCO/Bracket).
 """
 
 import pytest
-from src.lib.tradestation.order_executions import OrderExecutionOperations
+from tradestation.order_executions import OrderExecutionOperations
 
 from .fixtures import api_responses
 
@@ -45,7 +45,7 @@ class TestOrderExecutionOperationsPlaceOrder:
         assert json_data["Symbol"] == "MNQZ25"
         assert json_data["TradeAction"] == "BUY"
         assert json_data["Quantity"] == "2"
-        assert json_data["OrderType"] == "Market"
+        assert json_data["OrderType"] == "MARKET"
 
         # Verify response parsing
         assert order_id is not None
@@ -62,7 +62,7 @@ class TestOrderExecutionOperationsPlaceOrder:
 
         call_args = mock_http_client.make_request.call_args
         json_data = call_args[1]["json_data"]
-        assert json_data["OrderType"] == "Limit"
+        assert json_data["OrderType"] == "LIMIT"
         assert json_data["LimitPrice"] == "25000.0"
 
     def test_place_order_stop(self, mock_http_client, mocker):
@@ -77,7 +77,7 @@ class TestOrderExecutionOperationsPlaceOrder:
 
         call_args = mock_http_client.make_request.call_args
         json_data = call_args[1]["json_data"]
-        assert json_data["OrderType"] == "Stop"
+        assert json_data["OrderType"] == "STOP"
         assert json_data["StopPrice"] == "24900.0"
 
     def test_place_order_stop_limit(self, mock_http_client, mocker):
@@ -92,7 +92,7 @@ class TestOrderExecutionOperationsPlaceOrder:
 
         call_args = mock_http_client.make_request.call_args
         json_data = call_args[1]["json_data"]
-        assert json_data["OrderType"] == "StopLimit"
+        assert json_data["OrderType"] == "STOPLIMIT"
         assert json_data["LimitPrice"] == "25000.0"
         assert json_data["StopPrice"] == "24900.0"
 
@@ -108,7 +108,7 @@ class TestOrderExecutionOperationsPlaceOrder:
 
         call_args = mock_http_client.make_request.call_args
         json_data = call_args[1]["json_data"]
-        assert json_data["OrderType"] == "TrailingStop"
+        assert json_data["OrderType"] == "TRAILINGSTOP"
         assert json_data["TrailAmount"] == "1.5"
 
     def test_place_order_trailing_stop_percent(self, mock_http_client, mocker):
@@ -173,7 +173,7 @@ class TestOrderExecutionOperationsCancelOrder:
         )
 
         order_exec = OrderExecutionOperations(mock_http_client, mock_accounts, default_mode="PAPER")
-        order_id, status = order_exec.cancel_order("924243071", mode="PAPER")
+        success, status = order_exec.cancel_order("924243071", mode="PAPER")
 
         # Verify endpoint
         mock_request.assert_called_once()
@@ -182,7 +182,7 @@ class TestOrderExecutionOperationsCancelOrder:
         assert call_args[0][0] == "DELETE"
 
         # Verify response
-        assert order_id == "924243071"
+        assert success is True
 
 
 # ============================================================================
@@ -340,7 +340,7 @@ class TestOrderExecutionOperationsGroupOrders:
         call_args = mock_http_client.make_request.call_args
         assert "orderexecution/ordergroups" in call_args[0][1]
         json_data = call_args[1]["json_data"]
-        assert json_data["GroupType"] == "OCO"
+        assert json_data["Type"] == "OCO"
 
     def test_place_group_order_bracket(self, mock_http_client, mocker):
         """Test place_group_order with BRK (Bracket) group type."""
@@ -359,7 +359,7 @@ class TestOrderExecutionOperationsGroupOrders:
 
         call_args = mock_http_client.make_request.call_args
         json_data = call_args[1]["json_data"]
-        assert json_data["GroupType"] == "BRK"
+        assert json_data["Type"] == "BRK"
 
     def test_confirm_group_order(self, mock_http_client, mocker):
         """Test confirm_group_order performs pre-flight check."""
@@ -398,7 +398,7 @@ class TestOrderExecutionOperationsConvenienceFunctions:
 
         call_args = mock_http_client.make_request.call_args
         json_data = call_args[1]["json_data"]
-        assert json_data["OrderType"] == "Limit"
+        assert json_data["OrderType"] == "LIMIT"
         assert json_data["LimitPrice"] == "25000.0"
 
     def test_place_stop_order(self, mock_http_client, mocker):
@@ -413,7 +413,7 @@ class TestOrderExecutionOperationsConvenienceFunctions:
 
         call_args = mock_http_client.make_request.call_args
         json_data = call_args[1]["json_data"]
-        assert json_data["OrderType"] == "Stop"
+        assert json_data["OrderType"] == "STOP"
 
     def test_place_stop_limit_order(self, mock_http_client, mocker):
         """Test place_stop_limit_order convenience function."""
@@ -427,7 +427,7 @@ class TestOrderExecutionOperationsConvenienceFunctions:
 
         call_args = mock_http_client.make_request.call_args
         json_data = call_args[1]["json_data"]
-        assert json_data["OrderType"] == "StopLimit"
+        assert json_data["OrderType"] == "STOPLIMIT"
 
     def test_place_trailing_stop_order(self, mock_http_client, mocker):
         """Test place_trailing_stop_order convenience function."""
@@ -441,7 +441,7 @@ class TestOrderExecutionOperationsConvenienceFunctions:
 
         call_args = mock_http_client.make_request.call_args
         json_data = call_args[1]["json_data"]
-        assert json_data["OrderType"] == "TrailingStop"
+        assert json_data["OrderType"] == "TRAILINGSTOP"
 
     def test_place_oco_order(self, mock_http_client, mocker):
         """Test place_oco_order convenience function."""
@@ -459,7 +459,7 @@ class TestOrderExecutionOperationsConvenienceFunctions:
 
         call_args = mock_http_client.make_request.call_args
         json_data = call_args[1]["json_data"]
-        assert json_data["GroupType"] == "OCO"
+        assert json_data["Type"] == "OCO"
 
     def test_place_bracket_order(self, mock_http_client, mocker):
         """Test place_bracket_order with profit target and stop-loss."""
@@ -475,7 +475,7 @@ class TestOrderExecutionOperationsConvenienceFunctions:
 
         call_args = mock_http_client.make_request.call_args
         json_data = call_args[1]["json_data"]
-        assert json_data["GroupType"] == "BRK"
+        assert json_data["Type"] == "BRK"
         # Verify bracket order structure (entry + profit + stop)
         assert len(json_data["Orders"]) == 3
 
@@ -533,20 +533,11 @@ class TestOrderExecutionOperationsOtherMethods:
             ],
         )
 
-        # Need to mock OrderOperations.get_current_orders
-        from src.lib.tradestation.orders import OrderOperations
-
-        mock_order_ops = mocker.MagicMock(spec=OrderOperations)
-        mock_order_ops.get_current_orders.return_value = api_responses.MOCK_CURRENT_ORDERS
-
         order_exec = OrderExecutionOperations(mock_http_client, mock_accounts, default_mode="PAPER")
-        order_exec._orders = mock_order_ops  # Inject mock
 
         result = order_exec.cancel_all_orders_for_symbol("MNQZ25", mode="PAPER")
 
-        # Verify get_current_orders was called
-        mock_order_ops.get_current_orders.assert_called_once()
-        # Verify cancel_order was called for each order
+        assert result[0]["success"] is True
         assert mock_http_client.make_request.call_count >= 2
 
     def test_cancel_all_orders(self, mock_http_client, mocker):
@@ -554,19 +545,20 @@ class TestOrderExecutionOperationsOtherMethods:
         mock_accounts = mocker.MagicMock()
         mock_accounts.get_account_info.return_value = {"account_id": "SIM123456"}
 
-        from src.lib.tradestation.orders import OrderOperations
-
-        mock_order_ops = mocker.MagicMock(spec=OrderOperations)
-        mock_order_ops.get_current_orders.return_value = api_responses.MOCK_CURRENT_ORDERS
-
-        mocker.patch.object(mock_http_client, "make_request", return_value=api_responses.MOCK_ORDER_CANCEL_SUCCESS)
+        mocker.patch.object(
+            mock_http_client,
+            "make_request",
+            side_effect=[
+                api_responses.MOCK_CURRENT_ORDERS,
+                api_responses.MOCK_ORDER_CANCEL_SUCCESS,
+            ],
+        )
 
         order_exec = OrderExecutionOperations(mock_http_client, mock_accounts, default_mode="PAPER")
-        order_exec._orders = mock_order_ops
 
         result = order_exec.cancel_all_orders(mode="PAPER")
 
-        mock_order_ops.get_current_orders.assert_called_once()
+        assert result[0]["success"] is True
 
     def test_replace_order(self, mock_http_client, mocker):
         """Test replace_order cancels old and places new order."""

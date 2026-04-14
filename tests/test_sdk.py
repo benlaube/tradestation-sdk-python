@@ -5,7 +5,7 @@ Tests for TradeStationSDK class including initialization, function delegation, a
 """
 
 import pytest
-from src.lib.tradestation import TradeStationSDK
+from tradestation import TradeStationSDK, TradeStationSDKConfig
 
 # ============================================================================
 # TradeStationSDK Initialization Tests
@@ -19,18 +19,17 @@ class TestTradeStationSDKInitialization:
 
     def test_sdk_initialization_default(self, mocker):
         """Test SDK creation with default settings."""
-        mock_secrets = mocker.MagicMock()
-        mock_secrets.client_id = "test_client_id"
-        mock_secrets.client_secret = "test_client_secret"
-        mock_secrets.redirect_uri = "http://localhost:8888"
-        mock_secrets.account_id = "SIM123456"
-        mock_secrets.trading_mode = "PAPER"
-        mock_secrets.log_level = "DEBUG"
-
-        mocker.patch("config.secrets.secrets", mock_secrets)
-        mocker.patch("src.lib.tradestation.setup_logger")
-
-        sdk = TradeStationSDK(enable_full_logging=False)
+        sdk = TradeStationSDK(
+            config=TradeStationSDKConfig(
+                client_id="test_client_id",
+                client_secret="test_client_secret",
+                redirect_uri="http://localhost:8888",
+                account_id="SIM123456",
+                trading_mode="PAPER",
+                log_level="DEBUG",
+            ),
+            enable_full_logging=False,
+        )
 
         # Verify SDK was created
         assert sdk is not None
@@ -38,23 +37,54 @@ class TestTradeStationSDKInitialization:
         assert sdk.account_id == "SIM123456"
         assert sdk.default_mode == "PAPER"
 
-    def test_sdk_initialization_full_logging(self, mocker):
+    def test_sdk_initialization_full_logging(self):
         """Test SDK creation with enable_full_logging=True."""
-        mock_secrets = mocker.MagicMock()
-        mock_secrets.client_id = "test_client_id"
-        mock_secrets.client_secret = "test_client_secret"
-        mock_secrets.redirect_uri = "http://localhost:8888"
-        mock_secrets.account_id = "SIM123456"
-        mock_secrets.trading_mode = "PAPER"
-        mock_secrets.log_level = "DEBUG"
-
-        mocker.patch("config.secrets.secrets", mock_secrets)
-        mocker.patch("src.lib.tradestation.setup_logger")
-
-        sdk = TradeStationSDK(enable_full_logging=True)
+        sdk = TradeStationSDK(
+            config=TradeStationSDKConfig(
+                client_id="test_client_id",
+                client_secret="test_client_secret",
+                redirect_uri="http://localhost:8888",
+                account_id="SIM123456",
+                trading_mode="PAPER",
+                log_level="DEBUG",
+            ),
+            enable_full_logging=True,
+        )
 
         # Verify full logging is enabled
         assert sdk._client.enable_full_logging is True
+
+    def test_sdk_initialization_from_env(self, monkeypatch):
+        """Test SDK creation loads env on construction when no config is supplied."""
+        monkeypatch.setattr("tradestation.config._load_env_file", lambda: None)
+        monkeypatch.setenv("TRADESTATION_CLIENT_ID", "env_client_id")
+        monkeypatch.setenv("TRADESTATION_CLIENT_SECRET", "env_client_secret")
+        monkeypatch.setenv("TRADESTATION_REDIRECT_URI", "http://localhost:9999/callback")
+        monkeypatch.setenv("TRADESTATION_ACCOUNT_ID", "SIMENV123")
+        monkeypatch.setenv("TRADESTATION_MODE", "LIVE")
+        monkeypatch.delenv("TRADING_MODE", raising=False)
+
+        sdk = TradeStationSDK(enable_full_logging=False)
+
+        assert sdk.client_id == "env_client_id"
+        assert sdk.client_secret == "env_client_secret"
+        assert sdk.redirect_uri == "http://localhost:9999/callback"
+        assert sdk.account_id == "SIMENV123"
+        assert sdk.default_mode == "LIVE"
+
+    def test_sdk_initialization_prefers_tradestation_mode_over_trading_mode(
+        self, monkeypatch
+    ):
+        """Test TRADESTATION_MODE overrides deprecated TRADING_MODE."""
+        monkeypatch.setattr("tradestation.config._load_env_file", lambda: None)
+        monkeypatch.setenv("TRADESTATION_CLIENT_ID", "env_client_id")
+        monkeypatch.setenv("TRADESTATION_CLIENT_SECRET", "env_client_secret")
+        monkeypatch.setenv("TRADESTATION_MODE", "PAPER")
+        monkeypatch.setenv("TRADING_MODE", "LIVE")
+
+        sdk = TradeStationSDK(enable_full_logging=False)
+
+        assert sdk.default_mode == "PAPER"
 
     def test_sdk_all_modules_initialized(self, sdk_instance):
         """Test all operation modules are initialized."""
@@ -95,7 +125,7 @@ class TestTradeStationSDKFunctionDelegation:
         mock_market_data.assert_called_once()
         call_args = mock_market_data.call_args
         assert call_args[0][0] == "MNQZ25"
-        assert call_args[1]["mode"] == "PAPER"
+        assert call_args[0][-1] == "PAPER"
 
     def test_place_order_delegates(self, sdk_instance, mocker):
         """Test place_order delegates to OrderExecutionOperations."""

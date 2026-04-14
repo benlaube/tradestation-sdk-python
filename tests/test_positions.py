@@ -5,7 +5,7 @@ Tests for PositionOperations class including position queries and flattening.
 """
 
 import pytest
-from src.lib.tradestation.positions import PositionOperations
+from tradestation.positions import PositionOperations
 
 from .fixtures import api_responses
 
@@ -123,7 +123,7 @@ class TestPositionOperationsFlattenPosition:
         )
 
         # Mock OrderOperations.place_order
-        from src.lib.tradestation.order_executions import OrderExecutionOperations
+        from tradestation.order_executions import OrderExecutionOperations
 
         mock_order_exec = mocker.MagicMock(spec=OrderExecutionOperations)
         mock_order_exec.place_order.return_value = ("924243071", "SUCCESS")
@@ -148,7 +148,7 @@ class TestPositionOperationsFlattenPosition:
 
         mocker.patch.object(mock_http_client, "make_request", return_value=multi_positions)
 
-        from src.lib.tradestation.order_executions import OrderExecutionOperations
+        from tradestation.order_executions import OrderExecutionOperations
 
         mock_order_exec = mocker.MagicMock(spec=OrderExecutionOperations)
         mock_order_exec.place_order.return_value = ("924243071", "SUCCESS")

@@ -5,8 +5,8 @@ Tests for TradeStation SDK exception types, error details, and error parsing.
 """
 
 import pytest
-from src.lib.tradestation.client import parse_api_error_response
-from src.lib.tradestation.exceptions import (
+from tradestation.client import parse_api_error_response
+from tradestation.exceptions import (
     AuthenticationError,
     ErrorDetails,
     InvalidRequestError,
