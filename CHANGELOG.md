@@ -29,6 +29,25 @@ This changelog tracks SDK-specific changes including:
 
 ---
 
+## 2026-04-14 - Strict Pydantic Validation and Fail-Loud SDK Contracts
+
+**Highlights**
+- Added a strict shared model base and enforced `extra="forbid"` across exported SDK request/response models so unknown broker fields now fail validation instead of being silently dropped.
+- Added `SDKValidationError` plus shared validation helpers that attach operation, endpoint, mode, sanitized payload excerpts, and Pydantic validation details to every contract failure.
+- Moved the audited account, quote, order, execution, position, and streaming boundaries onto explicit model validation and `model_dump()` serialization while preserving the SDK’s public dict/list return shapes.
+- Removed silent parse downgrades in the audited SDK paths so validation/runtime failures now bubble up to callers with descriptive structured errors.
+- Added regression tests and CI coverage for model policy enforcement, validation failures, and compatibility of public return shapes.
+
+**Files Modified**
+- ✅ `tradestation/models/base.py` (new strict model base)
+- ✅ `tradestation/validation.py` (new validation helper layer)
+- ✅ `tradestation/exceptions.py`
+- ✅ `tradestation/accounts.py`, `market_data.py`, `orders.py`, `order_executions.py`, `positions.py`, `streaming.py`
+- ✅ `tradestation/models/*.py`
+- ✅ `tests/test_pydantic_contract.py` (new)
+- ✅ `.github/workflows/sdk-tests.yml` (new)
+- ✅ `README.md`, `docs/MODELS.md`, `CHANGELOG.md`
+
 ## 2025-12-18 - Submodule Workflow, Docstrings, Security Hardening
 
 **Highlights**

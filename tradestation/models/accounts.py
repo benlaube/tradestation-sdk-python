@@ -9,10 +9,12 @@ Dependencies: pydantic
 
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import AliasChoices, Field
+
+from .base import TradeStationModel, strict_model_config
 
 
-class AccountSummary(BaseModel):
+class AccountSummary(TradeStationModel):
     """Account summary information from TradeStation API."""
 
     AccountID: str = Field(..., description="TradeStation account ID")
@@ -20,8 +22,20 @@ class AccountSummary(BaseModel):
     Status: str | None = Field(None, description="Account status")
     Currency: str | None = Field(None, description="Account currency")
     Alias: str | None = Field(None, description="Account alias")
+    Equity: float | str | None = Field(None, description="Total equity")
+    CashBalance: float | str | None = Field(None, description="Cash balance")
+    BuyingPower: float | str | None = Field(None, description="Buying power")
+    DayTradingBuyingPower: float | str | None = Field(None, description="Day trading buying power")
+    MarginAvailable: float | str | None = Field(None, description="Margin available")
+    MarginUsed: float | str | None = Field(None, description="Margin used")
+    MaintenanceMargin: float | str | None = Field(None, description="Maintenance margin")
+    InitialMarginRequirement: float | str | None = Field(None, description="Initial margin requirement")
+    NetLiquidationValue: float | str | None = Field(None, description="Net liquidation value")
+    OpenPnL: float | str | None = Field(None, description="Open P&L")
+    RealizedPnL: float | str | None = Field(None, description="Realized P&L")
+    UnrealizedPnL: float | str | None = Field(None, description="Unrealized P&L")
 
-    model_config = ConfigDict(
+    model_config = strict_model_config(
         json_schema_extra={
             "example": {
                 "AccountID": "SIM123456",
@@ -34,7 +48,7 @@ class AccountSummary(BaseModel):
     )
 
 
-class BalanceDetail(BaseModel):
+class BalanceDetail(TradeStationModel):
     """Detailed balance information."""
 
     Equity: float | str | None = Field(None, description="Total equity")
@@ -51,17 +65,17 @@ class BalanceDetail(BaseModel):
     UnrealizedPnL: float | str | None = Field(None, description="Unrealized P&L")
 
 
-class AccountBalancesResponse(BaseModel):
+class AccountBalancesResponse(TradeStationModel):
     """
     Account balances response.
     Returned from /brokerage/accounts/{accountId} and detailed balances endpoint.
     """
 
     Account: AccountSummary = Field(..., description="Account info")
-    Balances: BalanceDetail | dict[str, Any] | None = Field(None, description="Balances detail")
+    Balances: BalanceDetail | None = Field(None, description="Balances detail")
 
 
-class BODBalance(BaseModel):
+class BODBalance(TradeStationModel):
     """Beginning-of-day balance entry."""
 
     AccountID: str = Field(..., description="TradeStation account ID")
@@ -73,8 +87,19 @@ class BODBalance(BaseModel):
     NetLiquidationValue: float | str | None = Field(None, description="Net liquidation value at BOD")
 
 
-class BODBalancesResponse(BaseModel):
+class BODBalancesResponse(TradeStationModel):
     """Response for BOD balances endpoint."""
 
-    BODBalances: list[BODBalance] | list[dict[str, Any]] = Field(..., description="List of BOD balances")
+    BODBalances: list[BODBalance] = Field(
+        ...,
+        description="List of BOD balances",
+        validation_alias=AliasChoices("BODBalances", "Balances"),
+    )
     Errors: list[dict[str, Any]] | None = Field(default_factory=list, description="List of errors from API")
+
+
+class DetailedBalancesResponse(TradeStationModel):
+    """Response for the detailed balances endpoint."""
+
+    Balances: list[BODBalance] = Field(default_factory=list, description="List of balance records")
+    Errors: list[dict[str, Any]] = Field(default_factory=list, description="Unstructured API errors")

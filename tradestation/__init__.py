@@ -7,6 +7,7 @@ Replaces external tastyware/tradestation SDK dependency.
 Dependencies: All tradestation SDK submodules
 """
 
+from collections.abc import AsyncGenerator
 from typing import Any
 
 from .logger import setup_logger
@@ -21,6 +22,7 @@ from .exceptions import (
     InvalidTokenError,
     NetworkError,
     RateLimitError,
+    SDKValidationError,
     TokenExpiredError,
     TradeStationAPIError,
 )
@@ -34,6 +36,7 @@ from .models.accounts import (
     BalanceDetail,
     BODBalance,
     BODBalancesResponse,
+    DetailedBalancesResponse,
 )
 from .models.accounts_list import AccountsListResponse
 from .models.order_executions import (
@@ -42,6 +45,7 @@ from .models.order_executions import (
 
 # Import models
 from .models.orders import (
+    OrdersResponse,
     TradeStationConditionalOrder,
     TradeStationMarketActivationRule,
     TradeStationOrderGroupRequest,
@@ -344,6 +348,75 @@ class TradeStationSDK:
             Dict containing `Symbols` list and `Errors` list.
         """
         return self._market_data.get_symbol_details(symbols, mode)
+
+    def get_crypto_symbol_names(self, mode: str | None = None) -> list[str]:
+        """Return the available crypto pair symbol names."""
+        return self._market_data.get_crypto_symbol_names(mode)
+
+    def get_option_expirations(
+        self, underlying: str, mode: str | None = None, strike_price: float | None = None
+    ) -> list[str]:
+        """Return option expiration dates for an underlying symbol."""
+        return self._market_data.get_option_expirations(underlying, mode, strike_price)
+
+    def get_option_risk_reward(self, request: dict[str, Any], mode: str | None = None) -> dict[str, Any]:
+        """Return option risk/reward calculations for a submitted request payload."""
+        return self._market_data.get_option_risk_reward(request, mode)
+
+    def get_option_spread_types(self, mode: str | None = None) -> list[dict[str, Any]]:
+        """Return supported option spread types."""
+        return self._market_data.get_option_spread_types(mode)
+
+    def get_option_strikes(
+        self,
+        underlying: str,
+        expiration_date: str | None = None,
+        min_strike: float | None = None,
+        max_strike: float | None = None,
+        mode: str | None = None,
+        spread_type: str | None = None,
+        strike_interval: int | None = None,
+        expiration: str | None = None,
+        expiration2: str | None = None,
+    ) -> list[float]:
+        """Return available option strikes for an underlying symbol and expiration filter."""
+        return self._market_data.get_option_strikes(
+            underlying,
+            expiration_date,
+            min_strike,
+            max_strike,
+            mode,
+            spread_type,
+            strike_interval,
+            expiration,
+            expiration2,
+        )
+
+    async def stream_quotes(self, symbols: str, mode: str | None = None) -> AsyncGenerator[QuoteStream, None]:
+        """Stream quote updates for one or more symbols."""
+        async for quote in self._streaming.stream_quotes(symbols, mode):
+            yield quote
+
+    async def stream_orders(
+        self, account_id: str | None = None, mode: str | None = None
+    ) -> AsyncGenerator[OrderStream, None]:
+        """Stream order updates for an account."""
+        async for order in self._streaming.stream_orders(account_id, mode):
+            yield order
+
+    async def stream_positions(
+        self, account_id: str | None = None, mode: str | None = None
+    ) -> AsyncGenerator[PositionStream, None]:
+        """Stream position updates for an account."""
+        async for position in self._streaming.stream_positions(account_id, mode):
+            yield position
+
+    async def stream_balances(
+        self, account_id: str | None = None, mode: str | None = None
+    ) -> AsyncGenerator[BalanceStream, None]:
+        """Stream balance updates for an account."""
+        async for balance in self._streaming.stream_balances(account_id, mode):
+            yield balance
 
     # Position methods - delegate to PositionOperations
     def get_position(self, symbol: str, mode: str | None = None) -> int:
@@ -1152,6 +1225,7 @@ __all__ = [
     "RateLimitError",
     "InvalidRequestError",
     "NetworkError",
+    "SDKValidationError",
     "TokenExpiredError",
     "InvalidTokenError",
     # Operation modules
@@ -1165,6 +1239,7 @@ __all__ = [
     # Models (REST API)
     "TradeStationOrderRequest",
     "TradeStationOrderGroupRequest",
+    "OrdersResponse",
     "TradeStationOrderResponse",
     "TradeStationOrderGroupResponse",
     "TradeStationExecutionResponse",
@@ -1188,6 +1263,7 @@ __all__ = [
     "AccountBalancesResponse",
     "BODBalance",
     "BODBalancesResponse",
+    "DetailedBalancesResponse",
     "AccountsListResponse",
     # Models (Positions)
     "PositionResponse",

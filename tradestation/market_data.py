@@ -17,6 +17,7 @@ from .client import HTTPClient
 from .config import sdk_config
 from .exceptions import TradeStationAPIError
 from .models import QuotesResponse
+from .validation import dump_model, raise_unexpected_error, validate_model
 
 logger = setup_logger(__name__, sdk_config.log_level)
 
@@ -436,11 +437,18 @@ class MarketDataOperations:
 
             logger.debug(f"Fetching quote snapshots: symbols={symbols}, mode={mode}")
             response = self.client.make_request("GET", endpoint, mode=mode)
-            parsed = QuotesResponse(**response)
+            parsed = validate_model(
+                QuotesResponse,
+                response,
+                operation="get_quote_snapshots",
+                endpoint=endpoint,
+                mode=mode,
+                source="response",
+            )
 
             # Convert Pydantic models to dicts for compatibility
             quotes = parsed.Quotes
-            quotes_dicts = [q.model_dump() if hasattr(q, "model_dump") else q for q in quotes]
+            quotes_dicts = [dump_model(quote) for quote in quotes]
             errors = parsed.Errors or []
 
             if errors:
@@ -455,10 +463,10 @@ class MarketDataOperations:
             if not e.details.message.startswith("Failed to get quote snapshots"):
                 e.details.message = f"Failed to get quote snapshots: {e.details.message}"
             logger.error(f"Failed to get quote snapshots: {e.details.to_human_readable()}", exc_info=True)
-            return {"Quotes": [], "Errors": []}
+            raise
         except Exception as e:
             logger.error(f"Failed to get quote snapshots: {e}", exc_info=True)
-            return {"Quotes": [], "Errors": []}
+            raise_unexpected_error(operation="get_quote_snapshots", endpoint=endpoint, mode=mode, exc=e)
 
     def get_symbol_details(self, symbols: str, mode: str | None = None) -> dict[str, Any]:
         """

@@ -72,16 +72,14 @@ class TestAccountOperationsGetAccountInfo:
         mock_request.assert_called_once_with("GET", "brokerage/accounts", mode="LIVE")
 
     def test_get_account_info_error_handling(self, mock_http_client, mocker):
-        """Test get_account_info handles errors gracefully."""
+        """Test get_account_info fails loud on broker errors."""
         from tradestation.exceptions import TradeStationAPIError
 
         mocker.patch.object(mock_http_client, "make_request", side_effect=TradeStationAPIError("API Error"))
 
         account_ops = AccountOperations(mock_http_client, default_mode="PAPER")
-        result = account_ops.get_account_info("PAPER")
-
-        # Should return empty dict on error
-        assert result == {}
+        with pytest.raises(TradeStationAPIError):
+            account_ops.get_account_info("PAPER")
 
 
 # ============================================================================

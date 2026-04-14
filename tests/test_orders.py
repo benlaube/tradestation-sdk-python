@@ -53,7 +53,8 @@ class TestOrderOperationsGetOrderHistory:
         order_ops.get_order_history(start_date="2025-12-01", end_date="2025-12-04", mode="PAPER")
 
         call_args = mock_http_client.make_request.call_args
-        assert "startDate" in call_args[1]["params"] or "StartDate" in call_args[1]["params"]
+        assert call_args[1]["params"]["since"] == "2025-12-01"
+        assert call_args[1]["params"]["endDate"] == "2025-12-04"
 
     def test_get_order_history_limit_parameter(self, mock_http_client, mocker):
         """Test get_order_history handles limit parameter."""
@@ -66,7 +67,7 @@ class TestOrderOperationsGetOrderHistory:
         order_ops.get_order_history(limit=50, mode="PAPER")
 
         call_args = mock_http_client.make_request.call_args
-        assert "limit" in call_args[1]["params"] or "Limit" in call_args[1]["params"]
+        assert call_args[1]["params"]["pageSize"] == 50
 
     def test_get_order_history_default_start_date(self, mock_http_client, mocker):
         """Test get_order_history defaults to 7 days ago when start_date is None."""

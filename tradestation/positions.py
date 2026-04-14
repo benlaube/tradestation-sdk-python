@@ -18,6 +18,7 @@ from .client import HTTPClient
 from .config import sdk_config
 from .exceptions import TradeStationAPIError
 from .models import PositionsResponse
+from .validation import dump_model, raise_unexpected_error, validate_model
 
 logger = setup_logger(__name__, sdk_config.log_level)
 
@@ -58,6 +59,20 @@ class PositionOperations:
         # Store default mode - will be used when mode=None is passed to functions
         self.default_mode = default_mode or sdk_config.trading_mode
 
+    def _fetch_positions(self, account_id: str, mode: str, operation: str) -> list[dict[str, Any]]:
+        """Fetch and validate positions, returning SDK-compatible dicts."""
+        endpoint = f"brokerage/accounts/{account_id}/positions"
+        response = self.client.make_request("GET", endpoint, mode=mode)
+        parsed = validate_model(
+            PositionsResponse,
+            response,
+            operation=operation,
+            endpoint=endpoint,
+            mode=mode,
+            source="response",
+        )
+        return [dump_model(position) for position in parsed.Positions]
+
     def get_position(self, symbol: str, mode: str | None = None) -> int:
         """
         Get current position quantity for a symbol.
@@ -77,12 +92,7 @@ class PositionOperations:
         account_info = self.accounts.get_account_info(mode)
         account_id = account_info.get("account_id") or self.account_id
 
-        endpoint = f"brokerage/accounts/{account_id}/positions"
-        response = self.client.make_request("GET", endpoint, mode=mode)
-        parsed = PositionsResponse(**response)
-
-        positions = parsed.Positions
-        positions_dicts = [p.model_dump() if hasattr(p, "model_dump") else p for p in positions]
+        positions_dicts = self._fetch_positions(account_id, mode, "get_position")
 
         for pos in positions_dicts:
             if pos.get("Symbol") == symbol:
@@ -111,12 +121,7 @@ class PositionOperations:
         account_info = self.accounts.get_account_info(mode)
         account_id = account_info.get("account_id") or self.account_id
 
-        endpoint = f"brokerage/accounts/{account_id}/positions"
-        response = self.client.make_request("GET", endpoint, mode=mode)
-        parsed = PositionsResponse(**response)
-
-        positions = parsed.Positions
-        positions_dicts = [p.model_dump() if hasattr(p, "model_dump") else p for p in positions]
+        positions_dicts = self._fetch_positions(account_id, mode, "get_all_positions")
 
         # Filter out zero positions and format
         active_positions = []
@@ -293,12 +298,7 @@ class PositionOperations:
             account_info = self.accounts.get_account_info(mode)
             account_id = account_info.get("account_id") or self.account_id
 
-            endpoint = f"brokerage/accounts/{account_id}/positions"
-            response = self.client.make_request("GET", endpoint, mode=mode)
-            parsed = PositionsResponse(**response)
-
-            positions = parsed.Positions
-            positions_dicts = [p.model_dump() if hasattr(p, "model_dump") else p for p in positions]
+            positions_dicts = self._fetch_positions(account_id, mode, "get_todays_profit_loss")
 
             total_pnl = 0.0
             for pos in positions_dicts:
@@ -317,10 +317,15 @@ class PositionOperations:
             if not e.details.message.startswith("Failed to get today's P&L"):
                 e.details.message = f"Failed to get today's P&L: {e.details.message}"
             logger.error(f"Failed to get today's P&L: {e.details.to_human_readable()}", exc_info=True)
-            return 0.0
+            raise
         except Exception as e:
             logger.error(f"Failed to get today's P&L: {e}", exc_info=True)
-            return 0.0
+            raise_unexpected_error(
+                operation="get_todays_profit_loss",
+                endpoint="brokerage/accounts/{account_id}/positions",
+                mode=mode,
+                exc=e,
+            )
 
     def get_todays_trades(self, order_operations=None, mode: str | None = None) -> list[dict[str, Any]]:
         """
@@ -386,12 +391,7 @@ class PositionOperations:
             account_info = self.accounts.get_account_info(mode)
             account_id = account_info.get("account_id") or self.account_id
 
-            endpoint = f"brokerage/accounts/{account_id}/positions"
-            response = self.client.make_request("GET", endpoint, mode=mode)
-            parsed = PositionsResponse(**response)
-
-            positions = parsed.Positions
-            positions_dicts = [p.model_dump() if hasattr(p, "model_dump") else p for p in positions]
+            positions_dicts = self._fetch_positions(account_id, mode, "get_unrealized_profit_loss")
 
             total_unrealized_pnl = 0.0
             for pos in positions_dicts:
@@ -410,7 +410,12 @@ class PositionOperations:
             if not e.details.message.startswith("Failed to get unrealized P&L"):
                 e.details.message = f"Failed to get unrealized P&L: {e.details.message}"
             logger.error(f"Failed to get unrealized P&L: {e.details.to_human_readable()}", exc_info=True)
-            return 0.0
+            raise
         except Exception as e:
             logger.error(f"Failed to get unrealized P&L: {e}", exc_info=True)
-            return 0.0
+            raise_unexpected_error(
+                operation="get_unrealized_profit_loss",
+                endpoint="brokerage/accounts/{account_id}/positions",
+                mode=mode,
+                exc=e,
+            )

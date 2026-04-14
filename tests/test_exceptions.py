@@ -289,5 +289,5 @@ class TestErrorParsing:
 
         details = parse_api_error_response(mock_response)
 
-        assert details.code == "HTTP_404"
+        assert details.code == "NOT_FOUND"
         assert details.api_error_code is None

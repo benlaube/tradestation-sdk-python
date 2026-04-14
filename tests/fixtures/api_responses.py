@@ -202,9 +202,14 @@ MOCK_ORDER_EXECUTIONS = {
         {
             "ExecutionID": "EX123456",
             "OrderID": "924243071",
+            "Symbol": "MNQZ25",
+            "TradeAction": "BUY",
             "Quantity": "2",
             "Price": "25000.00",
+            "Commission": "0.00",
+            "ExchangeFees": "0.00",
             "Time": "2025-12-04T10:00:00-05:00",
+            "Venue": "CME",
         }
     ]
 }
@@ -255,13 +260,13 @@ MOCK_EMPTY_POSITIONS = {"Positions": []}
 
 # Streaming Responses (newline-delimited JSON)
 
-MOCK_STREAM_QUOTE = '{"Type":"Quote","Symbol":"MNQZ25","Bid":25000.0,"Ask":25001.0,"Last":25000.5}\n'
-MOCK_STREAM_ORDER = '{"Type":"Order","OrderID":"924243071","Status":"FILLED"}\n'
-MOCK_STREAM_POSITION = '{"Type":"Position","Symbol":"MNQZ25","Quantity":"2"}\n'
-MOCK_STREAM_BALANCE = '{"Type":"Balance","AccountID":"SIM123456","Equity":"100000.00"}\n'
-MOCK_STREAM_STATUS_END = '{"Type":"StreamStatus","Status":"EndSnapshot"}\n'
-MOCK_STREAM_STATUS_GOAWAY = '{"Type":"StreamStatus","Status":"GoAway"}\n'
-MOCK_STREAM_ERROR = '{"Type":"Error","Error":"Connection lost"}\n'
+MOCK_STREAM_QUOTE = '{"Symbol":"MNQZ25","Bid":"25000.0","Ask":"25001.0","Last":"25000.5"}\n'
+MOCK_STREAM_ORDER = '{"AccountID":"SIM123456","OrderID":"924243071","Status":"FLL","Symbol":"MNQZ25","TradeAction":"Buy","Quantity":"2"}\n'
+MOCK_STREAM_POSITION = '{"AccountID":"SIM123456","Symbol":"MNQZ25","Quantity":"2"}\n'
+MOCK_STREAM_BALANCE = '{"AccountID":"SIM123456","Equity":"100000.00"}\n'
+MOCK_STREAM_STATUS_END = '{"StreamStatus":"EndSnapshot"}\n'
+MOCK_STREAM_STATUS_GOAWAY = '{"StreamStatus":"GoAway"}\n'
+MOCK_STREAM_ERROR = '{"Error":"Failed","Message":"Connection lost"}\n'
 
 # Error Responses
 

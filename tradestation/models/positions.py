@@ -7,12 +7,12 @@ These capture key fields from /brokerage/accounts/{accountId}/positions.
 Dependencies: pydantic
 """
 
-from typing import Any
+from pydantic import AliasChoices, Field
 
-from pydantic import BaseModel, Field
+from .base import TradeStationModel
 
 
-class PositionResponse(BaseModel):
+class PositionResponse(TradeStationModel):
     """
     Position response from TradeStation REST API.
 
@@ -39,7 +39,7 @@ class PositionResponse(BaseModel):
         ExpirationDate: Expiration date (futures/options)
     """
 
-    AccountID: str = Field(..., description="TradeStation account ID")
+    AccountID: str | None = Field(None, description="TradeStation account ID")
     PositionID: str | None = Field(None, description="Unique position identifier")
     Symbol: str = Field(..., description="Trading symbol")
     AssetType: str | None = Field(None, description="STOCK, STOCKOPTION, FUTURE, INDEXOPTION")
@@ -51,8 +51,16 @@ class PositionResponse(BaseModel):
     Ask: str | None = Field(None, description="Current ask price")
     MarketValue: str | None = Field(None, description="Current market value")
     TotalCost: str | None = Field(None, description="Total cost of position")
-    TodaysProfitLoss: str | None = Field(None, description="Today's P&L")
-    UnrealizedProfitLoss: str | None = Field(None, description="Unrealized P&L")
+    TodaysProfitLoss: str | None = Field(
+        None,
+        validation_alias=AliasChoices("TodaysProfitLoss", "TodaysPnL"),
+        description="Today's P&L",
+    )
+    UnrealizedProfitLoss: str | None = Field(
+        None,
+        validation_alias=AliasChoices("UnrealizedProfitLoss", "UnrealizedPnL"),
+        description="Unrealized P&L",
+    )
     UnrealizedProfitLossPercent: str | None = Field(None, description="Unrealized P&L percentage")
     UnrealizedProfitLossQty: str | None = Field(None, description="Unrealized P&L per unit")
     MarkToMarketPrice: str | None = Field(None, description="Mark-to-market price")
@@ -65,7 +73,7 @@ class PositionResponse(BaseModel):
     Deleted: bool | None = Field(None, description="True if position closed")
 
 
-class PositionsResponse(BaseModel):
+class PositionsResponse(TradeStationModel):
     """Wrapper for positions response."""
 
-    Positions: list[PositionResponse] | list[dict[str, Any]] = Field(..., description="List of positions")
+    Positions: list[PositionResponse] = Field(..., description="List of positions")

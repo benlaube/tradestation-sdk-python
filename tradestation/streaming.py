@@ -22,18 +22,20 @@ from .logger import setup_logger
 from .client import HTTPClient
 from .config import sdk_config
 from .exceptions import (
+    InvalidRequestError,
     NetworkError,
     NonRecoverableError,
     RateLimitError,
     RecoverableError,
 )
-from .models import BalanceStream
+from .models import BalanceStream, PositionsResponse
 from .models.streaming import (
     OrderStream,
     PositionStream,
     QuoteStream,
 )
 from .session import Session, TokenManager
+from .validation import validate_model
 
 logger = setup_logger(__name__, sdk_config.log_level)
 
@@ -257,9 +259,16 @@ class StreamingManager:
                     health.update_on_message()
                     yield item
 
+                logger.info(f"{stream_type} stream ended cleanly")
+                break
+
             except asyncio.CancelledError:
                 logger.info(f"{stream_type} stream cancelled")
                 break
+            except InvalidRequestError as e:
+                health.update_on_error()
+                logger.error(f"Validation or request error in {stream_type} stream: {e}")
+                raise
             except NonRecoverableError as e:
                 health.update_on_error()
                 logger.error(f"Non-recoverable error in {stream_type} stream: {e}")
@@ -298,7 +307,7 @@ class StreamingManager:
 
     async def stream_quotes(
         self,
-        symbols: list[str],
+        symbols: list[str] | str,
         mode: str | None = None,
         max_retries: int = 10,
         retry_delay: float = 1.0,
@@ -315,7 +324,7 @@ class StreamingManager:
         and REST polling fallback.
 
         Args:
-            symbols: List of symbols to stream (e.g., ["MNQZ25", "ESZ25"])
+            symbols: List of symbols or a comma-separated string (e.g., ["MNQZ25", "ESZ25"] or "MNQZ25,ESZ25")
             mode: "PAPER" or "LIVE". If None, uses sdk_config.trading_mode
             max_retries: Maximum number of retry attempts (default: 10)
             retry_delay: Initial retry delay in seconds (default: 1.0)
@@ -339,19 +348,22 @@ class StreamingManager:
         """
         if mode is None:
             mode = sdk_config.trading_mode
+        symbols_list = [symbol.strip() for symbol in symbols.split(",")] if isinstance(symbols, str) else symbols
 
         # Use generic retry wrapper
         async def _get_stream():
             """Create the quote stream generator."""
             # Try HTTP streaming first
             try:
-                async for quote in self._stream_quotes_internal(symbols, mode):
+                async for quote in self._stream_quotes_internal(symbols_list, mode):
                     yield quote
+            except InvalidRequestError:
+                raise
             except Exception as e:
                 # If fallback is enabled, try REST polling
                 if fallback_to_polling:
                     logger.warning(f"HTTP streaming failed: {e}, falling back to REST polling")
-                    async for quote in self._poll_quotes_rest(symbols, mode, polling_interval):
+                    async for quote in self._poll_quotes_rest(symbols_list, mode, polling_interval):
                         yield quote
                 else:
                     raise
@@ -450,7 +462,14 @@ class StreamingManager:
 
             # Parse and yield QuoteStream model
             try:
-                quote = QuoteStream(**quote_data)
+                quote = validate_model(
+                    QuoteStream,
+                    quote_data,
+                    operation="stream_quotes",
+                    endpoint=endpoint,
+                    mode=mode,
+                    source="response",
+                )
                 yield quote
             except Exception as e:
                 logger.warning(f"Failed to parse quote data: {e}, raw data: {quote_data}")
@@ -490,11 +509,14 @@ class StreamingManager:
                 quotes = quotes_response.get("Quotes", [])
 
                 for quote_dict in quotes:
-                    try:
-                        yield QuoteStream(**quote_dict)
-                    except Exception as e:
-                        logger.warning(f"Failed to parse quote from REST polling: {e}")
-                        continue
+                    yield validate_model(
+                        QuoteStream,
+                        quote_dict,
+                        operation="poll_quotes_rest",
+                        endpoint=f"marketdata/quotes/{symbols_str}",
+                        mode=mode,
+                        source="response",
+                    )
 
                 await asyncio.sleep(interval)
             except asyncio.CancelledError:
@@ -693,7 +715,14 @@ class StreamingManager:
                 continue
 
             try:
-                order = OrderStream(**order_data)
+                order = validate_model(
+                    OrderStream,
+                    order_data,
+                    operation="stream_orders",
+                    endpoint=endpoint,
+                    mode=mode,
+                    source="response",
+                )
                 yield order
             except Exception as e:
                 logger.warning(f"Failed to parse order data: {e}, raw data: {order_data}")
@@ -719,11 +748,14 @@ class StreamingManager:
                 orders = orders_response.get("Orders", [])
 
                 for order_dict in orders:
-                    try:
-                        yield OrderStream(**order_dict)
-                    except Exception as e:
-                        logger.warning(f"Failed to parse order from REST polling: {e}")
-                        continue
+                    yield validate_model(
+                        OrderStream,
+                        order_dict,
+                        operation="poll_orders_rest",
+                        endpoint=f"brokerage/accounts/{account_id}/orders",
+                        mode=mode,
+                        source="response",
+                    )
 
                 await asyncio.sleep(interval)
             except asyncio.CancelledError:
@@ -841,7 +873,14 @@ class StreamingManager:
                 continue
 
             try:
-                position = PositionStream(**position_data)
+                position = validate_model(
+                    PositionStream,
+                    position_data,
+                    operation="stream_positions",
+                    endpoint=endpoint,
+                    mode=mode,
+                    source="response",
+                )
                 yield position
             except Exception as e:
                 logger.warning(f"Failed to parse position data: {e}, raw data: {position_data}")
@@ -851,28 +890,33 @@ class StreamingManager:
         self, account_id: str, mode: str, interval: float
     ) -> AsyncGenerator[PositionStream, None]:
         """REST polling fallback for positions."""
-        from .accounts import AccountOperations
-        from .positions import PositionOperations
-
         if not self._api_client:
             self._api_client = HTTPClient(self.token_manager)
-
-        # PositionOperations requires AccountOperations
-        accounts_ops = AccountOperations(self._api_client, account_id, mode)
-        positions_ops = PositionOperations(self._api_client, accounts_ops, account_id, mode)
 
         logger.info(f"Using REST polling fallback for positions (interval: {interval}s)")
 
         while True:
             try:
-                positions = positions_ops.get_all_positions(mode=mode)
+                endpoint = f"brokerage/accounts/{account_id}/positions"
+                response = self._api_client.make_request("GET", endpoint, mode=mode)
+                parsed = validate_model(
+                    PositionsResponse,
+                    response,
+                    operation="poll_positions_rest",
+                    endpoint=endpoint,
+                    mode=mode,
+                    source="response",
+                )
 
-                for position_dict in positions:
-                    try:
-                        yield PositionStream(**position_dict)
-                    except Exception as e:
-                        logger.warning(f"Failed to parse position from REST polling: {e}")
-                        continue
+                for position in parsed.Positions:
+                    yield validate_model(
+                        PositionStream,
+                        position.model_dump(exclude_none=True),
+                        operation="poll_positions_rest",
+                        endpoint=endpoint,
+                        mode=mode,
+                        source="response",
+                    )
 
                 await asyncio.sleep(interval)
             except asyncio.CancelledError:
@@ -990,7 +1034,14 @@ class StreamingManager:
 
             # Parse and yield BalanceStream model
             try:
-                balance = BalanceStream(**balance_data)
+                balance = validate_model(
+                    BalanceStream,
+                    balance_data,
+                    operation="stream_balances",
+                    endpoint=endpoint,
+                    mode=mode,
+                    source="response",
+                )
                 yield balance
             except Exception as e:
                 logger.warning(f"Failed to parse balance data: {e}, raw data: {balance_data}")
@@ -1095,7 +1146,14 @@ class StreamingManager:
                 continue
 
             try:
-                order = OrderStream(**order_data)
+                order = validate_model(
+                    OrderStream,
+                    order_data,
+                    operation="stream_orders_by_ids",
+                    endpoint=endpoint,
+                    mode=mode,
+                    source="response",
+                )
                 yield order
             except Exception as e:
                 logger.warning(f"Failed to parse order data: {e}, raw data: {order_data}")

@@ -46,7 +46,7 @@ class TestStreamingManagerStreamQuotes:
         # Verify quotes were received
         assert len(quotes) > 0
         if quotes:
-            assert "Symbol" in quotes[0] or "Type" in quotes[0]
+            assert quotes[0].Symbol == "MNQZ25"
 
     @pytest.mark.asyncio
     async def test_stream_quotes_endpoint(self, mock_token_manager, mock_http_client, mocker):
@@ -65,7 +65,7 @@ class TestStreamingManagerStreamQuotes:
         # Verify endpoint was called
         mock_stream.assert_called_once()
         call_args = mock_stream.call_args
-        assert "marketdata/stream/quotes/MNQZ25" in call_args[0][1]
+        assert "marketdata/stream/quotes/MNQZ25" in call_args[0][0]
 
     @pytest.mark.asyncio
     async def test_stream_quotes_multiple_symbols(self, mock_token_manager, mock_http_client, mocker):
@@ -82,7 +82,7 @@ class TestStreamingManagerStreamQuotes:
             break
 
         call_args = mock_http_client.stream_data.call_args
-        assert "MNQZ25,ESZ25" in call_args[0][1]
+        assert "MNQZ25,ESZ25" in call_args[0][0]
 
     @pytest.mark.asyncio
     async def test_stream_quotes_handles_stream_status(self, mock_token_manager, mock_http_client, mocker):
@@ -104,6 +104,19 @@ class TestStreamingManagerStreamQuotes:
 
         # Should receive quote data, not StreamStatus
         assert len(quotes) > 0
+
+    @pytest.mark.asyncio
+    async def test_stream_quotes_validation_failure_raises(self, mock_token_manager, mock_http_client, mocker):
+        """Test malformed quote payloads raise instead of being swallowed."""
+        mock_data = [{"Symbol": "MNQZ25", "Bid": "25000.0", "UnexpectedField": "boom"}]
+
+        mocker.patch.object(mock_http_client, "stream_data", return_value=iter(mock_data))
+
+        streaming = StreamingManager(mock_token_manager, "client_id", "client_secret", mock_http_client)
+
+        with pytest.raises(Exception):
+            async for _ in streaming.stream_quotes("MNQZ25", mode="PAPER"):
+                break
 
 
 # ============================================================================
@@ -136,6 +149,7 @@ class TestStreamingManagerStreamOrders:
                 break
 
         assert len(orders) > 0
+        assert orders[0].OrderID == "924243071"
 
     @pytest.mark.asyncio
     async def test_stream_orders_endpoint(self, mock_token_manager, mock_http_client, mocker):
@@ -152,7 +166,7 @@ class TestStreamingManagerStreamOrders:
             break
 
         call_args = mock_http_client.stream_data.call_args
-        assert "brokerage/stream/accounts/SIM123456/orders" in call_args[0][1]
+        assert "brokerage/stream/accounts/SIM123456/orders" in call_args[0][0]
 
 
 # ============================================================================
@@ -185,6 +199,7 @@ class TestStreamingManagerStreamPositions:
                 break
 
         assert len(positions) > 0
+        assert positions[0].Symbol == "MNQZ25"
 
     @pytest.mark.asyncio
     async def test_stream_positions_endpoint(self, mock_token_manager, mock_http_client, mocker):
@@ -201,7 +216,7 @@ class TestStreamingManagerStreamPositions:
             break
 
         call_args = mock_http_client.stream_data.call_args
-        assert "brokerage/stream/accounts/SIM123456/positions" in call_args[0][1]
+        assert "brokerage/stream/accounts/SIM123456/positions" in call_args[0][0]
 
 
 # ============================================================================
@@ -234,6 +249,7 @@ class TestStreamingManagerStreamBalances:
                 break
 
         assert len(balances) > 0
+        assert balances[0].AccountID == "SIM123456"
 
     @pytest.mark.asyncio
     async def test_stream_balances_endpoint(self, mock_token_manager, mock_http_client, mocker):
@@ -250,7 +266,7 @@ class TestStreamingManagerStreamBalances:
             break
 
         call_args = mock_http_client.stream_data.call_args
-        assert "brokerage/stream/accounts/SIM123456/balances" in call_args[0][1]
+        assert "brokerage/stream/accounts/SIM123456/balances" in call_args[0][0]
 
 
 # ============================================================================
@@ -279,10 +295,8 @@ class TestStreamingManagerStreamOrdersByIds:
             break
 
         call_args = mock_http_client.stream_data.call_args
-        assert "brokerage/stream/accounts/SIM123456/orders" in call_args[0][1]
-        assert "924243071,924243072" in call_args[1]["params"]["ordersIds"] or "924243071,924243072" in str(
-            call_args[1]
-        )
+        assert "brokerage/stream/accounts/SIM123456/orders" in call_args[0][0]
+        assert "924243071,924243072" in call_args[0][0]
 
 
 # ============================================================================

@@ -70,8 +70,8 @@ class TestMarketDataOperationsGetBars:
             "MNQZ25", "1", "Minute", start_date="2025-12-04T09:00:00Z", end_date="2025-12-04T16:00:00Z", mode="PAPER"
         )
         call2 = mock_http_client.make_request.call_args
-        assert "firstDate" in call2[1]["params"]
-        assert "lastDate" in call2[1]["params"]
+        assert "firstdate" in call2[1]["params"]
+        assert "lastdate" in call2[1]["params"]
         assert "barsback" not in call2[1]["params"]
 
     def test_get_bars_default_bars_back(self, mock_http_client, mocker):
@@ -150,23 +150,22 @@ class TestMarketDataOperationsGetFuturesIndexSymbols:
     def test_get_futures_index_symbols_success(self, mock_http_client, mocker):
         """Test get_futures_index_symbols returns futures index symbols."""
         mock_request = mocker.patch.object(
-            mock_http_client, "make_request", return_value=api_responses.MOCK_FUTURES_INDEX_SYMBOLS
+            mock_http_client, "make_request", return_value=api_responses.MOCK_SYMBOL_SEARCH
         )
 
         market_data = MarketDataOperations(mock_http_client)
         result = market_data.get_futures_index_symbols("PAPER")
 
-        # Verify endpoint
-        mock_request.assert_called_once()
-        call_args = mock_request.call_args
-        assert "marketdata/symbollists/futures/index/symbolnames" in call_args[0][1]
+        assert mock_request.call_count == 8
+        call_args = mock_request.call_args_list[0]
+        assert "marketdata/symbols/search" in call_args[0][1]
 
         # Verify result
-        assert isinstance(result, list) or isinstance(result, dict)
+        assert isinstance(result, list)
 
     def test_get_futures_index_symbols_response_parsing(self, mock_http_client, mocker):
         """Test get_futures_index_symbols parses response correctly."""
-        mocker.patch.object(mock_http_client, "make_request", return_value=api_responses.MOCK_FUTURES_INDEX_SYMBOLS)
+        mocker.patch.object(mock_http_client, "make_request", return_value=api_responses.MOCK_SYMBOL_SEARCH)
 
         market_data = MarketDataOperations(mock_http_client)
         result = market_data.get_futures_index_symbols("PAPER")
@@ -316,5 +315,5 @@ class TestMarketDataOperationsOtherMethods:
 
         call_args = mock_http_client.make_request.call_args
         assert "marketdata/options/strikes/SPY" in call_args[0][1]
-        assert call_args[1]["params"]["expirationDate"] == "2025-12-19"
+        assert call_args[1]["params"]["expiration"] == "2025-12-19"
         assert result is not None

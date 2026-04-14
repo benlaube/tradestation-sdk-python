@@ -16,7 +16,8 @@ from .accounts import AccountOperations
 from .client import HTTPClient
 from .config import sdk_config
 from .exceptions import TradeStationAPIError
-from .models import TradeStationExecutionResponse
+from .models import OrdersResponse, TradeStationExecutionResponse, TradeStationOrderRequest
+from .validation import dump_model, raise_unexpected_error, validate_model
 
 logger = setup_logger(__name__, sdk_config.log_level)
 
@@ -360,11 +361,28 @@ class OrderExecutionOperations:
                 order_desc += f" trail {trail_percent:.2f}%"
             logger.info(f"📤 Placing order: {order_desc} ({mode} mode)")
 
-            response = self.client.make_request("POST", endpoint, json_data=order, mode=mode)
-            orders = response.get("Orders", [])
+            order_model = validate_model(
+                TradeStationOrderRequest,
+                order,
+                operation="place_order",
+                endpoint=endpoint,
+                mode=mode,
+                source="request",
+            )
+            response = self.client.make_request("POST", endpoint, json_data=dump_model(order_model), mode=mode)
+            orders_response = validate_model(
+                OrdersResponse,
+                response,
+                operation="place_order",
+                endpoint=endpoint,
+                mode=mode,
+                source="response",
+            )
+            orders = orders_response.Orders
             if orders:
-                order_id = orders[0].get("OrderID")
-                message = orders[0].get("Message", "Order received")
+                first_order = dump_model(orders[0])
+                order_id = first_order.get("OrderID")
+                message = first_order.get("Message", "Order received")
                 logger.info(f"✅ Order placed successfully - ID: {order_id}")
                 return order_id, message
             logger.error("❌ No order returned in response")
@@ -375,10 +393,10 @@ class OrderExecutionOperations:
             if not e.details.message.startswith("Order placement failed"):
                 e.details.message = f"Order placement failed: {e.details.message}"
             logger.error(f"❌ Order placement failed: {e.details.to_human_readable()}")
-            return None, f"ERROR: {e.details.message}"
+            raise
         except Exception as e:
             logger.error(f"❌ Order placement failed: {e}", exc_info=True)
-            return None, f"ERROR: {str(e)}"
+            raise_unexpected_error(operation="place_order", endpoint=endpoint, mode=mode, exc=e)
 
     def cancel_order(self, order_id: str, mode: str | None = None) -> tuple[bool, str]:
         """
@@ -1040,12 +1058,15 @@ class OrderExecutionOperations:
             executions_raw = response.get("Executions", [])
             executions = []
             for exec_data in executions_raw:
-                try:
-                    execution = TradeStationExecutionResponse(**exec_data)
-                    executions.append(execution.model_dump())
-                except Exception as e:
-                    logger.warning(f"Failed to parse execution: {e}, raw data: {exec_data}")
-                    executions.append(exec_data)  # Fallback to raw dict
+                execution = validate_model(
+                    TradeStationExecutionResponse,
+                    exec_data,
+                    operation="get_order_executions",
+                    endpoint=endpoint,
+                    mode=mode,
+                    source="response",
+                )
+                executions.append(dump_model(execution))
 
             logger.debug(f"Retrieved {len(executions)} executions for order {order_id}")
 
@@ -1056,10 +1077,10 @@ class OrderExecutionOperations:
             if not e.details.message.startswith("Failed to get order executions"):
                 e.details.message = f"Failed to get order executions: {e.details.message}"
             logger.error(f"Failed to get order executions for {order_id}: {e.details.to_human_readable()}")
-            return []
+            raise
         except Exception as e:
             logger.error(f"Failed to get order executions for {order_id}: {e}", exc_info=True)
-            return []
+            raise_unexpected_error(operation="get_order_executions", endpoint=endpoint, mode=mode, exc=e)
 
     def confirm_order(
         self,

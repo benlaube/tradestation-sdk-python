@@ -7,19 +7,18 @@ This file contains models for GET /v3/brokerage/accounts (list all accounts).
 Dependencies: pydantic
 """
 
-from typing import Any
-
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import Field
 
 from .accounts import AccountSummary
+from .base import TradeStationModel, strict_model_config
 
 
-class AccountsListResponse(BaseModel):
+class AccountsListResponse(TradeStationModel):
     """Response for GET /brokerage/accounts."""
 
-    Accounts: list[AccountSummary] | list[dict[str, Any]] = Field(..., description="List of accounts")
+    Accounts: list[AccountSummary] = Field(..., description="List of accounts")
 
-    model_config = ConfigDict(
+    model_config = strict_model_config(
         json_schema_extra={
             "example": {
                 "Accounts": [
