@@ -324,6 +324,35 @@ class TestStreamingManagerStreamBalances:
         assert balances[0].AccountID == "SIM123456"
 
     @pytest.mark.asyncio
+    async def test_stream_balances_accepts_futures_fields(self, mock_token_manager, mock_http_client, mocker):
+        """Test PAPER futures balance stream fields do not break validation."""
+        mock_data = [
+            {
+                "AccountID": "SIM123456",
+                "AccountType": "Futures",
+                "Equity": "100000.00",
+                "MarketValue": "0",
+                "UnclearedDeposit": "0",
+                "BalanceDetail": {"InitialMargin": "0"},
+                "CurrencyDetails": [{"Currency": "USD", "ConversionRate": "1"}],
+                "Commission": "0",
+            },
+            json.loads(api_responses.MOCK_STREAM_STATUS_END.strip()),
+        ]
+        mocker.patch.object(mock_http_client, "stream_data", return_value=iter(mock_data))
+
+        streaming = StreamingManager(mock_token_manager, "client_id", "client_secret", mock_http_client)
+
+        balances = []
+        async for balance in streaming.stream_balances("SIM123456", mode="PAPER"):
+            balances.append(balance)
+            if len(balances) >= 1:
+                break
+
+        assert balances[0].AccountType == "Futures"
+        assert balances[0].CurrencyDetails == [{"Currency": "USD", "ConversionRate": "1"}]
+
+    @pytest.mark.asyncio
     async def test_stream_balances_endpoint(self, mock_token_manager, mock_http_client, mocker):
         """Test stream_balances calls correct endpoint."""
         mocker.patch.object(

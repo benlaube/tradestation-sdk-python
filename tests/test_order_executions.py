@@ -153,6 +153,26 @@ class TestOrderExecutionOperationsPlaceOrder:
         # Verify order_id was extracted
         assert order_id == "924243071"
 
+    def test_place_order_accepts_ack_without_account_id(self, mock_http_client, mocker):
+        """Test broker write ACKs do not require AccountID in response rows."""
+        mock_accounts = mocker.MagicMock()
+        mock_accounts.get_account_info.return_value = {"account_id": "SIM123456"}
+        response = {
+            "Orders": [
+                {
+                    "OrderID": "948122453",
+                    "Message": "Order received",
+                }
+            ]
+        }
+        mocker.patch.object(mock_http_client, "make_request", return_value=response)
+
+        order_exec = OrderExecutionOperations(mock_http_client, mock_accounts, default_mode="PAPER")
+        order_id, status = order_exec.place_order("NQM26", "BUY", 2, "Limit", limit_price=26747.75, mode="PAPER")
+
+        assert order_id == "948122453"
+        assert status == "Order received"
+
 
 # ============================================================================
 # OrderExecutionOperations cancel_order Tests

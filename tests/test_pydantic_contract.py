@@ -30,6 +30,9 @@ APPROVED_RAW_FIELDS = {
     ("BODBalancesResponse", "Errors"),
     ("TradeStationOrderRequest", "TimeInForce"),
     ("TradeStationOrderResponse", "TimeInForce"),
+    ("OrderStream", "TimeInForce"),
+    ("BalanceStream", "BalanceDetail"),
+    ("BalanceStream", "CurrencyDetails"),
 }
 
 

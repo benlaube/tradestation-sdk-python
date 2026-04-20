@@ -190,6 +190,10 @@ class OrderStream(TradeStationModel):
     Quantity: str | None = Field(None, description="Quantity (if not in Legs)")
     FilledQuantity: str | None = Field(None, description="Filled quantity")
     AverageFillPrice: str | None = Field(None, description="Average fill price")
+    PlacedTime: str | None = Field(None, description="Placed time (alternative to OpenedDateTime)")
+    FilledTime: str | None = Field(None, description="Filled time (alternative to ClosedDateTime)")
+    TimeInForce: dict[str, str] | None = Field(None, description="Time in force (alternative to Duration)")
+    ConversionRate: str | None = Field(None, description="Currency conversion rate")
 
     model_config = strict_model_config(
         json_schema_extra={
@@ -373,9 +377,12 @@ class BalanceStream(TradeStationModel):
     """
 
     AccountID: str = Field(..., description="TradeStation account ID")
+    AccountType: str | None = Field(None, description="TradeStation account type")
     Equity: float | str | None = Field(None, description="Total equity")
     BuyingPower: float | str | None = Field(None, description="Buying power")
     CashBalance: float | str | None = Field(None, description="Cash balance")
+    MarketValue: float | str | None = Field(None, description="Current market value")
+    UnclearedDeposit: float | str | None = Field(None, description="Uncleared deposits")
     TodaysProfitLoss: float | str | None = Field(
         None,
         validation_alias=AliasChoices("TodaysProfitLoss", "TodaysPnL"),
@@ -394,6 +401,11 @@ class BalanceStream(TradeStationModel):
     DayTradingBuyingPower: float | str | None = Field(None, description="Day trading buying power")
     OpenPnL: float | str | None = Field(None, description="Open P&L")
     RealizedPnL: float | str | None = Field(None, description="Realized P&L")
+    BalanceDetail: dict[str, Any] | None = Field(None, description="Detailed balance payload")
+    CurrencyDetails: list[dict[str, Any]] | dict[str, Any] | None = Field(
+        None, description="Currency-specific balance details"
+    )
+    Commission: float | str | None = Field(None, description="Commission total")
     Timestamp: str | None = Field(None, description="Timestamp of the update (if provided)")
 
     model_config = strict_model_config(

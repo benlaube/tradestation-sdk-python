@@ -42,6 +42,29 @@ class TestOrderOperationsGetOrderHistory:
         if result:
             assert "OrderID" in result[0]
 
+    def test_get_order_history_accepts_conversion_rate(self, mock_http_client, mocker):
+        """Test PAPER futures order history accepts currency conversion fields."""
+        mock_accounts = mocker.MagicMock()
+        mock_accounts.get_account_info.return_value = {"account_id": "SIM123456"}
+        response = {
+            "Orders": [
+                {
+                    "AccountID": "SIM123456",
+                    "OrderID": f"hist-{index}",
+                    "Status": "OUT",
+                    "ConversionRate": "1",
+                }
+                for index in range(5)
+            ]
+        }
+        mocker.patch.object(mock_http_client, "make_request", return_value=response)
+
+        order_ops = OrderOperations(mock_http_client, mock_accounts, account_id="SIM123456", default_mode="PAPER")
+        result = order_ops.get_order_history(mode="PAPER")
+
+        assert len(result) == 5
+        assert result[0]["ConversionRate"] == "1"
+
     def test_get_order_history_date_filtering(self, mock_http_client, mocker):
         """Test get_order_history handles date filtering."""
         mock_accounts = mocker.MagicMock()
@@ -114,6 +137,27 @@ class TestOrderOperationsGetCurrentOrders:
         # Verify result structure
         assert isinstance(result, dict)
         assert "Orders" in result or isinstance(result, list)
+
+    def test_get_current_orders_accepts_conversion_rate(self, mock_http_client, mocker):
+        """Test current order rows accept PAPER futures conversion rate."""
+        mock_accounts = mocker.MagicMock()
+        mock_accounts.get_account_info.return_value = {"account_id": "SIM123456"}
+        response = {
+            "Orders": [
+                {
+                    "AccountID": "SIM123456",
+                    "OrderID": "current-1",
+                    "Status": "OPN",
+                    "ConversionRate": "1",
+                }
+            ]
+        }
+        mocker.patch.object(mock_http_client, "make_request", return_value=response)
+
+        order_ops = OrderOperations(mock_http_client, mock_accounts, account_id="SIM123456", default_mode="PAPER")
+        result = order_ops.get_current_orders(mode="PAPER")
+
+        assert result["Orders"][0]["ConversionRate"] == "1"
 
     def test_get_current_orders_pagination(self, mock_http_client, mocker):
         """Test get_current_orders handles pagination with next_token."""

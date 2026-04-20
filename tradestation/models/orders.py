@@ -152,7 +152,7 @@ class TradeStationOrderResponse(TradeStationModel):
     ensuring no data is lost when syncing orders from TradeStation.
 
     Attributes:
-        AccountID: TradeStation account ID
+        AccountID: TradeStation account ID when returned by the endpoint
         OrderID: TradeStation order ID
         OrderType: Order type (Market, Limit, etc.)
         Status: Order status (OPN, ACK, FLL, CNL, REJ)
@@ -181,7 +181,7 @@ class TradeStationOrderResponse(TradeStationModel):
         RejectionReason: Rejection reason (if rejected)
     """
 
-    AccountID: str = Field(..., description="TradeStation account ID")
+    AccountID: str | None = Field(None, description="TradeStation account ID")
     OrderID: str = Field(..., description="TradeStation order ID")
     OrderType: str | None = Field(None, description="Order type")
     Status: str | None = Field(None, description="Order status")
@@ -222,6 +222,7 @@ class TradeStationOrderResponse(TradeStationModel):
     PlacedTime: str | None = Field(None, description="Placed time (alternative to OpenedDateTime)")
     FilledTime: str | None = Field(None, description="Filled time (alternative to ClosedDateTime)")
     TimeInForce: dict[str, str] | None = Field(None, description="Time in force (alternative to Duration)")
+    ConversionRate: str | None = Field(None, description="Currency conversion rate")
 
     model_config = strict_model_config(
         json_schema_extra={
