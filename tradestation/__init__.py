@@ -10,8 +10,6 @@ Dependencies: All tradestation SDK submodules
 from collections.abc import AsyncGenerator
 from typing import Any
 
-from .logger import setup_logger
-
 # Import operation modules
 from .accounts import AccountOperations
 from .client import HTTPClient, get_base_url
@@ -23,9 +21,11 @@ from .exceptions import (
     NetworkError,
     RateLimitError,
     SDKValidationError,
+    StreamGoAwayError,
     TokenExpiredError,
     TradeStationAPIError,
 )
+from .logger import setup_logger
 
 # Import mappers
 from .mappers import normalize_order, normalize_position
@@ -1221,6 +1221,7 @@ __all__ = [
     "InvalidRequestError",
     "NetworkError",
     "SDKValidationError",
+    "StreamGoAwayError",
     "TokenExpiredError",
     "InvalidTokenError",
     # Operation modules
