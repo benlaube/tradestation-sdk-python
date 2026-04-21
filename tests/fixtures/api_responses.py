@@ -61,7 +61,12 @@ MOCK_ACCOUNT_BALANCES = {
 
 MOCK_DETAILED_BALANCES = {
     "Balances": [
-        {"AccountID": "SIM123456", "Equity": "100000.00", "CashBalance": "100000.00", "BuyingPower": "400000.00"}
+        {
+            "AccountID": "SIM123456",
+            "Equity": "100000.00",
+            "CashBalance": "100000.00",
+            "BuyingPower": "400000.00",
+        }
     ]
 }
 
@@ -132,8 +137,16 @@ MOCK_SYMBOL_DETAILS = {
 
 MOCK_SYMBOL_SEARCH = {
     "Symbols": [
-        {"Symbol": "MNQZ25", "Description": "Micro E-mini Nasdaq-100 Futures", "AssetType": "FUTURE"},
-        {"Symbol": "MNQH26", "Description": "Micro E-mini Nasdaq-100 Futures", "AssetType": "FUTURE"},
+        {
+            "Symbol": "MNQZ25",
+            "Description": "Micro E-mini Nasdaq-100 Futures",
+            "AssetType": "FUTURE",
+        },
+        {
+            "Symbol": "MNQH26",
+            "Description": "Micro E-mini Nasdaq-100 Futures",
+            "AssetType": "FUTURE",
+        },
     ]
 }
 
@@ -169,7 +182,14 @@ MOCK_ORDER_PLACEMENT_SUCCESS = {
 MOCK_ORDER_CANCEL_SUCCESS = {"Orders": [{"OrderID": "924243071", "Status": "CANCELED"}]}
 
 MOCK_ORDER_MODIFY_SUCCESS = {
-    "Orders": [{"OrderID": "924243071", "Quantity": "3", "LimitPrice": "25010.00", "Status": "OPEN"}]
+    "Orders": [
+        {
+            "OrderID": "924243071",
+            "Quantity": "3",
+            "LimitPrice": "25010.00",
+            "Status": "OPEN",
+        }
+    ]
 }
 
 MOCK_CURRENT_ORDERS = {
@@ -230,7 +250,10 @@ MOCK_GROUP_ORDER_PLACEMENT = {
         {
             "GroupID": "GRP123456",
             "GroupType": "BRK",
-            "Orders": [{"OrderID": "924243071", "Status": "OPEN"}, {"OrderID": "924243072", "Status": "OPEN"}],
+            "Orders": [
+                {"OrderID": "924243071", "Status": "OPEN"},
+                {"OrderID": "924243072", "Status": "OPEN"},
+            ],
         }
     ]
 }
@@ -275,6 +298,7 @@ MOCK_STREAM_POSITION = '{"AccountID":"SIM123456","Symbol":"MNQZ25","Quantity":"2
 MOCK_STREAM_BALANCE = '{"AccountID":"SIM123456","Equity":"100000.00"}\n'
 MOCK_STREAM_STATUS_END = '{"StreamStatus":"EndSnapshot"}\n'
 MOCK_STREAM_STATUS_GOAWAY = '{"StreamStatus":"GoAway"}\n'
+MOCK_STREAM_ERROR_GOAWAY = '{"Error":"GoAway","Message":"The server is about to shut down."}\n'
 MOCK_STREAM_ERROR = '{"Error":"Failed","Message":"Connection lost"}\n'
 
 # Error Responses
@@ -289,7 +313,10 @@ MOCK_ERROR_500 = {"Error": "Internal server error", "Code": "SERVER_ERROR"}
 
 MOCK_ERROR_ARRAY = {"Errors": [{"Error": "Invalid symbol", "Code": "INVALID_SYMBOL"}]}
 
-MOCK_OAUTH_ERROR = {"error": "invalid_grant", "error_description": "The provided authorization code is invalid"}
+MOCK_OAUTH_ERROR = {
+    "error": "invalid_grant",
+    "error_description": "The provided authorization code is invalid",
+}
 
 # Token Responses
 

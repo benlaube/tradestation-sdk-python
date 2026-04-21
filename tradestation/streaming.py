@@ -25,11 +25,13 @@ import requests
 from .client import HTTPClient
 from .config import sdk_config
 from .exceptions import (
+    ErrorDetails,
     InvalidRequestError,
     NetworkError,
     NonRecoverableError,
     RateLimitError,
     RecoverableError,
+    StreamGoAwayError,
 )
 from .logger import setup_logger
 from .models import BalanceStream, PositionsResponse
@@ -59,6 +61,99 @@ def _is_recoverable_stream_error(exc: Exception) -> bool:
         | TimeoutError
         | ConnectionError
         | OSError,
+    )
+
+
+def _stream_error_details(
+    *,
+    code: str,
+    message: str,
+    api_error_code: str,
+    operation: str,
+    endpoint: str,
+    mode: str | None,
+    payload: dict[str, Any],
+) -> ErrorDetails:
+    """Build structured details for broker stream control/error payloads."""
+    return ErrorDetails(
+        code=code,
+        message=message,
+        api_error_code=api_error_code,
+        api_error_message=payload.get("Message") or payload.get("error_description"),
+        request_endpoint=endpoint,
+        response_body=payload,
+        mode=mode,
+        operation=operation,
+    )
+
+
+def _handle_stream_control_payload(
+    payload: Any,
+    *,
+    stream_type: str,
+    operation: str,
+    endpoint: str,
+    mode: str | None,
+) -> bool:
+    """Handle stream control/error payloads before strict model validation.
+
+    Returns True when the payload is a handled control message that should be
+    skipped. Raises a typed SDK error for terminal broker control messages.
+    """
+    if not isinstance(payload, dict):
+        return False
+
+    if "StreamStatus" in payload:
+        status = str(payload.get("StreamStatus") or "")
+        if status == "EndSnapshot":
+            logger.debug("Initial %s snapshot complete, streaming live updates", stream_type)
+            return True
+        if status == "GoAway":
+            message = payload.get("Message") or "TradeStation requested stream reconnect"
+            logger.warning("%s stream received GoAway control status: %s", stream_type, message)
+            raise StreamGoAwayError(
+                _stream_error_details(
+                    code="STREAM_GOAWAY",
+                    message=str(message),
+                    api_error_code="GoAway",
+                    operation=operation,
+                    endpoint=endpoint,
+                    mode=mode,
+                    payload=payload,
+                )
+            )
+        return True
+
+    error = payload.get("Error") or payload.get("error")
+    if not error:
+        return False
+
+    error_code = str(error)
+    message = payload.get("Message") or payload.get("error_description") or error_code
+    if error_code.lower() == "goaway":
+        logger.warning("%s stream received GoAway error payload: %s", stream_type, message)
+        raise StreamGoAwayError(
+            _stream_error_details(
+                code="STREAM_GOAWAY",
+                message=str(message),
+                api_error_code="GoAway",
+                operation=operation,
+                endpoint=endpoint,
+                mode=mode,
+                payload=payload,
+            )
+        )
+
+    raise NonRecoverableError(
+        _stream_error_details(
+            code="STREAM_ERROR",
+            message=str(message),
+            api_error_code=error_code,
+            operation=operation,
+            endpoint=endpoint,
+            mode=mode,
+            payload=payload,
+        )
     )
 
 
@@ -404,6 +499,8 @@ class StreamingManager:
             try:
                 async for quote in self._stream_quotes_internal(symbols_list, mode):
                     yield quote
+            except StreamGoAwayError:
+                raise
             except InvalidRequestError:
                 raise
             except Exception as e:
@@ -486,15 +583,13 @@ class StreamingManager:
                     raise stream_error[0]
                 break
 
-            # Filter out StreamStatus control messages
-            if isinstance(quote_data, dict) and "StreamStatus" in quote_data:
-                status = quote_data.get("StreamStatus")
-                if status == "EndSnapshot":
-                    logger.debug("Initial snapshot complete, streaming live updates")
-                    continue
-                elif status == "GoAway":
-                    logger.warning("Stream closed by server (GoAway)")
-                    break
+            if _handle_stream_control_payload(
+                quote_data,
+                stream_type="quote",
+                operation="stream_quotes",
+                endpoint=endpoint,
+                mode=mode,
+            ):
                 continue
 
             # Filter out heartbeats
@@ -625,7 +720,16 @@ class StreamingManager:
                         raise stream_error[0]
                     break
 
-                if isinstance(bar_data, dict) and ("StreamStatus" in bar_data or "Heartbeat" in bar_data):
+                if _handle_stream_control_payload(
+                    bar_data,
+                    stream_type="bar",
+                    operation="stream_bars",
+                    endpoint=endpoint,
+                    mode=mode,
+                ):
+                    continue
+
+                if isinstance(bar_data, dict) and "Heartbeat" in bar_data:
                     continue
 
                 # Yield raw dict, let service parse it to BarEvent
@@ -683,6 +787,8 @@ class StreamingManager:
             try:
                 async for order in self._stream_orders_internal(account_id, mode):
                     yield order
+            except StreamGoAwayError:
+                raise
             except Exception as e:
                 if fallback_to_polling and _is_recoverable_stream_error(e):
                     logger.warning(
@@ -741,7 +847,13 @@ class StreamingManager:
                     raise stream_error[0]
                 break
 
-            if isinstance(order_data, dict) and "StreamStatus" in order_data:
+            if _handle_stream_control_payload(
+                order_data,
+                stream_type="order",
+                operation="stream_orders",
+                endpoint=endpoint,
+                mode=mode,
+            ):
                 continue
 
             if isinstance(order_data, dict) and "Heartbeat" in order_data and "OrderID" not in order_data:
@@ -838,6 +950,8 @@ class StreamingManager:
             try:
                 async for position in self._stream_positions_internal(account_id, mode):
                     yield position
+            except StreamGoAwayError:
+                raise
             except Exception as e:
                 if fallback_to_polling and _is_recoverable_stream_error(e):
                     logger.warning(
@@ -896,7 +1010,13 @@ class StreamingManager:
                     raise stream_error[0]
                 break
 
-            if isinstance(position_data, dict) and "StreamStatus" in position_data:
+            if _handle_stream_control_payload(
+                position_data,
+                stream_type="position",
+                operation="stream_positions",
+                endpoint=endpoint,
+                mode=mode,
+            ):
                 continue
 
             if isinstance(position_data, dict) and "Heartbeat" in position_data and "PositionID" not in position_data:
@@ -1040,15 +1160,13 @@ class StreamingManager:
                     raise stream_error[0]
                 break
 
-            # Filter out StreamStatus control messages
-            if isinstance(balance_data, dict) and "StreamStatus" in balance_data:
-                status = balance_data.get("StreamStatus")
-                if status == "EndSnapshot":
-                    logger.debug("Initial balance snapshot complete, streaming live updates")
-                    continue
-                elif status == "GoAway":
-                    logger.warning("Balance stream closed by server (GoAway)")
-                    break
+            if _handle_stream_control_payload(
+                balance_data,
+                stream_type="balance",
+                operation="stream_balances",
+                endpoint=endpoint,
+                mode=mode,
+            ):
                 continue
 
             # Filter out heartbeats
@@ -1155,7 +1273,13 @@ class StreamingManager:
                     raise stream_error[0]
                 break
 
-            if isinstance(order_data, dict) and "StreamStatus" in order_data:
+            if _handle_stream_control_payload(
+                order_data,
+                stream_type="order-by-id",
+                operation="stream_orders_by_ids",
+                endpoint=endpoint,
+                mode=mode,
+            ):
                 continue
 
             if isinstance(order_data, dict) and "Heartbeat" in order_data and "OrderID" not in order_data:

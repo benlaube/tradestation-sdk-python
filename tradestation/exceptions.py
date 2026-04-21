@@ -116,8 +116,8 @@ class ErrorDetails:
             "api_error_message": self.api_error_message,
             "request_method": self.request_method,
             "request_endpoint": self.request_endpoint,
-            "request_params": self._sanitize_dict(self.request_params) if self.request_params else None,
-            "request_body": self._sanitize_dict(self.request_body) if self.request_body else None,
+            "request_params": (self._sanitize_dict(self.request_params) if self.request_params else None),
+            "request_body": (self._sanitize_dict(self.request_body) if self.request_body else None),
             "response_status": self.response_status,
             "response_body": self.response_body,
             "mode": self.mode,
@@ -131,7 +131,14 @@ class ErrorDetails:
             return data
 
         sanitized = data.copy()
-        sensitive_keys = ["client_secret", "refresh_token", "code", "password", "access_token", "Authorization"]
+        sensitive_keys = [
+            "client_secret",
+            "refresh_token",
+            "code",
+            "password",
+            "access_token",
+            "Authorization",
+        ]
 
         for key in sensitive_keys:
             if key in sanitized:
@@ -238,6 +245,12 @@ class RecoverableError(TradeStationAPIError):
 
     SDK streaming methods will automatically retry RecoverableError exceptions.
     """
+
+    pass
+
+
+class StreamGoAwayError(RecoverableError):
+    """Raised when TradeStation asks a stream client to reconnect."""
 
     pass
 

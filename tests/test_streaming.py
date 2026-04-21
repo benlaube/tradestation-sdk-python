@@ -13,6 +13,7 @@ import time
 import pytest
 import requests
 
+from tradestation.exceptions import NonRecoverableError, StreamGoAwayError
 from tradestation.models.streaming import QuoteStream
 from tradestation.streaming import StreamingManager
 
@@ -174,6 +175,36 @@ class TestStreamingManagerStreamQuotes:
                 break
 
         assert mock_poll.call_count == 0
+
+    @pytest.mark.asyncio
+    async def test_stream_quotes_reconnects_after_goaway_error_payload(
+        self, mock_token_manager, mock_http_client, mocker
+    ):
+        """Test Error=GoAway payloads reconnect instead of being validated as quotes."""
+        mocker.patch.object(
+            mock_http_client,
+            "stream_data",
+            side_effect=[
+                iter([json.loads(api_responses.MOCK_STREAM_ERROR_GOAWAY.strip())]),
+                iter(
+                    [
+                        json.loads(api_responses.MOCK_STREAM_QUOTE.strip()),
+                        json.loads(api_responses.MOCK_STREAM_STATUS_END.strip()),
+                    ]
+                ),
+            ],
+        )
+
+        streaming = StreamingManager(mock_token_manager, "client_id", "client_secret", mock_http_client)
+
+        quotes = []
+        async for quote in streaming.stream_quotes("MNQZ25", mode="PAPER", max_retries=2, retry_delay=0):
+            quotes.append(quote)
+            break
+
+        assert len(quotes) == 1
+        assert quotes[0].Symbol == "MNQZ25"
+        assert mock_http_client.stream_data.call_count == 2
 
 
 # ============================================================================
@@ -424,7 +455,7 @@ class TestStreamingManagerErrorHandling:
         ticks = 0
 
         async def consume_stream():
-            async for _ in streaming.stream_quotes("MNQZ25", mode="PAPER"):
+            async for _ in streaming.stream_quotes("MNQZ25", mode="PAPER", retry_delay=0):
                 pass
 
         async def heartbeat():
@@ -448,12 +479,42 @@ class TestStreamingManagerErrorHandling:
         streaming = StreamingManager(mock_token_manager, "client_id", "client_secret", mock_http_client)
 
         quotes = []
-        async for quote in streaming.stream_quotes("MNQZ25", mode="PAPER"):
+        async for quote in streaming.stream_quotes("MNQZ25", mode="PAPER", retry_delay=0):
             quotes.append(quote)
             break
 
-        # GoAway should cause stream to end
+        # GoAway should reconnect and the exhausted test stream then ends cleanly.
         assert len(quotes) == 0
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        ("method_name", "args"),
+        [
+            ("_stream_quotes_internal", (["MNQZ25"], "PAPER")),
+            ("_stream_orders_internal", ("SIM123456", "PAPER")),
+            ("_stream_positions_internal", ("SIM123456", "PAPER")),
+            ("_stream_balances_internal", ("SIM123456", "PAPER")),
+            ("_stream_orders_by_ids_internal", ("SIM123456", "924243071", "PAPER")),
+        ],
+    )
+    async def test_stream_goaway_error_payload_raises_recoverable_before_validation(
+        self, method_name, args, mock_token_manager, mock_http_client, mocker
+    ):
+        """Test Error=GoAway control payloads are typed as recoverable stream errors."""
+        mocker.patch.object(
+            mock_http_client,
+            "stream_data",
+            return_value=iter([json.loads(api_responses.MOCK_STREAM_ERROR_GOAWAY.strip())]),
+        )
+
+        streaming = StreamingManager(mock_token_manager, "client_id", "client_secret", mock_http_client)
+
+        with pytest.raises(StreamGoAwayError) as exc_info:
+            async for _ in getattr(streaming, method_name)(*args):
+                break
+
+        assert exc_info.value.details.code == "STREAM_GOAWAY"
+        assert exc_info.value.details.api_error_code == "GoAway"
 
     @pytest.mark.asyncio
     async def test_stream_handles_error_status(self, mock_token_manager, mock_http_client, mocker):
@@ -465,6 +526,6 @@ class TestStreamingManagerErrorHandling:
         streaming = StreamingManager(mock_token_manager, "client_id", "client_secret", mock_http_client)
 
         # Should raise exception on error
-        with pytest.raises(Exception):
+        with pytest.raises(NonRecoverableError):
             async for quote in streaming.stream_quotes("MNQZ25", mode="PAPER"):
                 break
