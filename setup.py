@@ -36,6 +36,7 @@ setup(
         "PyJWT>=2.8.0",
         "pydantic>=2.12.5",
         "python-dotenv>=1.0.0",
+        "requests>=2.31.0",
     ],
     extras_require={
         "dev": [
