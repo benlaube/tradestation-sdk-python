@@ -16,10 +16,23 @@ from .logger import setup_logger
 from .accounts import AccountOperations
 from .client import HTTPClient
 from .config import sdk_config
-from .exceptions import TradeStationAPIError
+from .exceptions import ErrorDetails, InvalidRequestError, TradeStationAPIError
 from .models import PositionsResponse
+from .validation import dump_model, raise_unexpected_error, validate_model
 
 logger = setup_logger(__name__, sdk_config.log_level)
+
+
+def _raise_invalid_request(operation: str, message: str, mode: str | None = None) -> None:
+    """Raise a structured invalid-request error for local position-operation failures."""
+    raise InvalidRequestError(
+        ErrorDetails(
+            code="INVALID_REQUEST",
+            message=message,
+            mode=mode,
+            operation=operation,
+        )
+    )
 
 
 class PositionOperations:
@@ -58,6 +71,20 @@ class PositionOperations:
         # Store default mode - will be used when mode=None is passed to functions
         self.default_mode = default_mode or sdk_config.trading_mode
 
+    def _fetch_positions(self, account_id: str, mode: str, operation: str) -> list[dict[str, Any]]:
+        """Fetch and validate positions, returning SDK-compatible dicts."""
+        endpoint = f"brokerage/accounts/{account_id}/positions"
+        response = self.client.make_request("GET", endpoint, mode=mode)
+        parsed = validate_model(
+            PositionsResponse,
+            response,
+            operation=operation,
+            endpoint=endpoint,
+            mode=mode,
+            source="response",
+        )
+        return [dump_model(position) for position in parsed.Positions]
+
     def get_position(self, symbol: str, mode: str | None = None) -> int:
         """
         Get current position quantity for a symbol.
@@ -77,12 +104,7 @@ class PositionOperations:
         account_info = self.accounts.get_account_info(mode)
         account_id = account_info.get("account_id") or self.account_id
 
-        endpoint = f"brokerage/accounts/{account_id}/positions"
-        response = self.client.make_request("GET", endpoint, mode=mode)
-        parsed = PositionsResponse(**response)
-
-        positions = parsed.Positions
-        positions_dicts = [p.model_dump() if hasattr(p, "model_dump") else p for p in positions]
+        positions_dicts = self._fetch_positions(account_id, mode, "get_position")
 
         for pos in positions_dicts:
             if pos.get("Symbol") == symbol:
@@ -111,12 +133,7 @@ class PositionOperations:
         account_info = self.accounts.get_account_info(mode)
         account_id = account_info.get("account_id") or self.account_id
 
-        endpoint = f"brokerage/accounts/{account_id}/positions"
-        response = self.client.make_request("GET", endpoint, mode=mode)
-        parsed = PositionsResponse(**response)
-
-        positions = parsed.Positions
-        positions_dicts = [p.model_dump() if hasattr(p, "model_dump") else p for p in positions]
+        positions_dicts = self._fetch_positions(account_id, mode, "get_all_positions")
 
         # Filter out zero positions and format
         active_positions = []
@@ -147,8 +164,11 @@ class PositionOperations:
         if mode is None:
             mode = self.default_mode
         if order_operations is None:
-            logger.error("flatten_position requires order_operations parameter")
-            return []
+            _raise_invalid_request(
+                "flatten_position",
+                "flatten_position requires an order_operations dependency to place offsetting orders",
+                mode,
+            )
 
         if symbol:
             # Flatten single symbol
@@ -165,7 +185,14 @@ class PositionOperations:
 
             if order_id:
                 return [{"order_id": order_id, "symbol": symbol, "side": side, "quantity": quantity, "status": status}]
-            return []
+            raise InvalidRequestError(
+                ErrorDetails(
+                    code="ORDER_PLACEMENT_FAILED",
+                    message=f"Flatten order for {symbol} did not return an order ID",
+                    mode=mode,
+                    operation="flatten_position",
+                )
+            )
         # Flatten all positions
         all_positions = self.get_all_positions(mode)
         if not all_positions:
@@ -187,6 +214,15 @@ class PositionOperations:
             if order_id:
                 flattened.append(
                     {"order_id": order_id, "symbol": pos_symbol, "side": side, "quantity": quantity, "status": status}
+                )
+            else:
+                raise InvalidRequestError(
+                    ErrorDetails(
+                        code="ORDER_PLACEMENT_FAILED",
+                        message=f"Flatten order for {pos_symbol} did not return an order ID",
+                        mode=mode,
+                        operation="flatten_position",
+                    )
                 )
 
         if flattened:
@@ -245,6 +281,7 @@ class PositionOperations:
                     data_queue.put(data)
                 data_queue.put(None)
             except Exception as e:
+                logger.exception("PositionOperations stream worker failed for endpoint=%s mode=%s", endpoint, mode)
                 stream_error[0] = e
                 data_queue.put(None)
 
@@ -271,7 +308,7 @@ class PositionOperations:
 
                 yield data
             except Exception as e:
-                logger.error(f"Stream error: {e}")
+                logger.exception("PositionOperations async stream bridge failed for endpoint=%s mode=%s", endpoint, mode)
                 raise
 
     def get_todays_profit_loss(self, mode: str | None = None) -> float:
@@ -293,12 +330,7 @@ class PositionOperations:
             account_info = self.accounts.get_account_info(mode)
             account_id = account_info.get("account_id") or self.account_id
 
-            endpoint = f"brokerage/accounts/{account_id}/positions"
-            response = self.client.make_request("GET", endpoint, mode=mode)
-            parsed = PositionsResponse(**response)
-
-            positions = parsed.Positions
-            positions_dicts = [p.model_dump() if hasattr(p, "model_dump") else p for p in positions]
+            positions_dicts = self._fetch_positions(account_id, mode, "get_todays_profit_loss")
 
             total_pnl = 0.0
             for pos in positions_dicts:
@@ -317,10 +349,15 @@ class PositionOperations:
             if not e.details.message.startswith("Failed to get today's P&L"):
                 e.details.message = f"Failed to get today's P&L: {e.details.message}"
             logger.error(f"Failed to get today's P&L: {e.details.to_human_readable()}", exc_info=True)
-            return 0.0
+            raise
         except Exception as e:
             logger.error(f"Failed to get today's P&L: {e}", exc_info=True)
-            return 0.0
+            raise_unexpected_error(
+                operation="get_todays_profit_loss",
+                endpoint="brokerage/accounts/{account_id}/positions",
+                mode=mode,
+                exc=e,
+            )
 
     def get_todays_trades(self, order_operations=None, mode: str | None = None) -> list[dict[str, Any]]:
         """
@@ -341,8 +378,11 @@ class PositionOperations:
             from datetime import datetime
 
             if order_operations is None:
-                logger.error("get_todays_trades requires order_operations parameter")
-                return []
+                _raise_invalid_request(
+                    "get_todays_trades",
+                    "get_todays_trades requires an order_operations dependency to query order history",
+                    mode,
+                )
 
             if mode is None:
                 mode = self.default_mode
@@ -363,9 +403,15 @@ class PositionOperations:
             logger.info(f"Found {len(filled_trades)} filled trade(s) today")
             return filled_trades
 
+        except TradeStationAPIError as e:
+            e.details.operation = "get_todays_trades"
+            if not e.details.message.startswith("Failed to get today's trades"):
+                e.details.message = f"Failed to get today's trades: {e.details.message}"
+            logger.error(f"Failed to get today's trades: {e.details.to_human_readable()}", exc_info=True)
+            raise
         except Exception as e:
             logger.error(f"Failed to get today's trades: {e}", exc_info=True)
-            return []
+            raise_unexpected_error(operation="get_todays_trades", endpoint="orderexecution/orders", mode=mode, exc=e)
 
     def get_unrealized_profit_loss(self, mode: str | None = None) -> float:
         """
@@ -386,12 +432,7 @@ class PositionOperations:
             account_info = self.accounts.get_account_info(mode)
             account_id = account_info.get("account_id") or self.account_id
 
-            endpoint = f"brokerage/accounts/{account_id}/positions"
-            response = self.client.make_request("GET", endpoint, mode=mode)
-            parsed = PositionsResponse(**response)
-
-            positions = parsed.Positions
-            positions_dicts = [p.model_dump() if hasattr(p, "model_dump") else p for p in positions]
+            positions_dicts = self._fetch_positions(account_id, mode, "get_unrealized_profit_loss")
 
             total_unrealized_pnl = 0.0
             for pos in positions_dicts:
@@ -410,7 +451,12 @@ class PositionOperations:
             if not e.details.message.startswith("Failed to get unrealized P&L"):
                 e.details.message = f"Failed to get unrealized P&L: {e.details.message}"
             logger.error(f"Failed to get unrealized P&L: {e.details.to_human_readable()}", exc_info=True)
-            return 0.0
+            raise
         except Exception as e:
             logger.error(f"Failed to get unrealized P&L: {e}", exc_info=True)
-            return 0.0
+            raise_unexpected_error(
+                operation="get_unrealized_profit_loss",
+                endpoint="brokerage/accounts/{account_id}/positions",
+                mode=mode,
+                exc=e,
+            )

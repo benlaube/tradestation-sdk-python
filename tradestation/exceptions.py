@@ -30,6 +30,7 @@ class ErrorDetails:
     response_body: dict[str, Any] | None = None
     mode: str | None = None
     operation: str | None = None  # e.g., "place_order", "get_account_balances"
+    validation_errors: list[dict[str, Any]] | None = None
 
     def to_human_readable(self) -> str:
         """
@@ -93,6 +94,12 @@ class ErrorDetails:
                 sanitized = self._sanitize_dict(self.response_body)
                 lines.append(f"    - Body: {sanitized}")
 
+        if self.validation_errors:
+            lines.append("")
+            lines.append("  Validation Errors:")
+            for item in self.validation_errors[:5]:
+                lines.append(f"    - {item}")
+
         return "\n".join(lines)
 
     def to_dict(self) -> dict[str, Any]:
@@ -115,6 +122,7 @@ class ErrorDetails:
             "response_body": self.response_body,
             "mode": self.mode,
             "operation": self.operation,
+            "validation_errors": self.validation_errors,
         }
 
     def _sanitize_dict(self, data: dict[str, Any]) -> dict[str, Any]:
@@ -190,6 +198,12 @@ class RateLimitError(TradeStationAPIError):
 
 class InvalidRequestError(TradeStationAPIError):
     """Raised when API request is invalid."""
+
+    pass
+
+
+class SDKValidationError(InvalidRequestError):
+    """Raised when SDK request/response payload validation fails."""
 
     pass
 

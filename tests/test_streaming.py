@@ -5,9 +5,15 @@ Tests for StreamingManager class including HTTP streaming for quotes, orders, po
 Note: Tests use mocked HTTP streaming responses (newline-delimited JSON).
 """
 
+import asyncio
 import json
+import logging
+import time
 
 import pytest
+import requests
+
+from tradestation.models.streaming import QuoteStream
 from tradestation.streaming import StreamingManager
 
 from .fixtures import api_responses
@@ -46,7 +52,7 @@ class TestStreamingManagerStreamQuotes:
         # Verify quotes were received
         assert len(quotes) > 0
         if quotes:
-            assert "Symbol" in quotes[0] or "Type" in quotes[0]
+            assert quotes[0].Symbol == "MNQZ25"
 
     @pytest.mark.asyncio
     async def test_stream_quotes_endpoint(self, mock_token_manager, mock_http_client, mocker):
@@ -65,7 +71,7 @@ class TestStreamingManagerStreamQuotes:
         # Verify endpoint was called
         mock_stream.assert_called_once()
         call_args = mock_stream.call_args
-        assert "marketdata/stream/quotes/MNQZ25" in call_args[0][1]
+        assert "marketdata/stream/quotes/MNQZ25" in call_args[0][0]
 
     @pytest.mark.asyncio
     async def test_stream_quotes_multiple_symbols(self, mock_token_manager, mock_http_client, mocker):
@@ -82,7 +88,7 @@ class TestStreamingManagerStreamQuotes:
             break
 
         call_args = mock_http_client.stream_data.call_args
-        assert "MNQZ25,ESZ25" in call_args[0][1]
+        assert "MNQZ25,ESZ25" in call_args[0][0]
 
     @pytest.mark.asyncio
     async def test_stream_quotes_handles_stream_status(self, mock_token_manager, mock_http_client, mocker):
@@ -104,6 +110,70 @@ class TestStreamingManagerStreamQuotes:
 
         # Should receive quote data, not StreamStatus
         assert len(quotes) > 0
+
+    @pytest.mark.asyncio
+    async def test_stream_quotes_validation_failure_raises(self, mock_token_manager, mock_http_client, mocker):
+        """Test malformed quote payloads raise instead of being swallowed."""
+        mock_data = [{"Symbol": "MNQZ25", "Bid": "25000.0", "UnexpectedField": "boom"}]
+
+        mocker.patch.object(mock_http_client, "stream_data", return_value=iter(mock_data))
+
+        streaming = StreamingManager(mock_token_manager, "client_id", "client_secret", mock_http_client)
+
+        with pytest.raises(Exception):
+            async for _ in streaming.stream_quotes("MNQZ25", mode="PAPER"):
+                break
+
+    @pytest.mark.asyncio
+    async def test_stream_quotes_falls_back_only_for_recoverable_errors(
+        self, mock_token_manager, mock_http_client, mocker, caplog
+    ):
+        """Test quote streaming only falls back to REST polling for recoverable transport failures."""
+
+        async def raise_stream_error(*args, **kwargs):
+            if False:
+                yield None
+            raise requests.exceptions.ConnectionError("stream socket closed")
+
+        async def poll_once(*args, **kwargs):
+            yield QuoteStream.model_validate(json.loads(api_responses.MOCK_STREAM_QUOTE.strip()))
+
+        caplog.set_level(logging.WARNING, logger="tradestation.streaming")
+        streaming = StreamingManager(mock_token_manager, "client_id", "client_secret", mock_http_client)
+        mocker.patch.object(streaming, "_stream_quotes_internal", side_effect=raise_stream_error)
+        mock_poll = mocker.patch.object(streaming, "_poll_quotes_rest", side_effect=poll_once)
+
+        quotes = []
+        async for quote in streaming.stream_quotes("MNQZ25", mode="PAPER"):
+            quotes.append(quote)
+            break
+
+        assert len(quotes) == 1
+        assert quotes[0].Symbol == "MNQZ25"
+        assert mock_poll.call_count == 1
+        assert "falling back to REST polling" in caplog.text
+
+    @pytest.mark.asyncio
+    async def test_stream_quotes_unexpected_errors_do_not_fallback(self, mock_token_manager, mock_http_client, mocker):
+        """Test unexpected programming/runtime failures bubble instead of degrading to polling."""
+
+        async def raise_programming_error(*args, **kwargs):
+            if False:
+                yield None
+            raise RuntimeError("unexpected quote parser bug")
+
+        async def poll_once(*args, **kwargs):
+            yield QuoteStream.model_validate(json.loads(api_responses.MOCK_STREAM_QUOTE.strip()))
+
+        streaming = StreamingManager(mock_token_manager, "client_id", "client_secret", mock_http_client)
+        mocker.patch.object(streaming, "_stream_quotes_internal", side_effect=raise_programming_error)
+        mock_poll = mocker.patch.object(streaming, "_poll_quotes_rest", side_effect=poll_once)
+
+        with pytest.raises(RuntimeError):
+            async for _ in streaming.stream_quotes("MNQZ25", mode="PAPER"):
+                break
+
+        assert mock_poll.call_count == 0
 
 
 # ============================================================================
@@ -136,6 +206,7 @@ class TestStreamingManagerStreamOrders:
                 break
 
         assert len(orders) > 0
+        assert orders[0].OrderID == "924243071"
 
     @pytest.mark.asyncio
     async def test_stream_orders_endpoint(self, mock_token_manager, mock_http_client, mocker):
@@ -152,7 +223,23 @@ class TestStreamingManagerStreamOrders:
             break
 
         call_args = mock_http_client.stream_data.call_args
-        assert "brokerage/stream/accounts/SIM123456/orders" in call_args[0][1]
+        assert "brokerage/stream/accounts/SIM123456/orders" in call_args[0][0]
+
+    @pytest.mark.asyncio
+    async def test_stream_orders_logs_background_worker_failures(
+        self, mock_token_manager, mock_http_client, mocker, caplog
+    ):
+        """Test background-thread order stream failures are logged with context before bubbling."""
+        mocker.patch.object(mock_http_client, "stream_data", side_effect=RuntimeError("worker exploded"))
+        caplog.set_level(logging.ERROR, logger="tradestation.streaming")
+
+        streaming = StreamingManager(mock_token_manager, "client_id", "client_secret", mock_http_client)
+
+        with pytest.raises(RuntimeError):
+            async for _ in streaming.stream_orders("SIM123456", mode="PAPER", fallback_to_polling=False):
+                break
+
+        assert "Order stream worker failed" in caplog.text
 
 
 # ============================================================================
@@ -185,6 +272,7 @@ class TestStreamingManagerStreamPositions:
                 break
 
         assert len(positions) > 0
+        assert positions[0].Symbol == "MNQZ25"
 
     @pytest.mark.asyncio
     async def test_stream_positions_endpoint(self, mock_token_manager, mock_http_client, mocker):
@@ -201,7 +289,7 @@ class TestStreamingManagerStreamPositions:
             break
 
         call_args = mock_http_client.stream_data.call_args
-        assert "brokerage/stream/accounts/SIM123456/positions" in call_args[0][1]
+        assert "brokerage/stream/accounts/SIM123456/positions" in call_args[0][0]
 
 
 # ============================================================================
@@ -234,6 +322,36 @@ class TestStreamingManagerStreamBalances:
                 break
 
         assert len(balances) > 0
+        assert balances[0].AccountID == "SIM123456"
+
+    @pytest.mark.asyncio
+    async def test_stream_balances_accepts_futures_fields(self, mock_token_manager, mock_http_client, mocker):
+        """Test PAPER futures balance stream fields do not break validation."""
+        mock_data = [
+            {
+                "AccountID": "SIM123456",
+                "AccountType": "Futures",
+                "Equity": "100000.00",
+                "MarketValue": "0",
+                "UnclearedDeposit": "0",
+                "BalanceDetail": {"InitialMargin": "0"},
+                "CurrencyDetails": [{"Currency": "USD", "ConversionRate": "1"}],
+                "Commission": "0",
+            },
+            json.loads(api_responses.MOCK_STREAM_STATUS_END.strip()),
+        ]
+        mocker.patch.object(mock_http_client, "stream_data", return_value=iter(mock_data))
+
+        streaming = StreamingManager(mock_token_manager, "client_id", "client_secret", mock_http_client)
+
+        balances = []
+        async for balance in streaming.stream_balances("SIM123456", mode="PAPER"):
+            balances.append(balance)
+            if len(balances) >= 1:
+                break
+
+        assert balances[0].AccountType == "Futures"
+        assert balances[0].CurrencyDetails == [{"Currency": "USD", "ConversionRate": "1"}]
 
     @pytest.mark.asyncio
     async def test_stream_balances_endpoint(self, mock_token_manager, mock_http_client, mocker):
@@ -250,7 +368,7 @@ class TestStreamingManagerStreamBalances:
             break
 
         call_args = mock_http_client.stream_data.call_args
-        assert "brokerage/stream/accounts/SIM123456/balances" in call_args[0][1]
+        assert "brokerage/stream/accounts/SIM123456/balances" in call_args[0][0]
 
 
 # ============================================================================
@@ -279,10 +397,8 @@ class TestStreamingManagerStreamOrdersByIds:
             break
 
         call_args = mock_http_client.stream_data.call_args
-        assert "brokerage/stream/accounts/SIM123456/orders" in call_args[0][1]
-        assert "924243071,924243072" in call_args[1]["params"]["ordersIds"] or "924243071,924243072" in str(
-            call_args[1]
-        )
+        assert "brokerage/stream/accounts/SIM123456/orders" in call_args[0][0]
+        assert "924243071,924243072" in call_args[0][0]
 
 
 # ============================================================================
@@ -294,6 +410,33 @@ class TestStreamingManagerStreamOrdersByIds:
 @pytest.mark.streaming
 class TestStreamingManagerErrorHandling:
     """Tests for error handling in streaming methods."""
+
+    @pytest.mark.asyncio
+    async def test_stream_queue_wait_does_not_block_event_loop(self, mock_token_manager, mock_http_client, mocker):
+        """Test empty stream queues wait off the event loop while the worker is delayed."""
+
+        def delayed_stream():
+            time.sleep(0.25)
+            yield json.loads(api_responses.MOCK_STREAM_STATUS_GOAWAY.strip())
+
+        mocker.patch.object(mock_http_client, "stream_data", return_value=delayed_stream())
+        streaming = StreamingManager(mock_token_manager, "client_id", "client_secret", mock_http_client)
+        ticks = 0
+
+        async def consume_stream():
+            async for _ in streaming.stream_quotes("MNQZ25", mode="PAPER"):
+                pass
+
+        async def heartbeat():
+            nonlocal ticks
+            deadline = asyncio.get_running_loop().time() + 0.05
+            while asyncio.get_running_loop().time() < deadline:
+                ticks += 1
+                await asyncio.sleep(0.005)
+
+        await asyncio.gather(consume_stream(), heartbeat())
+
+        assert ticks > 1
 
     @pytest.mark.asyncio
     async def test_stream_handles_goaway_status(self, mock_token_manager, mock_http_client, mocker):

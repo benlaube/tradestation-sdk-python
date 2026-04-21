@@ -24,7 +24,7 @@ How this SDK compares to other trading SDKs and libraries.
 
 | Feature | This SDK (Internal) | tastyware/tradestation | Official SDK (if available) |
 |---------|-------------------|----------------------|---------------------------|
-| **Installation** | `pip install tradestation-sdk` | `pip install tradestation` | N/A |
+| **Installation** | `pip install tradestation-python-sdk` | `pip install tradestation` | N/A |
 | **Python Version** | 3.10+ | 3.7+ | N/A |
 | **OAuth2 Support** | ✅ Automatic | ✅ Manual | N/A |
 | **Token Management** | ✅ Automatic refresh | ⚠️ Manual | N/A |

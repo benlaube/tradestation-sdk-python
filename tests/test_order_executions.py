@@ -6,6 +6,7 @@ executions, confirmations, and group orders (OCO/Bracket).
 """
 
 import pytest
+from tradestation.exceptions import ErrorDetails, InvalidRequestError, TradeStationAPIError
 from tradestation.order_executions import OrderExecutionOperations
 
 from .fixtures import api_responses
@@ -152,6 +153,26 @@ class TestOrderExecutionOperationsPlaceOrder:
         # Verify order_id was extracted
         assert order_id == "924243071"
 
+    def test_place_order_accepts_ack_without_account_id(self, mock_http_client, mocker):
+        """Test broker write ACKs do not require AccountID in response rows."""
+        mock_accounts = mocker.MagicMock()
+        mock_accounts.get_account_info.return_value = {"account_id": "SIM123456"}
+        response = {
+            "Orders": [
+                {
+                    "OrderID": "948122453",
+                    "Message": "Order received",
+                }
+            ]
+        }
+        mocker.patch.object(mock_http_client, "make_request", return_value=response)
+
+        order_exec = OrderExecutionOperations(mock_http_client, mock_accounts, default_mode="PAPER")
+        order_id, status = order_exec.place_order("NQM26", "BUY", 2, "Limit", limit_price=26747.75, mode="PAPER")
+
+        assert order_id == "948122453"
+        assert status == "Order received"
+
 
 # ============================================================================
 # OrderExecutionOperations cancel_order Tests
@@ -263,6 +284,16 @@ class TestOrderExecutionOperationsGetOrderExecutions:
         call_args = mock_http_client.make_request.call_args
         assert "orderexecution/orders/924243071/executions" in call_args[0][1]
         assert isinstance(result, list)
+
+    def test_get_order_executions_invalid_order_id_raises(self, mock_http_client, mocker):
+        """Test get_order_executions rejects invalid local input instead of returning an empty list."""
+        mock_accounts = mocker.MagicMock()
+        order_exec = OrderExecutionOperations(mock_http_client, mock_accounts, default_mode="PAPER")
+
+        with pytest.raises(InvalidRequestError) as exc_info:
+            order_exec.get_order_executions("", mode="PAPER")
+
+        assert exc_info.value.details.operation == "get_order_executions"
 
     def test_is_order_filled(self, mock_http_client, mocker):
         """Test is_order_filled convenience function."""
@@ -504,6 +535,22 @@ class TestOrderExecutionOperationsOtherMethods:
         assert "orderexecution/activationtriggers" in call_args[0][1]
         assert result is not None
 
+    def test_get_activation_triggers_api_error_raises(self, mock_http_client, mocker):
+        """Test get_activation_triggers fails loud on broker errors."""
+        mock_accounts = mocker.MagicMock()
+        mocker.patch.object(
+            mock_http_client,
+            "make_request",
+            side_effect=TradeStationAPIError(ErrorDetails(message="activation triggers unavailable")),
+        )
+
+        order_exec = OrderExecutionOperations(mock_http_client, mock_accounts, default_mode="PAPER")
+
+        with pytest.raises(TradeStationAPIError) as exc_info:
+            order_exec.get_activation_triggers("PAPER")
+
+        assert exc_info.value.details.operation == "get_activation_triggers"
+
     def test_get_routes(self, mock_http_client, mocker):
         """Test get_routes returns routing options."""
         mock_accounts = mocker.MagicMock()
@@ -517,6 +564,22 @@ class TestOrderExecutionOperationsOtherMethods:
         call_args = mock_http_client.make_request.call_args
         assert "orderexecution/routes" in call_args[0][1]
         assert result is not None
+
+    def test_get_routes_api_error_raises(self, mock_http_client, mocker):
+        """Test get_routes fails loud on broker errors."""
+        mock_accounts = mocker.MagicMock()
+        mocker.patch.object(
+            mock_http_client,
+            "make_request",
+            side_effect=TradeStationAPIError(ErrorDetails(message="routes unavailable")),
+        )
+
+        order_exec = OrderExecutionOperations(mock_http_client, mock_accounts, default_mode="PAPER")
+
+        with pytest.raises(TradeStationAPIError) as exc_info:
+            order_exec.get_routes("PAPER")
+
+        assert exc_info.value.details.operation == "get_routes"
 
     def test_cancel_all_orders_for_symbol(self, mock_http_client, mocker):
         """Test cancel_all_orders_for_symbol cancels all orders for a symbol."""
@@ -540,6 +603,23 @@ class TestOrderExecutionOperationsOtherMethods:
         assert result[0]["success"] is True
         assert mock_http_client.make_request.call_count >= 2
 
+    def test_cancel_all_orders_for_symbol_api_error_raises(self, mock_http_client, mocker):
+        """Test cancel_all_orders_for_symbol fails loud on broker errors."""
+        mock_accounts = mocker.MagicMock()
+        mock_accounts.get_account_info.return_value = {"account_id": "SIM123456"}
+        mocker.patch.object(
+            mock_http_client,
+            "make_request",
+            side_effect=TradeStationAPIError(ErrorDetails(message="current orders query failed")),
+        )
+
+        order_exec = OrderExecutionOperations(mock_http_client, mock_accounts, default_mode="PAPER")
+
+        with pytest.raises(TradeStationAPIError) as exc_info:
+            order_exec.cancel_all_orders_for_symbol("MNQZ25", mode="PAPER")
+
+        assert exc_info.value.details.operation == "cancel_all_orders_for_symbol"
+
     def test_cancel_all_orders(self, mock_http_client, mocker):
         """Test cancel_all_orders cancels all orders."""
         mock_accounts = mocker.MagicMock()
@@ -559,6 +639,23 @@ class TestOrderExecutionOperationsOtherMethods:
         result = order_exec.cancel_all_orders(mode="PAPER")
 
         assert result[0]["success"] is True
+
+    def test_cancel_all_orders_api_error_raises(self, mock_http_client, mocker):
+        """Test cancel_all_orders fails loud on broker errors."""
+        mock_accounts = mocker.MagicMock()
+        mock_accounts.get_account_info.return_value = {"account_id": "SIM123456"}
+        mocker.patch.object(
+            mock_http_client,
+            "make_request",
+            side_effect=TradeStationAPIError(ErrorDetails(message="open order query failed")),
+        )
+
+        order_exec = OrderExecutionOperations(mock_http_client, mock_accounts, default_mode="PAPER")
+
+        with pytest.raises(TradeStationAPIError) as exc_info:
+            order_exec.cancel_all_orders(mode="PAPER")
+
+        assert exc_info.value.details.operation == "cancel_all_orders"
 
     def test_replace_order(self, mock_http_client, mocker):
         """Test replace_order cancels old and places new order."""

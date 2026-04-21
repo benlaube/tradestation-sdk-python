@@ -18,6 +18,8 @@ from .accounts import AccountOperations
 from .client import HTTPClient
 from .config import sdk_config
 from .exceptions import TradeStationAPIError
+from .models import OrdersResponse
+from .validation import dump_model, raise_unexpected_error, validate_model
 
 logger = setup_logger(__name__, sdk_config.log_level)
 
@@ -146,14 +148,27 @@ class OrderOperations:
             # Try different response formats
             # TradeStation API v3 returns: {"Orders": [...]} for historical orders endpoint
             # (Note: API documentation shows "Orders" not "HistoricalOrders")
-            orders = []
             if isinstance(response, list):
-                orders = response
+                normalized_response = {"Orders": response}
             elif isinstance(response, dict):
-                # Try common response keys (Orders is the correct key for v3)
-                orders = response.get(
-                    "Orders", response.get("HistoricalOrders", response.get("orders", response.get("data", [])))
-                )
+                normalized_response = {
+                    "Orders": response.get(
+                        "Orders", response.get("HistoricalOrders", response.get("orders", response.get("data", [])))
+                    ),
+                    "Errors": response.get("Errors", []),
+                    "NextToken": response.get("NextToken"),
+                }
+            else:
+                normalized_response = {"Orders": []}
+            parsed = validate_model(
+                OrdersResponse,
+                normalized_response,
+                operation="get_order_history",
+                endpoint=endpoint,
+                mode=mode,
+                source="response",
+            )
+            orders = [dump_model(order) for order in parsed.Orders]
 
             logger.info(
                 f"Retrieved {len(orders)} orders from TradeStation API (endpoint: {endpoint}, account: {account_id}, mode: {mode or sdk_config.trading_mode})"
@@ -176,10 +191,15 @@ class OrderOperations:
             if not e.details.message.startswith("Failed to get order history"):
                 e.details.message = f"Failed to get order history: {e.details.message}"
             logger.error(f"Failed to get order history: {e.details.to_human_readable()}", exc_info=True)
-            return []
+            raise
         except Exception as e:
             logger.error(f"Failed to get order history: {e}", exc_info=True)
-            return []
+            raise_unexpected_error(
+                operation="get_order_history",
+                endpoint=endpoint if "endpoint" in locals() else "brokerage/accounts/{account_id}/historicalorders",
+                mode=mode,
+                exc=e,
+            )
 
     def get_current_orders(
         self,
@@ -239,10 +259,17 @@ class OrderOperations:
             )
             response = self.client.make_request("GET", endpoint, params=params or None, mode=mode)
 
-            # Response structure: {"Orders": [...], "Errors": [...], "NextToken": "..."}
-            orders = response.get("Orders", [])
-            errors = response.get("Errors", [])
-            next_token_response = response.get("NextToken")
+            parsed = validate_model(
+                OrdersResponse,
+                response,
+                operation="get_current_orders",
+                endpoint=endpoint,
+                mode=mode,
+                source="response",
+            )
+            orders = [dump_model(order) for order in parsed.Orders]
+            errors = parsed.Errors
+            next_token_response = parsed.NextToken
 
             if errors:
                 logger.warning(f"Some accounts returned errors: {errors}")
@@ -260,10 +287,15 @@ class OrderOperations:
             if not e.details.message.startswith("Failed to get current orders"):
                 e.details.message = f"Failed to get current orders: {e.details.message}"
             logger.error(f"Failed to get current orders: {e.details.to_human_readable()}", exc_info=True)
-            return {"Orders": [], "Errors": []}
+            raise
         except Exception as e:
             logger.error(f"Failed to get current orders: {e}", exc_info=True)
-            return {"Orders": [], "Errors": []}
+            raise_unexpected_error(
+                operation="get_current_orders",
+                endpoint=endpoint if "endpoint" in locals() else "brokerage/accounts/{accounts}/orders",
+                mode=mode,
+                exc=e,
+            )
 
     def get_orders_by_ids(
         self, order_ids: str, account_ids: str | None = None, mode: str | None = None
@@ -307,9 +339,16 @@ class OrderOperations:
             )
             response = self.client.make_request("GET", endpoint, mode=mode)
 
-            # Response structure: {"Orders": [...], "Errors": [...]}
-            orders = response.get("Orders", [])
-            errors = response.get("Errors", [])
+            parsed = validate_model(
+                OrdersResponse,
+                response,
+                operation="get_orders_by_ids",
+                endpoint=endpoint,
+                mode=mode,
+                source="response",
+            )
+            orders = [dump_model(order) for order in parsed.Orders]
+            errors = parsed.Errors
 
             if errors:
                 logger.warning(f"Some orders returned errors: {errors}")
@@ -323,10 +362,15 @@ class OrderOperations:
             if not e.details.message.startswith("Failed to get orders by IDs"):
                 e.details.message = f"Failed to get orders by IDs: {e.details.message}"
             logger.error(f"Failed to get orders by IDs: {e.details.to_human_readable()}", exc_info=True)
-            return {"Orders": [], "Errors": []}
+            raise
         except Exception as e:
             logger.error(f"Failed to get orders by IDs: {e}", exc_info=True)
-            return {"Orders": [], "Errors": []}
+            raise_unexpected_error(
+                operation="get_orders_by_ids",
+                endpoint=endpoint if "endpoint" in locals() else "brokerage/accounts/{accounts}/orders/{order_ids}",
+                mode=mode,
+                exc=e,
+            )
 
     def get_historical_orders_by_ids(
         self,
@@ -398,9 +442,16 @@ class OrderOperations:
             )
             response = self.client.make_request("GET", endpoint, params=params or None, mode=mode)
 
-            # Response structure: {"Orders": [...], "Errors": [...]}
-            orders = response.get("Orders", [])
-            errors = response.get("Errors", [])
+            parsed = validate_model(
+                OrdersResponse,
+                response,
+                operation="get_historical_orders_by_ids",
+                endpoint=endpoint,
+                mode=mode,
+                source="response",
+            )
+            orders = [dump_model(order) for order in parsed.Orders]
+            errors = parsed.Errors
 
             if errors:
                 logger.warning(f"Some orders returned errors: {errors}")
@@ -416,10 +467,17 @@ class OrderOperations:
             if not e.details.message.startswith("Failed to get historical orders by IDs"):
                 e.details.message = f"Failed to get historical orders by IDs: {e.details.message}"
             logger.error(f"Failed to get historical orders by IDs: {e.details.to_human_readable()}", exc_info=True)
-            return {"Orders": [], "Errors": []}
+            raise
         except Exception as e:
             logger.error(f"Failed to get historical orders by IDs: {e}", exc_info=True)
-            return {"Orders": [], "Errors": []}
+            raise_unexpected_error(
+                operation="get_historical_orders_by_ids",
+                endpoint=endpoint
+                if "endpoint" in locals()
+                else "brokerage/accounts/{accounts}/historicalorders/{order_ids}",
+                mode=mode,
+                exc=e,
+            )
 
     async def stream_orders(
         self, account_id: str | None = None, mode: str | None = None
@@ -471,6 +529,7 @@ class OrderOperations:
                     data_queue.put(data)
                 data_queue.put(None)
             except Exception as e:
+                logger.exception("OrderOperations stream worker failed for endpoint=%s mode=%s", endpoint, mode)
                 stream_error[0] = e
                 data_queue.put(None)
 
@@ -497,7 +556,7 @@ class OrderOperations:
 
                 yield data
             except Exception as e:
-                logger.error(f"Stream error: {e}")
+                logger.exception("OrderOperations async stream bridge failed for endpoint=%s mode=%s", endpoint, mode)
                 raise
 
     def get_orders_by_status(
@@ -563,7 +622,12 @@ class OrderOperations:
 
         except Exception as e:
             logger.error(f"Failed to get orders by status: {e}", exc_info=True)
-            return {"Orders": [], "Errors": []}
+            raise_unexpected_error(
+                operation="get_orders_by_status",
+                endpoint="brokerage/accounts/{accounts}/orders",
+                mode=mode,
+                exc=e,
+            )
 
     def get_open_orders(
         self, account_ids: str | None = None, next_token: str | None = None, mode: str | None = None

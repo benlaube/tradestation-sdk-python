@@ -8,6 +8,7 @@ This document provides a **visual overview of all SDK features and capabilities*
 
 **Related Documents:**
 - 📖 **[README.md](README.md)** - Complete SDK documentation
+- 🧭 **[docs/CANONICAL_SDK_INVENTORY.md](docs/CANONICAL_SDK_INVENTORY.md)** - Authoritative SDK method and endpoint inventory
 - 📚 **[docs/API_REFERENCE.md](docs/API_REFERENCE.md)** - Detailed API reference for all functions
 - 📋 **[CHEATSHEET.md](CHEATSHEET.md)** - Quick code snippets
 - 💡 **[docs/SDK_USAGE_EXAMPLES.md](docs/SDK_USAGE_EXAMPLES.md)** - Usage examples
@@ -266,7 +267,7 @@ See [API_COVERAGE.md](docs/API_COVERAGE.md) for details.
 
 - 📖 [QUICKSTART.md](QUICKSTART.md) - 2-minute setup
 - 📓 [01_authentication.ipynb](examples/01_authentication.ipynb) - Interactive auth
-- 🔧 [test_connection.py](cli/test_connection.py) - Verify setup
+- 🔧 [test_connection.py](tradestation/cli/test_connection.py) - Verify setup
 - 📋 [CHEATSHEET.md](CHEATSHEET.md) - Quick reference
 
 ### For Developers

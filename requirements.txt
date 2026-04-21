@@ -12,3 +12,6 @@ pydantic>=2.12.5
 
 # Environment variable management
 python-dotenv>=1.0.0
+
+# HTTP client (sync support)
+requests>=2.31.0

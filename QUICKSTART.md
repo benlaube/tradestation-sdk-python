@@ -46,7 +46,7 @@ TRADING_MODE=PAPER
 Copy-paste this into `test.py`:
 
 ```python
-from tradestation_sdk import TradeStationSDK
+from tradestation import TradeStationSDK
 
 # Initialize
 sdk = TradeStationSDK()
@@ -108,7 +108,7 @@ pip install --upgrade tradestation-python-sdk
 - 📖 [Full README](README.md)
 - 💡 [Usage Examples](docs/SDK_USAGE_EXAMPLES.md)
 - 📊 [Jupyter Notebooks](examples/)
-- 🔧 [CLI Tools](cli/)
+- 🔧 [CLI Tools](tradestation/cli/)
 - ❓ [FAQ & Troubleshooting](README.md#faq--troubleshooting)
 
 ---

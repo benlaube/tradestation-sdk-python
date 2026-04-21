@@ -5,10 +5,42 @@ Tests for request/response logging behavior in HTTPClient and SDK operations.
 """
 
 import json
+from unittest.mock import patch
 
 import pytest
 
 from .fixtures import api_responses
+
+
+class _PytestMockShim:
+    """Minimal shim for legacy tests that expected pytest.Mock()."""
+
+    def __init__(self):
+        self._patchers = []
+
+    def patch(self, *args, **kwargs):
+        patcher = patch(*args, **kwargs)
+        mocked = patcher.start()
+        self._patchers.append(patcher)
+        return mocked
+
+    def __del__(self):
+        for patcher in reversed(self._patchers):
+            try:
+                patcher.stop()
+            except RuntimeError:
+                pass
+
+
+if not hasattr(pytest, "Mock"):
+    pytest.Mock = _PytestMockShim  # type: ignore[attr-defined]
+
+
+@pytest.fixture(autouse=True)
+def _capture_http_client_logs(caplog):
+    """Capture debug-level SDK client logs for assertions in this module."""
+    caplog.set_level("DEBUG", logger="tradestation.client")
+    return caplog
 
 # ============================================================================
 # Request Logging Tests
@@ -107,7 +139,7 @@ class TestRequestLogging:
         log_text = "\n".join(log_records)
 
         assert "secret_token_123" not in log_text
-        assert "***REDACTED***" in log_text
+        assert "<redacted>" in log_text
 
     def test_request_log_truncates_body_when_full_logging_disabled(self, mock_http_client, caplog):
         """Verify body truncation when enable_full_logging=False."""

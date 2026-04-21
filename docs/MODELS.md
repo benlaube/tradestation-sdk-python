@@ -29,6 +29,39 @@ This document provides **summary and status documentation** for all Pydantic mod
 
 ---
 
+## Current Contract Status (2026-04-14)
+
+The SDK now treats Pydantic models as an enforced contract boundary, not just documentation.
+
+### Current Behavior
+
+- Exported request/response models inherit a shared strict base with `extra="forbid"`.
+- Unknown broker fields raise `SDKValidationError` instead of being silently ignored.
+- Audited SDK boundaries validate inbound/outbound payloads before returning public dict/list shapes.
+- Validation and runtime failures now bubble up with structured `ErrorDetails` that include operation, endpoint, mode, and sanitized payload excerpts.
+- Public SDK compatibility is preserved at the return-shape layer: successful calls still return dicts/lists, while malformed payloads now fail loud.
+
+### Scope Hardened in This Pass
+
+- Accounts
+- Account discovery and balance convenience helpers
+- Quote snapshots
+- Market-data convenience helpers
+- Positions
+- Position convenience helpers that depend on order history / flattening
+- Order history/current order lookups
+- Order executions and placement request construction
+- Session ID-token decoding
+- Streaming quote/order/position/balance parsing
+
+### Compatibility Notes
+
+- `TRADESTATION_MODE` is the canonical environment variable for PAPER/LIVE mode selection.
+- `TRADING_MODE` remains a deprecated fallback alias for compatibility.
+- The historical analysis below remains useful as background, but where it conflicts with this section, this section is authoritative.
+
+---
+
 ## Quick Answer to Your Questions
 
 ### Q: Are we collecting all data points from TradeStation API?

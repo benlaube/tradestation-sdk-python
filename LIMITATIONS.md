@@ -148,7 +148,7 @@ with ThreadPoolExecutor(max_workers=10) as executor:
 
 **Custom Configuration:**
 ```python
-from tradestation_sdk import TradeStationSDK
+from tradestation import TradeStationSDK
 
 # Custom retry configuration
 sdk = TradeStationSDK()
@@ -421,7 +421,7 @@ def rate_limited_place_order(*args, **kwargs):
 **Workaround:** Use Docker with Python 3.10+
 ```dockerfile
 FROM python:3.10-slim
-RUN pip install tradestation-sdk
+RUN pip install tradestation-python-sdk
 ```
 
 ---

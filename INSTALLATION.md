@@ -48,7 +48,7 @@ pip install tradestation-python-sdk==1.0.0
 **For latest features (pre-release):**
 
 ```bash
-pip install --pre tradestation-sdk
+pip install --pre tradestation-python-sdk
 ```
 
 ---
@@ -60,7 +60,7 @@ pip install --pre tradestation-sdk
 ```bash
 # Clone repository
 git clone https://github.com/benlaube/tradestation-python-sdk.git
-cd tradestation-sdk
+cd tradestation-python-sdk
 
 # Install in editable mode
 pip install -e .
@@ -188,7 +188,7 @@ pip install tradestation-python-sdk
 
 2. **"Access denied"** - Run as administrator or use `--user` flag
    ```powershell
-   pip install --user tradestation-sdk
+   pip install --user tradestation-python-sdk
    ```
 
 ---
@@ -202,7 +202,7 @@ pip install tradestation-python-sdk
 brew install python@3.10
 
 # Install SDK
-pip3 install tradestation-sdk
+pip3 install tradestation-python-sdk
 ```
 
 **Using system Python:**
@@ -212,7 +212,7 @@ pip3 install tradestation-sdk
 python3 --version  # Should be 3.10+
 
 # Install SDK
-pip3 install tradestation-sdk
+pip3 install tradestation-python-sdk
 ```
 
 **Common macOS Issues:**
@@ -224,7 +224,7 @@ pip3 install tradestation-sdk
 
 2. **Permission errors** - Use `--user` flag
    ```bash
-   pip3 install --user tradestation-sdk
+   pip3 install --user tradestation-python-sdk
    ```
 
 ---
@@ -237,7 +237,7 @@ sudo apt update
 sudo apt install python3.10 python3.10-venv python3-pip
 
 # Install SDK
-pip3 install tradestation-sdk
+pip3 install tradestation-python-sdk
 ```
 
 **Using system Python:**
@@ -255,7 +255,7 @@ python3 -m pip install tradestation-python-sdk
 sudo dnf install python3.10 python3-pip
 
 # Install SDK
-pip3 install tradestation-sdk
+pip3 install tradestation-python-sdk
 ```
 
 ---
@@ -266,7 +266,7 @@ pip3 install tradestation-sdk
 
 ```bash
 # Check if SDK is installed
-python -c "import tradestation_sdk; print(tradestation_sdk.__version__)"
+python -c "import tradestation; print(tradestation.__version__)"
 ```
 
 Expected output: `1.0.0`
@@ -283,14 +283,14 @@ Expected:
 httpx               0.27.2
 pydantic            2.12.5
 PyJWT               2.8.0
-tradestation-sdk    1.0.0
+tradestation-python-sdk    1.0.0
 ```
 
 ### Run Test Script
 
 ```bash
 # Download and run test script
-python cli/test_connection.py
+python tradestation/cli/test_connection.py
 ```
 
 ---
@@ -329,7 +329,7 @@ TRADING_MODE=PAPER
 ### Step 4: Test Configuration
 
 ```bash
-python cli/test_auth.py PAPER
+python tradestation/cli/test_auth.py PAPER
 ```
 
 Expected output: `✅ Authentication successful`
@@ -341,14 +341,14 @@ Expected output: `✅ Authentication successful`
 ### Upgrade to Latest Version
 
 ```bash
-pip install --upgrade tradestation-sdk
+pip install --upgrade tradestation-python-sdk
 ```
 
 ### Check Current Version
 
 ```python
-import tradestation_sdk
-print(tradestation_sdk.__version__)
+import tradestation
+print(tradestation.__version__)
 ```
 
 ### Upgrade Notes
@@ -364,14 +364,14 @@ See [CHANGELOG.md](CHANGELOG.md) for version-specific upgrade notes.
 ## Uninstalling
 
 ```bash
-pip uninstall tradestation-sdk
+pip uninstall tradestation-python-sdk
 ```
 
 ---
 
 ## Troubleshooting Installation
 
-### "No module named 'tradestation_sdk'"
+### "No module named 'tradestation'"
 
 **Cause:** SDK not installed or wrong environment.
 
@@ -398,7 +398,7 @@ pip list | grep tradestation
 ```bash
 # Install from source
 git clone https://github.com/benlaube/tradestation-python-sdk.git
-cd tradestation-sdk
+cd tradestation-python-sdk
 pip install -e .
 ```
 
@@ -449,7 +449,7 @@ pip check
 
 **Option 3:** Install with force-reinstall
 ```bash
-pip install --force-reinstall tradestation-sdk
+pip install --force-reinstall tradestation-python-sdk
 ```
 
 ---
@@ -467,7 +467,7 @@ pip install --force-reinstall tradestation-sdk
 
 **Solution:**
 1. Install [Microsoft C++ Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/)
-2. Or use pre-built wheels: `pip install --only-binary :all: tradestation-sdk`
+2. Or use pre-built wheels: `pip install --only-binary :all: tradestation-python-sdk`
 
 ### Linux: "externally-managed-environment"
 
@@ -484,21 +484,21 @@ pip install tradestation-python-sdk
 
 **Option 2:** Use pipx (for CLI tools)
 ```bash
-pipx install tradestation-sdk
+pipx install tradestation-python-sdk
 ```
 
 **Option 3:** Override (not recommended)
 ```bash
-pip install --break-system-packages tradestation-sdk
+pip install --break-system-packages tradestation-python-sdk
 ```
 
 ---
 
 ## Next Steps After Installation
 
-1. ✅ **Verify installation:** `python -c "import tradestation_sdk; print(tradestation_sdk.__version__)"`
+1. ✅ **Verify installation:** `python -c "import tradestation; print(tradestation.__version__)"`
 2. ✅ **Configure credentials:** Create `.env` file
-3. ✅ **Test connection:** Run `python cli/test_connection.py`
+3. ✅ **Test connection:** Run `python tradestation/cli/test_connection.py`
 4. ✅ **Follow Quick Start:** See [QUICKSTART.md](QUICKSTART.md)
 
 ---

@@ -17,7 +17,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from dotenv import load_dotenv
-from tradestation_sdk import AuthenticationError, TradeStationSDK
+from tradestation import AuthenticationError, TradeStationSDK
 
 
 def test_authentication(mode="PAPER"):

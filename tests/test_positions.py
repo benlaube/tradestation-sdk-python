@@ -5,6 +5,7 @@ Tests for PositionOperations class including position queries and flattening.
 """
 
 import pytest
+from tradestation.exceptions import ErrorDetails, InvalidRequestError, TradeStationAPIError
 from tradestation.positions import PositionOperations
 
 from .fixtures import api_responses
@@ -160,3 +161,42 @@ class TestPositionOperationsFlattenPosition:
 
         # Verify place_order was called for each position
         assert mock_order_exec.place_order.call_count == 2
+
+    def test_flatten_position_requires_order_operations(self, mock_http_client, mocker):
+        """Test flatten_position fails loud when order operations are missing."""
+        mock_accounts = mocker.MagicMock()
+        position_ops = PositionOperations(mock_http_client, mock_accounts, default_mode="PAPER")
+
+        with pytest.raises(InvalidRequestError) as exc_info:
+            position_ops.flatten_position("MNQZ25", None, mode="PAPER")
+
+        assert exc_info.value.details.operation == "flatten_position"
+
+
+@pytest.mark.unit
+@pytest.mark.orders
+class TestPositionOperationsTradeQueries:
+    """Tests for position-related trade query helpers."""
+
+    def test_get_todays_trades_requires_order_operations(self, mock_http_client, mocker):
+        """Test get_todays_trades fails loud when order operations are missing."""
+        mock_accounts = mocker.MagicMock()
+        position_ops = PositionOperations(mock_http_client, mock_accounts, default_mode="PAPER")
+
+        with pytest.raises(InvalidRequestError) as exc_info:
+            position_ops.get_todays_trades(order_operations=None, mode="PAPER")
+
+        assert exc_info.value.details.operation == "get_todays_trades"
+
+    def test_get_todays_trades_api_error_raises(self, mock_http_client, mocker):
+        """Test get_todays_trades bubbles broker errors instead of returning an empty list."""
+        mock_accounts = mocker.MagicMock()
+        mock_order_ops = mocker.MagicMock()
+        mock_order_ops.get_order_history.side_effect = TradeStationAPIError(ErrorDetails(message="order history failed"))
+
+        position_ops = PositionOperations(mock_http_client, mock_accounts, default_mode="PAPER")
+
+        with pytest.raises(TradeStationAPIError) as exc_info:
+            position_ops.get_todays_trades(order_operations=mock_order_ops, mode="PAPER")
+
+        assert exc_info.value.details.operation == "get_todays_trades"

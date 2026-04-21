@@ -7,10 +7,12 @@ Executions represent the actual fills of orders.
 Dependencies: pydantic
 """
 
-from pydantic import BaseModel, Field
+from pydantic import AliasChoices, Field
+
+from .base import TradeStationModel
 
 
-class TradeStationExecutionResponse(BaseModel):
+class TradeStationExecutionResponse(TradeStationModel):
     """
     TradeStation API execution (fill) response model.
 
@@ -30,11 +32,16 @@ class TradeStationExecutionResponse(BaseModel):
     """
 
     ExecutionID: str | None = Field(None, description="TradeStation execution ID")
+    OrderID: str | None = Field(None, description="TradeStation order ID")
     Symbol: str = Field(..., description="Trading symbol")
     TradeAction: str = Field(..., description="Buy or Sell")
     Quantity: int | str = Field(..., description="Number of contracts filled")
     Price: float | str = Field(..., description="Fill price")
     Commission: float | str | None = Field(None, description="Commission paid")
     ExchangeFees: float | str | None = Field(None, description="Exchange fees")
-    ExecutionTime: str = Field(..., description="Execution timestamp")
+    ExecutionTime: str = Field(
+        ...,
+        description="Execution timestamp",
+        validation_alias=AliasChoices("ExecutionTime", "Time"),
+    )
     Venue: str | None = Field(None, description="Execution venue")

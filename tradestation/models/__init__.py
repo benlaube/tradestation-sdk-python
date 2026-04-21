@@ -2,7 +2,11 @@
 TradeStation API Models
 
 Pydantic models for TradeStation API requests and responses.
-These models ensure we capture ALL data points from TradeStation API.
+
+Validation policy:
+- request models validate outbound payloads before network calls
+- response models validate inbound payloads before public methods return
+- schema drift is treated as an error, not silently tolerated
 
 Models are organized by domain:
 - orders.py: Order requests, responses, and nested order components
@@ -18,16 +22,19 @@ Dependencies: pydantic
 
 from .accounts import (
     AccountBalancesResponse,
+    AccountDetail,
     AccountSummary,
     BalanceDetail,
     BODBalance,
     BODBalancesResponse,
+    DetailedBalancesResponse,
 )
 from .accounts_list import AccountsListResponse
 from .order_executions import (
     TradeStationExecutionResponse,
 )
 from .orders import (
+    OrdersResponse,
     TradeStationConditionalOrder,
     TradeStationMarketActivationRule,
     TradeStationOrderGroupRequest,
@@ -55,6 +62,7 @@ __all__ = [
     # Order Models
     "TradeStationOrderRequest",
     "TradeStationOrderGroupRequest",
+    "OrdersResponse",
     "TradeStationOrderResponse",
     "TradeStationOrderGroupResponse",
     # Order Nested Models
@@ -75,11 +83,13 @@ __all__ = [
     "StreamErrorResponse",
     "MarketFlags",
     # Accounts / Balances
+    "AccountDetail",
     "AccountSummary",
     "BalanceDetail",
     "AccountBalancesResponse",
     "BODBalance",
     "BODBalancesResponse",
+    "DetailedBalancesResponse",
     "AccountsListResponse",
     # Positions
     "PositionResponse",

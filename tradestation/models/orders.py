@@ -9,19 +9,21 @@ Dependencies: pydantic
 
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import Field
+
+from .base import TradeStationModel, strict_model_config
 
 # Nested Order Models
 
 
-class TradeStationTrailingStop(BaseModel):
+class TradeStationTrailingStop(TradeStationModel):
     """Trailing stop parameters from TradeStation API."""
 
     Percent: str | None = Field(None, description="Trail percentage")
     Amount: str | None = Field(None, description="Trail amount in points")
 
 
-class TradeStationOrderLeg(BaseModel):
+class TradeStationOrderLeg(TradeStationModel):
     """Order leg for multi-leg orders (spreads, etc.)."""
 
     Symbol: str = Field(..., description="Leg symbol")
@@ -38,7 +40,7 @@ class TradeStationOrderLeg(BaseModel):
     Underlying: str | None = Field(None, description="Underlying symbol (options)")
 
 
-class TradeStationMarketActivationRule(BaseModel):
+class TradeStationMarketActivationRule(TradeStationModel):
     """Market activation rule for conditional orders."""
 
     RuleType: str | None = Field(None, description="Rule type (e.g., Price)")
@@ -48,13 +50,13 @@ class TradeStationMarketActivationRule(BaseModel):
     Price: str | None = Field(None, description="Trigger price")
 
 
-class TradeStationTimeActivationRule(BaseModel):
+class TradeStationTimeActivationRule(TradeStationModel):
     """Time activation rule for conditional orders."""
 
     TimeUtc: str | None = Field(None, description="Activation time (UTC)")
 
 
-class TradeStationConditionalOrder(BaseModel):
+class TradeStationConditionalOrder(TradeStationModel):
     """Conditional order relationship (OCO, OTO, OCA)."""
 
     Relationship: str | None = Field(None, description="OCO, OTO, or OCA")
@@ -64,7 +66,7 @@ class TradeStationConditionalOrder(BaseModel):
 # Request Models
 
 
-class TradeStationOrderRequest(BaseModel):
+class TradeStationOrderRequest(TradeStationModel):
     """
     TradeStation API order placement request model.
 
@@ -94,7 +96,7 @@ class TradeStationOrderRequest(BaseModel):
     TrailAmount: str | None = Field(None, description="Trail amount in points (for TrailingStop)")
     TrailPercent: str | None = Field(None, description="Trail percentage (for TrailingStop)")
 
-    model_config = ConfigDict(
+    model_config = strict_model_config(
         json_schema_extra={
             "example": {
                 "AccountID": "SIM123456",
@@ -108,7 +110,7 @@ class TradeStationOrderRequest(BaseModel):
     )
 
 
-class TradeStationOrderGroupRequest(BaseModel):
+class TradeStationOrderGroupRequest(TradeStationModel):
     """
     TradeStation API group order request model (OCO/Bracket).
 
@@ -120,7 +122,7 @@ class TradeStationOrderGroupRequest(BaseModel):
     Type: str = Field(..., description="Group type: OCO, BRK, or NORMAL")
     Orders: list[TradeStationOrderRequest] = Field(..., description="List of orders in the group")
 
-    model_config = ConfigDict(
+    model_config = strict_model_config(
         json_schema_extra={
             "example": {
                 "Type": "OCO",
@@ -142,7 +144,7 @@ class TradeStationOrderGroupRequest(BaseModel):
 # Response Models
 
 
-class TradeStationOrderResponse(BaseModel):
+class TradeStationOrderResponse(TradeStationModel):
     """
     Complete TradeStation API order response model.
 
@@ -150,7 +152,7 @@ class TradeStationOrderResponse(BaseModel):
     ensuring no data is lost when syncing orders from TradeStation.
 
     Attributes:
-        AccountID: TradeStation account ID
+        AccountID: TradeStation account ID when returned by the endpoint
         OrderID: TradeStation order ID
         OrderType: Order type (Market, Limit, etc.)
         Status: Order status (OPN, ACK, FLL, CNL, REJ)
@@ -179,7 +181,7 @@ class TradeStationOrderResponse(BaseModel):
         RejectionReason: Rejection reason (if rejected)
     """
 
-    AccountID: str = Field(..., description="TradeStation account ID")
+    AccountID: str | None = Field(None, description="TradeStation account ID")
     OrderID: str = Field(..., description="TradeStation order ID")
     OrderType: str | None = Field(None, description="Order type")
     Status: str | None = Field(None, description="Order status")
@@ -196,17 +198,13 @@ class TradeStationOrderResponse(BaseModel):
     FilledPrice: str | None = Field(None, description="Fill price")
     LimitPrice: str | None = Field(None, description="Limit price")
     StopPrice: str | None = Field(None, description="Stop price")
-    TrailingStop: TradeStationTrailingStop | dict[str, Any] | None = Field(None, description="Trailing stop parameters")
-    Legs: list[TradeStationOrderLeg] | list[dict[str, Any]] | None = Field(
-        None, description="Order legs (multi-leg orders)"
-    )
-    MarketActivationRules: list[TradeStationMarketActivationRule] | list[dict[str, Any]] | None = Field(
+    TrailingStop: TradeStationTrailingStop | None = Field(None, description="Trailing stop parameters")
+    Legs: list[TradeStationOrderLeg] | None = Field(None, description="Order legs (multi-leg orders)")
+    MarketActivationRules: list[TradeStationMarketActivationRule] | None = Field(
         None, description="Market activation rules"
     )
-    TimeActivationRules: list[TradeStationTimeActivationRule] | list[dict[str, Any]] | None = Field(
-        None, description="Time activation rules"
-    )
-    ConditionalOrders: list[TradeStationConditionalOrder] | list[dict[str, Any]] | None = Field(
+    TimeActivationRules: list[TradeStationTimeActivationRule] | None = Field(None, description="Time activation rules")
+    ConditionalOrders: list[TradeStationConditionalOrder] | None = Field(
         None, description="Conditional order relationships"
     )
     GroupName: str | None = Field(None, description="Order group name")
@@ -224,8 +222,9 @@ class TradeStationOrderResponse(BaseModel):
     PlacedTime: str | None = Field(None, description="Placed time (alternative to OpenedDateTime)")
     FilledTime: str | None = Field(None, description="Filled time (alternative to ClosedDateTime)")
     TimeInForce: dict[str, str] | None = Field(None, description="Time in force (alternative to Duration)")
+    ConversionRate: str | None = Field(None, description="Currency conversion rate")
 
-    model_config = ConfigDict(
+    model_config = strict_model_config(
         json_schema_extra={
             "example": {
                 "AccountID": "SIM123456",
@@ -243,7 +242,7 @@ class TradeStationOrderResponse(BaseModel):
     )
 
 
-class TradeStationOrderGroupResponse(BaseModel):
+class TradeStationOrderGroupResponse(TradeStationModel):
     """
     TradeStation API group order response (OCO/Bracket).
 
@@ -257,4 +256,12 @@ class TradeStationOrderGroupResponse(BaseModel):
     GroupID: str | None = Field(None, description="Group order ID")
     GroupName: str | None = Field(None, description="Group order name")
     Type: str | None = Field(None, description="Group type: OCO, BRK, or NORMAL")
-    Orders: list[TradeStationOrderResponse] | list[dict[str, Any]] = Field(..., description="Orders in the group")
+    Orders: list[TradeStationOrderResponse] = Field(..., description="Orders in the group")
+
+
+class OrdersResponse(TradeStationModel):
+    """Canonical response wrapper for order query endpoints."""
+
+    Orders: list[TradeStationOrderResponse] = Field(default_factory=list, description="Orders in the response")
+    Errors: list[dict[str, Any]] = Field(default_factory=list, description="Unstructured API errors")
+    NextToken: str | None = Field(None, description="Pagination token for the next page")

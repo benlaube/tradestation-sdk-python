@@ -12,12 +12,25 @@ Streaming endpoints return NDJSON (newline-delimited JSON) with:
 Dependencies: pydantic
 """
 
+from __future__ import annotations
+
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import AliasChoices, Field
+
+from .base import TradeStationModel, strict_model_config
+from .orders import (
+    TradeStationConditionalOrder,
+    TradeStationMarketActivationRule,
+    TradeStationOrderLeg,
+    TradeStationTimeActivationRule,
+    TradeStationTrailingStop,
+)
+
+NumericText = float | int | str
 
 
-class MarketFlags(BaseModel):
+class TradeStationMarketFlags(TradeStationModel):
     """Market-specific flags for a symbol."""
 
     IsBats: bool | None = Field(None, description="Is BATS exchange")
@@ -26,7 +39,7 @@ class MarketFlags(BaseModel):
     IsHardToBorrow: bool | None = Field(None, description="Is hard to borrow")
 
 
-class QuoteStream(BaseModel):
+class QuoteStream(TradeStationModel):
     """
     Quote data from TradeStation HTTP Streaming API.
 
@@ -71,39 +84,39 @@ class QuoteStream(BaseModel):
     """
 
     Symbol: str = Field(..., description="Trading symbol")
-    Last: str | None = Field(None, description="Last traded price")
-    Bid: str | None = Field(None, description="Current bid price")
-    Ask: str | None = Field(None, description="Current ask price")
-    BidSize: str | None = Field(None, description="Bid size (contracts/shares)")
-    AskSize: str | None = Field(None, description="Ask size (contracts/shares)")
-    Volume: str | None = Field(None, description="Daily volume")
+    Last: NumericText | None = Field(None, description="Last traded price")
+    Bid: NumericText | None = Field(None, description="Current bid price")
+    Ask: NumericText | None = Field(None, description="Current ask price")
+    BidSize: NumericText | None = Field(None, description="Bid size (contracts/shares)")
+    AskSize: NumericText | None = Field(None, description="Ask size (contracts/shares)")
+    Volume: NumericText | None = Field(None, description="Daily volume")
     TradeTime: str | None = Field(None, description="Time of last trade")
-    Open: str | None = Field(None, description="Opening price of the day")
-    High: str | None = Field(None, description="Highest price of the day")
-    Low: str | None = Field(None, description="Lowest price of the day")
-    Close: str | None = Field(None, description="Closing price")
-    PreviousClose: str | None = Field(None, description="Previous day's closing price")
-    NetChange: str | None = Field(None, description="Net change from previous close")
-    NetChangePct: str | None = Field(None, description="Net change percentage")
-    VWAP: str | None = Field(None, description="Volume-weighted average price")
-    High52Week: str | None = Field(None, description="52-week high price")
+    Open: NumericText | None = Field(None, description="Opening price of the day")
+    High: NumericText | None = Field(None, description="Highest price of the day")
+    Low: NumericText | None = Field(None, description="Lowest price of the day")
+    Close: NumericText | None = Field(None, description="Closing price")
+    PreviousClose: NumericText | None = Field(None, description="Previous day's closing price")
+    NetChange: NumericText | None = Field(None, description="Net change from previous close")
+    NetChangePct: NumericText | None = Field(None, description="Net change percentage")
+    VWAP: NumericText | None = Field(None, description="Volume-weighted average price")
+    High52Week: NumericText | None = Field(None, description="52-week high price")
     High52WeekTimestamp: str | None = Field(None, description="Date of 52-week high")
-    Low52Week: str | None = Field(None, description="52-week low price")
+    Low52Week: NumericText | None = Field(None, description="52-week low price")
     Low52WeekTimestamp: str | None = Field(None, description="Date of 52-week low")
-    PreviousVolume: str | None = Field(None, description="Previous day's volume")
-    DailyOpenInterest: str | None = Field(None, description="Open interest (futures/options)")
-    MarketFlags: dict[str, Any] | None = Field(None, description="Market-specific flags")
+    PreviousVolume: NumericText | None = Field(None, description="Previous day's volume")
+    DailyOpenInterest: NumericText | None = Field(None, description="Open interest (futures/options)")
+    MarketFlags: TradeStationMarketFlags | None = Field(None, description="Market-specific flags")
     Restrictions: list[str] | None = Field(None, description="Trading restrictions")
-    MinPrice: str | None = Field(None, description="Minimum price (futures)")
-    MaxPrice: str | None = Field(None, description="Maximum price (futures)")
+    MinPrice: NumericText | None = Field(None, description="Minimum price (futures)")
+    MaxPrice: NumericText | None = Field(None, description="Maximum price (futures)")
     FirstNoticeDate: str | None = Field(None, description="First notice date (futures)")
     LastTradingDate: str | None = Field(None, description="Last trading date (futures)")
     TickSizeTier: str | None = Field(None, description="Trading increment tier")
-    LastSize: str | None = Field(None, description="Size of last trade")
+    LastSize: NumericText | None = Field(None, description="Size of last trade")
     LastVenue: str | None = Field(None, description="Exchange of last trade")
     Error: str | None = Field(None, description="Error message (if any)")
 
-    model_config = ConfigDict(
+    model_config = strict_model_config(
         json_schema_extra={
             "example": {
                 "Symbol": "MNQZ25",
@@ -124,7 +137,7 @@ class QuoteStream(BaseModel):
     )
 
 
-class OrderStream(BaseModel):
+class OrderStream(TradeStationModel):
     """
     Order update from TradeStation HTTP Streaming API.
 
@@ -139,7 +152,7 @@ class OrderStream(BaseModel):
     """
 
     # All fields from TradeStationOrderResponse
-    AccountID: str = Field(..., description="TradeStation account ID")
+    AccountID: str | None = Field(None, description="TradeStation account ID")
     OrderID: str = Field(..., description="TradeStation order ID")
     OrderType: str | None = Field(None, description="Order type")
     Status: str | None = Field(None, description="Order status (OPN, ACK, FLL, CNL, REJ)")
@@ -156,11 +169,17 @@ class OrderStream(BaseModel):
     FilledPrice: str | None = Field(None, description="Fill price")
     LimitPrice: str | None = Field(None, description="Limit price")
     StopPrice: str | None = Field(None, description="Stop price")
-    TrailingStop: dict[str, Any] | None = Field(None, description="Trailing stop parameters")
-    Legs: list[dict[str, Any]] | None = Field(None, description="Order legs (multi-leg orders)")
-    MarketActivationRules: list[dict[str, Any]] | None = Field(None, description="Market activation rules")
-    TimeActivationRules: list[dict[str, Any]] | None = Field(None, description="Time activation rules")
-    ConditionalOrders: list[dict[str, Any]] | None = Field(None, description="Conditional order relationships")
+    TrailingStop: TradeStationTrailingStop | None = Field(None, description="Trailing stop parameters")
+    Legs: list[TradeStationOrderLeg] | None = Field(None, description="Order legs (multi-leg orders)")
+    MarketActivationRules: list[TradeStationMarketActivationRule] | None = Field(
+        None, description="Market activation rules"
+    )
+    TimeActivationRules: list[TradeStationTimeActivationRule] | None = Field(
+        None, description="Time activation rules"
+    )
+    ConditionalOrders: list[TradeStationConditionalOrder] | None = Field(
+        None, description="Conditional order relationships"
+    )
     GroupName: str | None = Field(None, description="Order group name")
     GroupID: str | None = Field(None, description="Order group ID")
     AdvancedOptions: str | None = Field(None, description="Advanced options string")
@@ -171,8 +190,12 @@ class OrderStream(BaseModel):
     Quantity: str | None = Field(None, description="Quantity (if not in Legs)")
     FilledQuantity: str | None = Field(None, description="Filled quantity")
     AverageFillPrice: str | None = Field(None, description="Average fill price")
+    PlacedTime: str | None = Field(None, description="Placed time (alternative to OpenedDateTime)")
+    FilledTime: str | None = Field(None, description="Filled time (alternative to ClosedDateTime)")
+    TimeInForce: dict[str, str] | None = Field(None, description="Time in force (alternative to Duration)")
+    ConversionRate: str | None = Field(None, description="Currency conversion rate")
 
-    model_config = ConfigDict(
+    model_config = strict_model_config(
         json_schema_extra={
             "example": {
                 "AccountID": "SIM123456",
@@ -190,7 +213,7 @@ class OrderStream(BaseModel):
     )
 
 
-class PositionStream(BaseModel):
+class PositionStream(TradeStationModel):
     """
     Position update from TradeStation HTTP Streaming API.
 
@@ -239,8 +262,16 @@ class PositionStream(BaseModel):
     Ask: str | None = Field(None, description="Current ask price")
     MarketValue: str | None = Field(None, description="Current market value")
     TotalCost: str | None = Field(None, description="Total cost of position")
-    TodaysProfitLoss: str | None = Field(None, description="Today's P&L (equity/options only)")
-    UnrealizedProfitLoss: str | None = Field(None, description="Unrealized P&L")
+    TodaysProfitLoss: str | None = Field(
+        None,
+        validation_alias=AliasChoices("TodaysProfitLoss", "TodaysPnL"),
+        description="Today's P&L (equity/options only)",
+    )
+    UnrealizedProfitLoss: str | None = Field(
+        None,
+        validation_alias=AliasChoices("UnrealizedProfitLoss", "UnrealizedPnL"),
+        description="Unrealized P&L",
+    )
     UnrealizedProfitLossPercent: str | None = Field(None, description="Unrealized P&L percentage")
     UnrealizedProfitLossQty: str | None = Field(None, description="Unrealized P&L per unit")
     MarkToMarketPrice: str | None = Field(None, description="Mark-to-market price (equity/options)")
@@ -252,7 +283,7 @@ class PositionStream(BaseModel):
     ExpirationDate: str | None = Field(None, description="Expiration date (futures/options)")
     Deleted: bool | None = Field(None, description="True if position was closed (deletion notification)")
 
-    model_config = ConfigDict(
+    model_config = strict_model_config(
         json_schema_extra={
             "example": {
                 "AccountID": "SIM123456",
@@ -276,7 +307,7 @@ class PositionStream(BaseModel):
     )
 
 
-class StreamStatus(BaseModel):
+class StreamStatus(TradeStationModel):
     """
     Stream status control message from TradeStation HTTP Streaming API.
 
@@ -289,7 +320,7 @@ class StreamStatus(BaseModel):
     StreamStatus: str = Field(..., description="Status: EndSnapshot, GoAway, or Error")
 
 
-class Heartbeat(BaseModel):
+class Heartbeat(TradeStationModel):
     """
     Heartbeat message from TradeStation HTTP Streaming API.
 
@@ -304,7 +335,7 @@ class Heartbeat(BaseModel):
     Timestamp: str = Field(..., description="Heartbeat timestamp")
 
 
-class StreamErrorResponse(BaseModel):
+class StreamErrorResponse(TradeStationModel):
     """
     Error response from TradeStation HTTP Streaming API.
 
@@ -321,7 +352,7 @@ class StreamErrorResponse(BaseModel):
     Symbol: str | None = Field(None, description="Symbol (if applicable, for quote errors)")
 
 
-class BalanceStream(BaseModel):
+class BalanceStream(TradeStationModel):
     """
     Streaming account balance update from TradeStation HTTP Streaming API.
 
@@ -346,11 +377,22 @@ class BalanceStream(BaseModel):
     """
 
     AccountID: str = Field(..., description="TradeStation account ID")
+    AccountType: str | None = Field(None, description="TradeStation account type")
     Equity: float | str | None = Field(None, description="Total equity")
     BuyingPower: float | str | None = Field(None, description="Buying power")
     CashBalance: float | str | None = Field(None, description="Cash balance")
-    TodaysProfitLoss: float | str | None = Field(None, description="Today's profit/loss")
-    UnrealizedProfitLoss: float | str | None = Field(None, description="Unrealized profit/loss")
+    MarketValue: float | str | None = Field(None, description="Current market value")
+    UnclearedDeposit: float | str | None = Field(None, description="Uncleared deposits")
+    TodaysProfitLoss: float | str | None = Field(
+        None,
+        validation_alias=AliasChoices("TodaysProfitLoss", "TodaysPnL"),
+        description="Today's profit/loss",
+    )
+    UnrealizedProfitLoss: float | str | None = Field(
+        None,
+        validation_alias=AliasChoices("UnrealizedProfitLoss", "UnrealizedPnL"),
+        description="Unrealized profit/loss",
+    )
     MarginAvailable: float | str | None = Field(None, description="Margin available")
     MarginUsed: float | str | None = Field(None, description="Margin used")
     MaintenanceMargin: float | str | None = Field(None, description="Maintenance margin")
@@ -359,9 +401,14 @@ class BalanceStream(BaseModel):
     DayTradingBuyingPower: float | str | None = Field(None, description="Day trading buying power")
     OpenPnL: float | str | None = Field(None, description="Open P&L")
     RealizedPnL: float | str | None = Field(None, description="Realized P&L")
+    BalanceDetail: dict[str, Any] | None = Field(None, description="Detailed balance payload")
+    CurrencyDetails: list[dict[str, Any]] | dict[str, Any] | None = Field(
+        None, description="Currency-specific balance details"
+    )
+    Commission: float | str | None = Field(None, description="Commission total")
     Timestamp: str | None = Field(None, description="Timestamp of the update (if provided)")
 
-    model_config = ConfigDict(
+    model_config = strict_model_config(
         json_schema_extra={
             "example": {
                 "AccountID": "SIM123456",
@@ -374,3 +421,6 @@ class BalanceStream(BaseModel):
             }
         }
     )
+
+
+MarketFlags = TradeStationMarketFlags

@@ -9,10 +9,14 @@ Dependencies: pydantic
 
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import Field
+
+from .base import TradeStationModel, strict_model_config
+
+NumericText = float | int | str
 
 
-class QuoteSnapshot(BaseModel):
+class QuoteSnapshot(TradeStationModel):
     """
     Quote snapshot from TradeStation REST API.
 
@@ -38,22 +42,22 @@ class QuoteSnapshot(BaseModel):
     """
 
     Symbol: str = Field(..., description="Trading symbol")
-    Last: str | None = Field(None, description="Last traded price")
-    Bid: str | None = Field(None, description="Current bid price")
-    Ask: str | None = Field(None, description="Current ask price")
-    BidSize: str | None = Field(None, description="Bid size")
-    AskSize: str | None = Field(None, description="Ask size")
-    Volume: str | None = Field(None, description="Daily volume")
+    Last: NumericText | None = Field(None, description="Last traded price")
+    Bid: NumericText | None = Field(None, description="Current bid price")
+    Ask: NumericText | None = Field(None, description="Current ask price")
+    BidSize: NumericText | None = Field(None, description="Bid size")
+    AskSize: NumericText | None = Field(None, description="Ask size")
+    Volume: NumericText | None = Field(None, description="Daily volume")
     TradeTime: str | None = Field(None, description="Time of last trade")
-    Open: str | None = Field(None, description="Opening price")
-    High: str | None = Field(None, description="Highest price")
-    Low: str | None = Field(None, description="Lowest price")
-    Close: str | None = Field(None, description="Closing price")
-    PreviousClose: str | None = Field(None, description="Previous day's closing price")
-    NetChange: str | None = Field(None, description="Net change from previous close")
-    NetChangePct: str | None = Field(None, description="Net change percentage")
+    Open: NumericText | None = Field(None, description="Opening price")
+    High: NumericText | None = Field(None, description="Highest price")
+    Low: NumericText | None = Field(None, description="Lowest price")
+    Close: NumericText | None = Field(None, description="Closing price")
+    PreviousClose: NumericText | None = Field(None, description="Previous day's closing price")
+    NetChange: NumericText | None = Field(None, description="Net change from previous close")
+    NetChangePct: NumericText | None = Field(None, description="Net change percentage")
 
-    model_config = ConfigDict(
+    model_config = strict_model_config(
         json_schema_extra={
             "example": {
                 "Symbol": "MNQZ25",
@@ -73,8 +77,8 @@ class QuoteSnapshot(BaseModel):
     )
 
 
-class QuotesResponse(BaseModel):
+class QuotesResponse(TradeStationModel):
     """Response wrapper for REST quotes endpoint."""
 
-    Quotes: list[QuoteSnapshot] | list[dict[str, Any]] = Field(..., description="List of quote snapshots")
+    Quotes: list[QuoteSnapshot] = Field(..., description="List of quote snapshots")
     Errors: list[dict[str, Any]] | None = Field(None, description="List of errors (if any)")

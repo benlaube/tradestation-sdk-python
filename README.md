@@ -19,6 +19,7 @@ This is the **main entry point** for the TradeStation Python SDK documentation. 
 **Related Documents:**
 - 🚀 **[QUICKSTART.md](QUICKSTART.md)** - Get started in 2 minutes (even faster than this guide)
 - 📋 **[CHEATSHEET.md](CHEATSHEET.md)** - Quick reference for common operations
+- 🧭 **[docs/CANONICAL_SDK_INVENTORY.md](docs/CANONICAL_SDK_INVENTORY.md)** - Authoritative SDK method and endpoint inventory
 - 📦 **[INSTALLATION.md](INSTALLATION.md)** - Detailed installation instructions for all platforms
 - 📖 **[docs/GETTING_STARTED.md](docs/GETTING_STARTED.md)** - 15-minute comprehensive tutorial
 - 📚 **[docs/INDEX.md](docs/INDEX.md)** - Complete documentation index and navigation
@@ -47,7 +48,7 @@ A comprehensive, self-contained Python SDK for TradeStation API v3. This SDK pro
 | New to SDK? | Documentation | Tools & Examples |
 |------------|---------------|------------------|
 | [2-Min Quick Start](QUICKSTART.md) | [Complete README](README.md) | [Jupyter Notebooks](examples/) |
-| [15-Min Tutorial](docs/GETTING_STARTED.md) | [API Reference](docs/API_REFERENCE.md) | [CLI Tools](cli/) |
+| [15-Min Tutorial](docs/GETTING_STARTED.md) | [Canonical Inventory](docs/CANONICAL_SDK_INVENTORY.md) | [CLI Tools](tradestation/cli/) |
 | [Installation Guide](INSTALLATION.md) | [Usage Examples](docs/SDK_USAGE_EXAMPLES.md) | [Cheat Sheet](CHEATSHEET.md) |
 
 | Need Help? | Going Live? | Contributing? |
@@ -62,6 +63,7 @@ A comprehensive, self-contained Python SDK for TradeStation API v3. This SDK pro
 
 - 🚀 **[QUICKSTART.md](QUICKSTART.md)** - Get started in 2 minutes
 - 📋 **[CHEATSHEET.md](CHEATSHEET.md)** - Quick reference (print and keep!)
+- 🧭 **[docs/CANONICAL_SDK_INVENTORY.md](docs/CANONICAL_SDK_INVENTORY.md)** - Authoritative SDK inventory
 - 📦 **[INSTALLATION.md](INSTALLATION.md)** - Detailed installation guide
 - 🔄 **[MIGRATION.md](MIGRATION.md)** - Migrate from other SDKs
 - ⚠️ **[LIMITATIONS.md](LIMITATIONS.md)** - Known constraints and workarounds
@@ -231,8 +233,10 @@ Create a `.env` file in your project directory:
 TRADESTATION_CLIENT_ID=your_client_id_here
 TRADESTATION_CLIENT_SECRET=your_client_secret_here
 TRADESTATION_REDIRECT_URI=http://localhost:8888/callback
-TRADING_MODE=PAPER
+TRADESTATION_MODE=PAPER
 ```
+
+`TRADESTATION_MODE` is the canonical mode variable. `TRADING_MODE` is still accepted as a deprecated fallback for compatibility.
 
 **Get your credentials:**
 1. Go to [TradeStation Developer Portal](https://developer.tradestation.com)
@@ -243,7 +247,7 @@ TRADING_MODE=PAPER
 ### Step 2: First Script (Hello TradeStation!)
 
 ```python
-from tradestation_sdk import TradeStationSDK
+from tradestation import TradeStationSDK
 
 # Initialize SDK
 sdk = TradeStationSDK()
@@ -399,7 +403,7 @@ import os
 os.environ['TRADESTATION_CLIENT_ID'] = 'your_client_id'
 os.environ['TRADESTATION_CLIENT_SECRET'] = 'your_client_secret'
 
-from tradestation_sdk import TradeStationSDK
+from tradestation import TradeStationSDK
 sdk = TradeStationSDK()
 ```
 
@@ -491,7 +495,7 @@ sdk._client.max_retry_delay = 120.0  # Allow up to 2min delay
 When you exceed rate limits, the SDK raises `RateLimitError`:
 
 ```python
-from tradestation_sdk import RateLimitError
+from tradestation import RateLimitError
 
 try:
     order_id, status = sdk.place_order(...)
@@ -587,6 +591,7 @@ The SDK provides comprehensive error handling with descriptive error messages an
 - **`InvalidTokenError`** - Token is invalid or missing
 - **`RateLimitError`** - Rate limit exceeded (429)
 - **`InvalidRequestError`** - Invalid API request (400)
+- **`SDKValidationError`** - Request/response payload failed SDK contract validation
 - **`NetworkError`** - Network/connection errors (500+)
 - **`RecoverableError`** - Errors that can be retried (network, temporary failures)
 - **`NonRecoverableError`** - Errors that should not be retried (authentication, invalid request)
@@ -600,15 +605,25 @@ All exceptions include structured `ErrorDetails` with:
 - Response details (status, body)
 - Operation context (which SDK method failed)
 - Trading mode (PAPER/LIVE)
+- Validation details for schema drift or malformed payloads
+
+### Validation Contract
+
+- Exported Pydantic request/response models use `extra="forbid"` by default.
+- Unknown broker fields are treated as schema drift and raise `SDKValidationError`.
+- Validation errors include sanitized payload excerpts and Pydantic error details.
+- Audited SDK boundaries now fail loud instead of silently returning `{}`, `[]`, or raw fallback payloads on parse failures.
+- Convenience helpers now fail loud on malformed ID tokens, unresolved account selection, invalid local inputs, and broker/runtime errors instead of masking those failures as empty results.
 
 ### Example Error Handling
 
 ```python
-from src.lib.tradestation import (
+from tradestation import (
     TradeStationSDK,
     TradeStationAPIError,
     AuthenticationError,
-    InvalidRequestError
+    InvalidRequestError,
+    SDKValidationError,
 )
 
 sdk = TradeStationSDK()
@@ -629,6 +644,10 @@ except InvalidRequestError as e:
     print(f"API Error Code: {details['api_error_code']}")
     print(f"Request: {details['request_method']} {details['request_endpoint']}")
     print(f"Operation: {details['operation']}")
+except SDKValidationError as e:
+    details = e.to_dict()
+    print(f"Validation failed: {details['message']}")
+    print(f"Validation Errors: {details['validation_errors']}")
 except AuthenticationError as e:
     print(f"Authentication failed: {e}")
     sdk.authenticate(mode="PAPER")
@@ -648,16 +667,30 @@ Order placement failed: Invalid symbol 'INVALID_SYMBOL'
   - Mode: PAPER
 ```
 
+Validation failures use the same structured style:
+
+```
+Get Quote Snapshots failed: Response validation failed for QuotesResponse
+
+  Request Details:
+    - Endpoint: marketdata/quotes/MNQZ25
+    - Mode: PAPER
+
+  Validation Errors:
+    - {'type': 'extra_forbidden', 'loc': ('Quotes', 0, 'UnexpectedField'), 'msg': 'Extra inputs are not permitted'}
+```
+
 **Structured (via `to_dict()`):**
 ```python
 {
-    "code": "INVALID_REQUEST",
-    "message": "Order placement failed: Invalid symbol",
-    "api_error_code": "INVALID_SYMBOL",
-    "request_method": "POST",
-    "request_endpoint": "orderexecution/orders",
+    "code": "SDK_VALIDATION_ERROR",
+    "message": "Response validation failed for QuotesResponse",
+    "api_error_code": None,
+    "request_method": None,
+    "request_endpoint": "marketdata/quotes/MNQZ25",
     "mode": "PAPER",
-    "operation": "place_order"
+    "operation": "get_quote_snapshots",
+    "validation_errors": [...]
 }
 ```
 
@@ -1296,6 +1329,8 @@ TradeStationAPIError (base)
 
 ### Request Models
 
+All exported request/response models now inherit a strict SDK base that forbids unknown fields by default.
+
 **TradeStationOrderRequest**
 - Used for placing single orders
 - Fields: AccountID, Symbol, TradeAction, OrderType, Quantity, LimitPrice, StopPrice, TimeInForce, TrailAmount, TrailPercent
@@ -1344,7 +1379,7 @@ TradeStationAPIError (base)
 ### Using Models
 
 ```python
-from src.lib.tradestation import (
+from tradestation import (
     TradeStationSDK,
     TradeStationOrderRequest,
     QuoteStream,
@@ -1649,10 +1684,10 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for complete guidelines including:
 - **[04_placing_orders.ipynb](examples/04_placing_orders.ipynb)** - Order placement
 - **[quick_start.py](examples/quick_start.py)** - Standalone quick start script
 
-### CLI Tools (cli/)
+### CLI Tools (`tradestation/cli/`)
 
-- **[test_auth.py](cli/test_auth.py)** - Test authentication
-- **[test_connection.py](cli/test_connection.py)** - Comprehensive connection test
+- **[test_auth.py](tradestation/cli/test_auth.py)** - Test authentication
+- **[test_connection.py](tradestation/cli/test_connection.py)** - Comprehensive connection test
 
 ### External Resources
 
@@ -1718,7 +1753,7 @@ See [CHANGELOG.md](CHANGELOG.md) for version history and release notes.
 
 ## 📊 SDK at a Glance
 
-**📦 Installation:** `pip install tradestation-sdk`  
+**📦 Installation:** `pip install tradestation-python-sdk`
 **⏱️ Time to First Order:** 2-5 minutes  
 **📈 API Coverage:** 92% (57/62 endpoints)  
 **🧪 Test Coverage:** 90%+  

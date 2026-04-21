@@ -9,8 +9,8 @@ import json
 from unittest.mock import MagicMock
 
 import pytest
-from tradestation.exceptions import AuthenticationError
-from tradestation.session import TokenManager
+from tradestation.exceptions import AuthenticationError, InvalidTokenError
+from tradestation.session import Session, TokenManager
 
 from .fixtures import api_responses
 
@@ -384,3 +384,39 @@ class TestTokenManagerTokenRefresh:
         tm.ensure_authenticated("PAPER")
 
         mock_refresh.assert_called_once_with("PAPER")
+
+
+@pytest.mark.unit
+class TestSessionUserInfo:
+    """Tests for Session.user_info."""
+
+    def test_user_info_without_id_token_returns_empty_dict(self):
+        """Test user_info remains empty when no ID token exists."""
+        session = Session(
+            "client_id",
+            "client_secret",
+            "refresh_token",
+            access_token="access_token",
+            id_token=None,
+            is_test=True,
+        )
+
+        assert session.user_info == {}
+
+    def test_user_info_invalid_token_raises(self, mocker):
+        """Test malformed ID tokens fail loud instead of returning an empty dict."""
+        mocker.patch("tradestation.session.jwt.decode", side_effect=ValueError("bad token"))
+
+        session = Session(
+            "client_id",
+            "client_secret",
+            "refresh_token",
+            access_token="access_token",
+            id_token="not-a-valid-token",
+            is_test=True,
+        )
+
+        with pytest.raises(InvalidTokenError) as exc_info:
+            _ = session.user_info
+
+        assert exc_info.value.details.operation == "user_info"

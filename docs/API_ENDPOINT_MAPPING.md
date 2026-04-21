@@ -2,11 +2,12 @@
 
 ## About This Document
 
-This document provides a **comprehensive mapping** between SDK functions and TradeStation API endpoints. It shows which SDK method calls which API endpoint, what HTTP methods are used, and what models are required.
+This document provides a **detailed mapping** between SDK functions and TradeStation API endpoints. The authoritative source for the current façade and endpoint families is [`CANONICAL_SDK_INVENTORY.md`](./CANONICAL_SDK_INVENTORY.md); use this file for deeper module-level mapping and examples.
 
 **Use this if:** You need to understand the relationship between SDK functions and API endpoints, see what models are used, or debug API calls.
 
 **Related Documents:**
+- 🧭 **[CANONICAL_SDK_INVENTORY.md](CANONICAL_SDK_INVENTORY.md)** - Authoritative SDK method and endpoint inventory
 - 📚 **[API_REFERENCE.md](API_REFERENCE.md)** - Complete SDK API reference
 - 📝 **[ORDER_FUNCTIONS_REFERENCE.md](ORDER_FUNCTIONS_REFERENCE.md)** - Detailed order function documentation
 - 💡 **[SDK_USAGE_EXAMPLES.md](SDK_USAGE_EXAMPLES.md)** - Usage examples
@@ -17,7 +18,7 @@ This document provides a **comprehensive mapping** between SDK functions and Tra
 
 - **Status:** Active
 - **Created:** 12-05-2025
-- **Last Updated:** 12-05-2025 14:21:15 EST
+- **Last Updated:** 2026-04-14 16:39:46 EDT
 - **Version:** 1.0
 - **Description:** Comprehensive mapping between SDK functions and TradeStation API endpoints, including HTTP methods, request/response models, and usage examples organized by operation class
 - **Type:** API Reference - Technical reference for developers implementing API integrations
@@ -27,7 +28,15 @@ This document provides a **comprehensive mapping** between SDK functions and Tra
   - [`ORDER_FUNCTIONS_REFERENCE.md`](./ORDER_FUNCTIONS_REFERENCE.md) - Detailed order function documentation
   - [`SDK_USAGE_EXAMPLES.md`](./SDK_USAGE_EXAMPLES.md) - Usage examples
   - [`tradestation-api-v3-openapi.json`](../tradestation-api-v3-openapi.json) - Source OpenAPI specification
-- **How to Use:** Use this document as a quick reference to find which SDK function maps to which API endpoint, what models are required, and see usage examples
+- **How to Use:** Use `CANONICAL_SDK_INVENTORY.md` first to verify the current supported surface, then use this document for detailed module-level endpoint mapping and examples.
+
+## Authority Note
+
+The current endpoint inventory is anchored to:
+
+1. [`tradestation/__init__.py`](../tradestation/__init__.py)
+2. [`tests/test_endpoints.py`](../tests/test_endpoints.py)
+3. [`tradestation-api-v3-openapi.json`](../tradestation-api-v3-openapi.json)
 
 ---
 
