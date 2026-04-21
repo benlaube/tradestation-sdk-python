@@ -5,12 +5,15 @@ Tests for StreamingManager class including HTTP streaming for quotes, orders, po
 Note: Tests use mocked HTTP streaming responses (newline-delimited JSON).
 """
 
+import asyncio
 import json
 import logging
+import time
 
 import pytest
 import requests
-from tradestation.models.streaming import OrderStream, QuoteStream
+
+from tradestation.models.streaming import QuoteStream
 from tradestation.streaming import StreamingManager
 
 from .fixtures import api_responses
@@ -151,9 +154,7 @@ class TestStreamingManagerStreamQuotes:
         assert "falling back to REST polling" in caplog.text
 
     @pytest.mark.asyncio
-    async def test_stream_quotes_unexpected_errors_do_not_fallback(
-        self, mock_token_manager, mock_http_client, mocker
-    ):
+    async def test_stream_quotes_unexpected_errors_do_not_fallback(self, mock_token_manager, mock_http_client, mocker):
         """Test unexpected programming/runtime failures bubble instead of degrading to polling."""
 
         async def raise_programming_error(*args, **kwargs):
@@ -409,6 +410,33 @@ class TestStreamingManagerStreamOrdersByIds:
 @pytest.mark.streaming
 class TestStreamingManagerErrorHandling:
     """Tests for error handling in streaming methods."""
+
+    @pytest.mark.asyncio
+    async def test_stream_queue_wait_does_not_block_event_loop(self, mock_token_manager, mock_http_client, mocker):
+        """Test empty stream queues wait off the event loop while the worker is delayed."""
+
+        def delayed_stream():
+            time.sleep(0.25)
+            yield json.loads(api_responses.MOCK_STREAM_STATUS_GOAWAY.strip())
+
+        mocker.patch.object(mock_http_client, "stream_data", return_value=delayed_stream())
+        streaming = StreamingManager(mock_token_manager, "client_id", "client_secret", mock_http_client)
+        ticks = 0
+
+        async def consume_stream():
+            async for _ in streaming.stream_quotes("MNQZ25", mode="PAPER"):
+                pass
+
+        async def heartbeat():
+            nonlocal ticks
+            deadline = asyncio.get_running_loop().time() + 0.05
+            while asyncio.get_running_loop().time() < deadline:
+                ticks += 1
+                await asyncio.sleep(0.005)
+
+        await asyncio.gather(consume_stream(), heartbeat())
+
+        assert ticks > 1
 
     @pytest.mark.asyncio
     async def test_stream_handles_goaway_status(self, mock_token_manager, mock_http_client, mocker):

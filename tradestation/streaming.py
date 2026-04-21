@@ -12,14 +12,15 @@ Dependencies: typing, HTTPClient
 """
 
 import asyncio
+import queue
+import threading
+import time
 from collections.abc import AsyncGenerator, Callable
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any, TypeVar
 
 import requests
-
-from .logger import setup_logger
 
 from .client import HTTPClient
 from .config import sdk_config
@@ -30,6 +31,7 @@ from .exceptions import (
     RateLimitError,
     RecoverableError,
 )
+from .logger import setup_logger
 from .models import BalanceStream, PositionsResponse
 from .models.streaming import (
     OrderStream,
@@ -43,22 +45,55 @@ logger = setup_logger(__name__, sdk_config.log_level)
 
 # Type variable for stream items
 T = TypeVar("T")
+_QUEUE_TIMEOUT = object()
 
 
 def _is_recoverable_stream_error(exc: Exception) -> bool:
     """Return True when a stream error is eligible for retry or REST fallback."""
     return isinstance(
         exc,
-        (
-            RecoverableError,
-            NetworkError,
-            RateLimitError,
-            requests.exceptions.RequestException,
-            TimeoutError,
-            ConnectionError,
-            OSError,
-        ),
+        RecoverableError
+        | NetworkError
+        | RateLimitError
+        | requests.exceptions.RequestException
+        | TimeoutError
+        | ConnectionError
+        | OSError,
     )
+
+
+async def _get_stream_queue_item(
+    data_queue: queue.Queue[Any],
+    stream_error: list[Exception | None],
+    stream_type: str,
+    timeout: float = 1.0,
+) -> Any:
+    """Read a thread-fed stream queue without blocking the event loop."""
+    started_at = time.perf_counter()
+    try:
+        item = await asyncio.to_thread(data_queue.get, True, timeout)
+    except queue.Empty:
+        elapsed = time.perf_counter() - started_at
+        if elapsed > timeout * 1.5:
+            logger.warning(
+                "%s stream queue poll exceeded expected latency: %.3fs (timeout %.3fs)",
+                stream_type,
+                elapsed,
+                timeout,
+            )
+        if stream_error[0]:
+            raise stream_error[0]
+        return _QUEUE_TIMEOUT
+
+    elapsed = time.perf_counter() - started_at
+    if elapsed > timeout * 1.5:
+        logger.warning(
+            "%s stream queue poll exceeded expected latency: %.3fs (timeout %.3fs)",
+            stream_type,
+            elapsed,
+            timeout,
+        )
+    return item
 
 
 @dataclass
@@ -421,10 +456,6 @@ class StreamingManager:
         # Use HTTPClient.stream_data for HTTP streaming
         # stream_data() is synchronous generator, so we run it in a thread
         # and use a queue to pass data to async context
-        import asyncio
-        import queue
-        import threading
-
         quote_queue = queue.Queue()
         stream_error = [None]
 
@@ -445,14 +476,8 @@ class StreamingManager:
 
         # Process quotes from queue
         while True:
-            # Wait for quote with timeout (allows checking for errors)
-            try:
-                quote_data = quote_queue.get(timeout=1.0)
-            except queue.Empty:
-                # Check for errors
-                if stream_error[0]:
-                    raise stream_error[0]
-                await asyncio.sleep(0.01)
+            quote_data = await _get_stream_queue_item(quote_queue, stream_error, "quote")
+            if quote_data is _QUEUE_TIMEOUT:
                 continue
 
             # None signals end of stream
@@ -537,7 +562,7 @@ class StreamingManager:
                 await asyncio.sleep(interval)
             except asyncio.CancelledError:
                 break
-            except Exception as e:
+            except Exception:
                 logger.exception("Quote REST polling fallback failed for symbols=%s mode=%s", symbols_str, mode)
                 await asyncio.sleep(interval)  # Continue polling despite errors
 
@@ -568,16 +593,13 @@ class StreamingManager:
         async def _get_stream():
             if not self._api_client:
                 self._api_client = HTTPClient(self.token_manager)
-            
+
             # Endpoint: marketdata/stream/barcharts/{symbol}/{interval}/{unit}
             endpoint = f"marketdata/stream/barcharts/{symbol}/{interval}/{unit}"
             logger.info(f"Starting bar stream for {symbol} ({interval} {unit}) via HTTP Streaming")
 
-            # We reuse the internal threading logic here inline or refactor. 
+            # We reuse the internal threading logic here inline or refactor.
             # For speed, I'll inline the thread runner pattern used in stream_quotes_internal
-            import queue
-            import threading
-            
             bar_queue = queue.Queue()
             stream_error = [None]
 
@@ -594,17 +616,15 @@ class StreamingManager:
             stream_thread.start()
 
             while True:
-                try:
-                    bar_data = bar_queue.get(timeout=1.0)
-                except queue.Empty:
-                    if stream_error[0]: raise stream_error[0]
-                    await asyncio.sleep(0.01)
+                bar_data = await _get_stream_queue_item(bar_queue, stream_error, "bar")
+                if bar_data is _QUEUE_TIMEOUT:
                     continue
 
                 if bar_data is None:
-                    if stream_error[0]: raise stream_error[0]
+                    if stream_error[0]:
+                        raise stream_error[0]
                     break
-                
+
                 if isinstance(bar_data, dict) and ("StreamStatus" in bar_data or "Heartbeat" in bar_data):
                     continue
 
@@ -694,10 +714,6 @@ class StreamingManager:
         endpoint = f"brokerage/stream/accounts/{account_id}/orders"
         logger.info(f"Starting order stream for account {account_id} via HTTP Streaming")
 
-        import asyncio
-        import queue
-        import threading
-
         order_queue = queue.Queue()
         stream_error = [None]
 
@@ -716,12 +732,8 @@ class StreamingManager:
         stream_thread.start()
 
         while True:
-            try:
-                order_data = order_queue.get(timeout=1.0)
-            except queue.Empty:
-                if stream_error[0]:
-                    raise stream_error[0]
-                await asyncio.sleep(0.01)
+            order_data = await _get_stream_queue_item(order_queue, stream_error, "order")
+            if order_data is _QUEUE_TIMEOUT:
                 continue
 
             if order_data is None:
@@ -781,7 +793,7 @@ class StreamingManager:
                 await asyncio.sleep(interval)
             except asyncio.CancelledError:
                 break
-            except Exception as e:
+            except Exception:
                 logger.exception("Order REST polling fallback failed for account_id=%s mode=%s", account_id, mode)
                 await asyncio.sleep(interval)
 
@@ -857,10 +869,6 @@ class StreamingManager:
         endpoint = f"brokerage/stream/accounts/{account_id}/positions"
         logger.info(f"Starting position stream for account {account_id} via HTTP Streaming")
 
-        import asyncio
-        import queue
-        import threading
-
         position_queue = queue.Queue()
         stream_error = [None]
 
@@ -879,12 +887,8 @@ class StreamingManager:
         stream_thread.start()
 
         while True:
-            try:
-                position_data = position_queue.get(timeout=1.0)
-            except queue.Empty:
-                if stream_error[0]:
-                    raise stream_error[0]
-                await asyncio.sleep(0.01)
+            position_data = await _get_stream_queue_item(position_queue, stream_error, "position")
+            if position_data is _QUEUE_TIMEOUT:
                 continue
 
             if position_data is None:
@@ -947,7 +951,7 @@ class StreamingManager:
                 await asyncio.sleep(interval)
             except asyncio.CancelledError:
                 break
-            except Exception as e:
+            except Exception:
                 logger.exception("Position REST polling fallback failed for account_id=%s mode=%s", account_id, mode)
                 await asyncio.sleep(interval)
 
@@ -1009,10 +1013,6 @@ class StreamingManager:
         endpoint = f"brokerage/stream/accounts/{account_id}/balances"
         logger.info(f"Starting balance stream for account {account_id} via HTTP Streaming")
 
-        import asyncio
-        import queue
-        import threading
-
         balance_queue = queue.Queue()
         stream_error = [None]
 
@@ -1031,12 +1031,8 @@ class StreamingManager:
         stream_thread.start()
 
         while True:
-            try:
-                balance_data = balance_queue.get(timeout=1.0)
-            except queue.Empty:
-                if stream_error[0]:
-                    raise stream_error[0]
-                await asyncio.sleep(0.01)
+            balance_data = await _get_stream_queue_item(balance_queue, stream_error, "balance")
+            if balance_data is _QUEUE_TIMEOUT:
                 continue
 
             if balance_data is None:
@@ -1132,10 +1128,6 @@ class StreamingManager:
         endpoint = f"brokerage/stream/accounts/{account_ids}/orders/{order_ids}"
         logger.info(f"Starting order stream by IDs: accounts={account_ids}, orders={order_ids} via HTTP Streaming")
 
-        import asyncio
-        import queue
-        import threading
-
         order_queue = queue.Queue()
         stream_error = [None]
 
@@ -1154,12 +1146,8 @@ class StreamingManager:
         stream_thread.start()
 
         while True:
-            try:
-                order_data = order_queue.get(timeout=1.0)
-            except queue.Empty:
-                if stream_error[0]:
-                    raise stream_error[0]
-                await asyncio.sleep(0.01)
+            order_data = await _get_stream_queue_item(order_queue, stream_error, "order-by-id")
+            if order_data is _QUEUE_TIMEOUT:
                 continue
 
             if order_data is None:
