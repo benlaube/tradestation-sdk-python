@@ -12,6 +12,7 @@ from typing import Any
 from pydantic import Field
 
 from .base import TradeStationModel, strict_model_config
+from .streaming import TradeStationMarketFlags
 
 NumericText = float | int | str
 
@@ -67,8 +68,8 @@ class QuoteSnapshot(TradeStationModel):
     Low52WeekTimestamp: str | None = Field(None, description="Date of 52-week low")
     PreviousVolume: NumericText | None = Field(None, description="Previous day's volume")
     DailyOpenInterest: NumericText | None = Field(None, description="Open interest (futures/options)")
-    MarketFlags: dict[str, Any] | None = Field(None, description="Market-specific flags")
-    Restrictions: list[Any] | None = Field(None, description="Trading restrictions")
+    MarketFlags: TradeStationMarketFlags | None = Field(None, description="Market-specific flags")
+    Restrictions: list[str] | None = Field(None, description="Trading restrictions")
     MinPrice: NumericText | None = Field(None, description="Minimum price")
     MaxPrice: NumericText | None = Field(None, description="Maximum price")
     FirstNoticeDate: str | None = Field(None, description="First notice date")
