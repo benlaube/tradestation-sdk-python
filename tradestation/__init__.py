@@ -36,6 +36,7 @@ from .models.accounts import (
     BalanceDetail,
     BODBalance,
     BODBalancesResponse,
+    CurrencyDetail,
     DetailedBalance,
     DetailedBalancesResponse,
 )
@@ -1260,6 +1261,7 @@ __all__ = [
     "AccountBalancesResponse",
     "BODBalance",
     "BODBalancesResponse",
+    "CurrencyDetail",
     "DetailedBalance",
     "DetailedBalancesResponse",
     "AccountsListResponse",
