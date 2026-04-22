@@ -5,6 +5,7 @@ Tests for MarketDataOperations class including historical bars, symbol search, q
 """
 
 import pytest
+
 from tradestation.exceptions import ErrorDetails, TradeStationAPIError
 from tradestation.market_data import MarketDataOperations
 
@@ -121,7 +122,7 @@ class TestMarketDataOperationsSearchSymbols:
         mocker.patch.object(mock_http_client, "make_request", return_value=api_responses.MOCK_SYMBOL_SEARCH)
 
         market_data = MarketDataOperations(mock_http_client)
-        result = market_data.search_symbols("ES", category="Future", mode="PAPER")
+        market_data.search_symbols("ES", category="Future", mode="PAPER")
 
         call_args = mock_http_client.make_request.call_args
         assert call_args[1]["params"]["pattern"] == "ES"
@@ -237,7 +238,7 @@ class TestMarketDataOperationsGetQuoteSnapshots:
         mocker.patch.object(mock_http_client, "make_request", return_value=api_responses.MOCK_QUOTE_SNAPSHOT)
 
         market_data = MarketDataOperations(mock_http_client)
-        result = market_data.get_quote_snapshots("MNQZ25,ESZ25", mode="PAPER")
+        market_data.get_quote_snapshots("MNQZ25,ESZ25", mode="PAPER")
 
         call_args = mock_http_client.make_request.call_args
         assert "MNQZ25,ESZ25" in call_args[0][1]
@@ -251,6 +252,46 @@ class TestMarketDataOperationsGetQuoteSnapshots:
 
         # Verify quote data structure
         assert result is not None
+
+    def test_get_quote_snapshots_accepts_rich_quote_fields(self, mock_http_client, mocker):
+        """Test REST quote snapshots accept fields TradeStation also sends on streaming quotes."""
+        quote_response = {
+            "Quotes": [
+                {
+                    "Symbol": "NQM26",
+                    "Bid": "18506.50",
+                    "Ask": "18507.00",
+                    "Last": "18506.75",
+                    "High52Week": "22200.00",
+                    "High52WeekTimestamp": "2026-02-19T16:00:00Z",
+                    "Low52Week": "16800.00",
+                    "Low52WeekTimestamp": "2025-08-05T16:00:00Z",
+                    "PreviousVolume": "123456",
+                    "DailyOpenInterest": "456789",
+                    "TickSizeTier": "0",
+                    "MinPrice": "0.25",
+                    "MaxPrice": "999999.00",
+                    "LastTradingDate": "2026-06-19",
+                    "MarketFlags": {
+                        "IsDelayed": False,
+                        "IsHalted": False,
+                    },
+                    "LastSize": "1",
+                    "LastVenue": "CME",
+                    "VWAP": "18501.25",
+                }
+            ],
+            "Errors": [],
+        }
+        mocker.patch.object(mock_http_client, "make_request", return_value=quote_response)
+
+        market_data = MarketDataOperations(mock_http_client)
+        result = market_data.get_quote_snapshots("NQM26", mode="PAPER")
+
+        quote = result["Quotes"][0]
+        assert quote["High52Week"] == "22200.00"
+        assert quote["MarketFlags"]["IsDelayed"] is False
+        assert quote["VWAP"] == "18501.25"
 
 
 # ============================================================================
