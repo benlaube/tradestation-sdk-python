@@ -547,7 +547,7 @@ class TestStreamingManagerErrorHandling:
     @pytest.mark.asyncio
     async def test_stream_handles_error_status(self, mock_token_manager, mock_http_client, mocker):
         """Test stream handles error status message."""
-        mock_data = [json.loads(api_responses.MOCK_STREAM_ERROR.strip())]
+        mock_data = [{"Error": "BadRequest", "Message": "Stream rejected"}]
 
         mocker.patch.object(mock_http_client, "stream_data", return_value=iter(mock_data))
 
