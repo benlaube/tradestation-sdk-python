@@ -113,6 +113,35 @@ class BODBalance(TradeStationModel):
     NetLiquidationValue: float | str | None = Field(None, description="Net liquidation value at BOD")
 
 
+class DetailedBalance(TradeStationModel):
+    """Detailed current balance entry from the account balances endpoint."""
+
+    AccountID: str = Field(..., description="TradeStation account ID")
+    AccountType: str | None = Field(None, description="TradeStation account type")
+    Equity: float | str | None = Field(None, description="Current account equity")
+    CashBalance: float | str | None = Field(None, description="Cash balance")
+    BuyingPower: float | str | None = Field(None, description="Buying power")
+    DayTradingBuyingPower: float | str | None = Field(None, description="Day trading buying power")
+    MarketValue: float | str | None = Field(None, description="Current market value")
+    TodaysProfitLoss: float | str | None = Field(
+        None,
+        validation_alias=AliasChoices("TodaysProfitLoss", "TodaysPnL"),
+        description="Today's profit/loss",
+    )
+    UnrealizedProfitLoss: float | str | None = Field(
+        None,
+        validation_alias=AliasChoices("UnrealizedProfitLoss", "UnrealizedPnL"),
+        description="Unrealized profit/loss",
+    )
+    RealizedProfitLoss: float | str | None = Field(None, description="Realized profit/loss")
+    UnclearedDeposit: float | str | None = Field(None, description="Uncleared deposits")
+    BalanceDetail: dict[str, Any] | None = Field(None, description="Detailed futures balance payload")
+    CurrencyDetails: list[dict[str, Any]] | dict[str, Any] | None = Field(
+        None, description="Currency-specific balance details"
+    )
+    Commission: float | str | None = Field(None, description="Commission total")
+
+
 class BODBalancesResponse(TradeStationModel):
     """Response for BOD balances endpoint."""
 
@@ -127,7 +156,7 @@ class BODBalancesResponse(TradeStationModel):
 class DetailedBalancesResponse(TradeStationModel):
     """Response for the detailed balances endpoint."""
 
-    Balances: list[BODBalance] = Field(default_factory=list, description="List of balance records")
+    Balances: list[DetailedBalance] = Field(default_factory=list, description="List of balance records")
     Errors: list[dict[str, Any]] = Field(default_factory=list, description="Unstructured API errors")
 
 

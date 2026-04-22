@@ -295,6 +295,13 @@ class TestAccountOperationsGetAccountBalancesDetailed:
 
         # Verify result structure
         assert "Balances" in result or isinstance(result, list)
+        assert result["Balances"][0]["AccountType"] == "Futures"
+        assert result["Balances"][0]["MarketValue"] == "7506450"
+        assert result["Balances"][0]["TodaysProfitLoss"] == "23940"
+        assert result["Balances"][0]["UnclearedDeposit"] == "0"
+        assert result["Balances"][0]["BalanceDetail"]["InitialMargin"] == "569604"
+        assert result["Balances"][0]["CurrencyDetails"][0]["AccountConversionRate"] == "1"
+        assert result["Balances"][0]["Commission"] == "16.8"
 
     def test_get_account_balances_detailed_multiple_accounts(self, mock_http_client, mocker):
         """Test get_account_balances_detailed handles multiple account IDs."""

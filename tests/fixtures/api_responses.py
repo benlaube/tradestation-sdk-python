@@ -63,9 +63,28 @@ MOCK_DETAILED_BALANCES = {
     "Balances": [
         {
             "AccountID": "SIM123456",
+            "AccountType": "Futures",
             "Equity": "100000.00",
             "CashBalance": "100000.00",
             "BuyingPower": "400000.00",
+            "MarketValue": "7506450",
+            "TodaysProfitLoss": "23940",
+            "UnclearedDeposit": "0",
+            "BalanceDetail": {
+                "DayTradeExcess": "484631.2999",
+                "RealizedProfitLoss": "-16.8",
+                "UnrealizedProfitLoss": "23940",
+                "InitialMargin": "569604",
+                "MaintenanceMargin": "517832",
+            },
+            "CurrencyDetails": [
+                {
+                    "Currency": "USD",
+                    "Commission": "16.8",
+                    "AccountConversionRate": "1",
+                }
+            ],
+            "Commission": "16.8",
         }
     ]
 }

@@ -27,6 +27,7 @@ from .accounts import (
     BalanceDetail,
     BODBalance,
     BODBalancesResponse,
+    DetailedBalance,
     DetailedBalancesResponse,
 )
 from .accounts_list import AccountsListResponse
@@ -89,6 +90,7 @@ __all__ = [
     "AccountBalancesResponse",
     "BODBalance",
     "BODBalancesResponse",
+    "DetailedBalance",
     "DetailedBalancesResponse",
     "AccountsListResponse",
     # Positions

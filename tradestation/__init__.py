@@ -36,6 +36,7 @@ from .models.accounts import (
     BalanceDetail,
     BODBalance,
     BODBalancesResponse,
+    DetailedBalance,
     DetailedBalancesResponse,
 )
 from .models.accounts_list import AccountsListResponse
@@ -1259,6 +1260,7 @@ __all__ = [
     "AccountBalancesResponse",
     "BODBalance",
     "BODBalancesResponse",
+    "DetailedBalance",
     "DetailedBalancesResponse",
     "AccountsListResponse",
     # Models (Positions)
