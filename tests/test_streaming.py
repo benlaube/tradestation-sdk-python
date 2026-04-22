@@ -155,6 +155,34 @@ class TestStreamingManagerStreamQuotes:
         assert "falling back to REST polling" in caplog.text
 
     @pytest.mark.asyncio
+    async def test_stream_quotes_failed_payload_uses_polling_fallback(
+        self, mock_token_manager, mock_http_client, mocker, caplog
+    ):
+        """Test broker Error=FAILED stream payloads use REST polling fallback."""
+        mocker.patch.object(
+            mock_http_client,
+            "stream_data",
+            return_value=iter([{"Error": "FAILED"}]),
+        )
+
+        async def poll_once(*args, **kwargs):
+            yield QuoteStream.model_validate(json.loads(api_responses.MOCK_STREAM_QUOTE.strip()))
+
+        caplog.set_level(logging.WARNING, logger="tradestation.streaming")
+        streaming = StreamingManager(mock_token_manager, "client_id", "client_secret", mock_http_client)
+        mock_poll = mocker.patch.object(streaming, "_poll_quotes_rest", side_effect=poll_once)
+
+        quotes = []
+        async for quote in streaming.stream_quotes("MNQZ25", mode="PAPER"):
+            quotes.append(quote)
+            break
+
+        assert len(quotes) == 1
+        assert quotes[0].Symbol == "MNQZ25"
+        assert mock_poll.call_count == 1
+        assert "falling back to REST polling" in caplog.text
+
+    @pytest.mark.asyncio
     async def test_stream_quotes_unexpected_errors_do_not_fallback(self, mock_token_manager, mock_http_client, mocker):
         """Test unexpected programming/runtime failures bubble instead of degrading to polling."""
 

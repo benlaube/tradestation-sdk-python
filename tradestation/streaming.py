@@ -144,6 +144,19 @@ def _handle_stream_control_payload(
             )
         )
 
+    if error_code.upper() == "FAILED":
+        raise RecoverableError(
+            _stream_error_details(
+                code="STREAM_FAILED",
+                message=str(message),
+                api_error_code=error_code,
+                operation=operation,
+                endpoint=endpoint,
+                mode=mode,
+                payload=payload,
+            )
+        )
+
     raise NonRecoverableError(
         _stream_error_details(
             code="STREAM_ERROR",
