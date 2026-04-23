@@ -233,6 +233,59 @@ class TestPositionOperationsFlattenPosition:
 
         assert exc_info.value.details.operation == "flatten_position"
 
+    def test_flatten_position_rebuilds_execution_helper_when_query_helper_is_passed(
+        self, mock_http_client, mocker
+    ):
+        """Test flatten_position recovers when given a query-only order helper."""
+        mock_accounts = mocker.MagicMock()
+        mock_accounts.get_account_info.return_value = {"account_id": "SIM123456"}
+        mocker.patch.object(
+            mock_http_client,
+            "make_request",
+            return_value={"Positions": [{"Symbol": "NQM26", "Quantity": "2"}]},
+        )
+
+        from tradestation.order_executions import OrderExecutionOperations
+
+        rebuilt_exec = mocker.MagicMock(spec=OrderExecutionOperations)
+        rebuilt_exec.place_order.return_value = ("flat-order-1", "SUCCESS")
+        mock_ctor = mocker.patch(
+            "tradestation.positions.OrderExecutionOperations",
+            return_value=rebuilt_exec,
+        )
+
+        query_only_helper = mocker.MagicMock()
+        query_only_helper.client = mock_http_client
+        query_only_helper.accounts = mock_accounts
+        query_only_helper.account_id = "SIM123456"
+        query_only_helper.default_mode = "PAPER"
+        del query_only_helper.place_order
+
+        position_ops = PositionOperations(
+            mock_http_client,
+            mock_accounts,
+            default_mode="PAPER",
+        )
+
+        result = position_ops.flatten_position(None, query_only_helper, mode="PAPER")
+
+        mock_ctor.assert_called_once_with(
+            client=mock_http_client,
+            accounts=mock_accounts,
+            account_id="SIM123456",
+            default_mode="PAPER",
+        )
+        rebuilt_exec.place_order.assert_called_once_with("NQM26", "SELL", 2, mode="PAPER")
+        assert result == [
+            {
+                "order_id": "flat-order-1",
+                "quantity": 2,
+                "side": "SELL",
+                "status": "SUCCESS",
+                "symbol": "NQM26",
+            }
+        ]
+
 
 @pytest.mark.unit
 @pytest.mark.orders

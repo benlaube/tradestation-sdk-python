@@ -150,6 +150,16 @@ class TestTradeStationSDKFunctionDelegation:
         mock_positions.assert_called_once_with("MNQZ25", "PAPER")
         assert result == 2
 
+    def test_flatten_position_delegates_to_order_executions(self, sdk_instance, mocker):
+        """Test flatten_position passes the execution helper to PositionOperations."""
+        mock_flatten = mocker.patch.object(sdk_instance._positions, "flatten_position")
+        mock_flatten.return_value = [{"order_id": "924243071", "status": "SUCCESS"}]
+
+        result = sdk_instance.flatten_position("MNQZ25", mode="PAPER")
+
+        mock_flatten.assert_called_once_with("MNQZ25", sdk_instance._order_executions, "PAPER")
+        assert result == [{"order_id": "924243071", "status": "SUCCESS"}]
+
     def test_mode_parameter_propagation(self, sdk_instance, mocker):
         """Test mode parameter propagates to operation modules."""
         mock_accounts = mocker.patch.object(sdk_instance._accounts, "get_account_info")
