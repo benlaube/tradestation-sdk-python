@@ -97,6 +97,31 @@ class TestPositionOperationsGetAllPositions:
         if result:
             assert "Symbol" in result[0] or "symbol" in result[0]
 
+    def test_get_all_positions_accepts_empty_errors_field(
+        self, mock_http_client, mocker
+    ):
+        """Test additive Errors arrays from the positions endpoint are accepted."""
+        mock_accounts = mocker.MagicMock()
+        mock_accounts.get_account_info.return_value = {"account_id": "SIM123456"}
+        mocker.patch.object(
+            mock_http_client,
+            "make_request",
+            return_value={
+                "Positions": [{"Symbol": "NQM26", "Quantity": "2"}],
+                "Errors": [],
+            },
+        )
+
+        position_ops = PositionOperations(
+            mock_http_client,
+            mock_accounts,
+            default_mode="PAPER",
+        )
+
+        assert position_ops.get_all_positions(mode="PAPER") == [
+            {"symbol": "NQM26", "quantity": 2}
+        ]
+
 
 # ============================================================================
 # PositionOperations flatten_position Tests

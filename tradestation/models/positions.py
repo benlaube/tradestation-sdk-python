@@ -7,6 +7,8 @@ These capture key fields from /brokerage/accounts/{accountId}/positions.
 Dependencies: pydantic
 """
 
+from typing import Any
+
 from pydantic import AliasChoices, Field
 
 from .base import TradeStationModel
@@ -77,3 +79,7 @@ class PositionsResponse(TradeStationModel):
     """Wrapper for positions response."""
 
     Positions: list[PositionResponse] = Field(..., description="List of positions")
+    Errors: list[dict[str, Any]] = Field(
+        default_factory=list,
+        description="Unstructured API errors returned alongside positions",
+    )

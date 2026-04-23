@@ -25,6 +25,7 @@ from tradestation.streaming import StreamingManager
 
 APPROVED_RAW_FIELDS = {
     ("OrdersResponse", "Errors"),
+    ("PositionsResponse", "Errors"),
     ("QuotesResponse", "Errors"),
     ("DetailedBalancesResponse", "Errors"),
     ("BODBalancesResponse", "Errors"),
