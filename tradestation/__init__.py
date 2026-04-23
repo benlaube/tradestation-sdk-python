@@ -457,7 +457,19 @@ class TradeStationSDK:
         Returns:
             List of order responses created to flatten the requested positions.
         """
-        return self._positions.flatten_position(symbol, self._orders, mode)
+        order_operations = self._order_executions
+        if not callable(getattr(order_operations, "place_order", None)):
+            logger.warning(
+                "TradeStationSDK flatten_position received a non-execution order helper; rebuilding fallback",
+                extra={"dependency_type": type(order_operations).__name__, "mode": mode},
+            )
+            order_operations = OrderExecutionOperations(
+                self._client,
+                self._accounts,
+                self.account_id,
+                self.default_mode,
+            )
+        return self._positions.flatten_position(symbol, order_operations, mode)
 
     def get_todays_profit_loss(self, mode: str | None = None) -> float:
         """

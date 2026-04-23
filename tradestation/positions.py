@@ -10,17 +10,39 @@ Dependencies: typing, Optional
 
 from collections.abc import AsyncGenerator
 from typing import Any
+from typing import Protocol
 
 from .logger import setup_logger
 
 from .accounts import AccountOperations
 from .client import HTTPClient
 from .config import sdk_config
+from .order_executions import OrderExecutionOperations
 from .exceptions import ErrorDetails, InvalidRequestError, TradeStationAPIError
 from .models import PositionsResponse
 from .validation import dump_model, raise_unexpected_error, validate_model
 
 logger = setup_logger(__name__, sdk_config.log_level)
+
+
+class SupportsPlaceOrder(Protocol):
+    """Minimal order-placement contract needed for position flattening."""
+
+    def place_order(
+        self,
+        symbol: str,
+        side: str,
+        quantity: int,
+        order_type: str = "Market",
+        limit_price: float | None = None,
+        stop_price: float | None = None,
+        time_in_force: str = "DAY",
+        _wait_for_fill: bool = False,
+        trail_amount: float | None = None,
+        trail_percent: float | None = None,
+        mode: str | None = None,
+        account_id: str | None = None,
+    ) -> tuple[str | None, str]: ...
 
 
 def _raise_invalid_request(operation: str, message: str, mode: str | None = None) -> None:
@@ -32,6 +54,48 @@ def _raise_invalid_request(operation: str, message: str, mode: str | None = None
             mode=mode,
             operation=operation,
         )
+    )
+
+
+def _resolve_place_order_dependency(
+    order_operations: SupportsPlaceOrder | Any | None,
+    *,
+    mode: str | None,
+) -> SupportsPlaceOrder:
+    """Normalize flattening dependencies to an execution-capable order helper."""
+
+    if order_operations is None:
+        _raise_invalid_request(
+            "flatten_position",
+            "flatten_position requires an order_operations dependency to place offsetting orders",
+            mode,
+        )
+
+    place_order = getattr(order_operations, "place_order", None)
+    if callable(place_order):
+        return order_operations
+
+    client = getattr(order_operations, "client", None)
+    accounts = getattr(order_operations, "accounts", None)
+    if client is not None and accounts is not None:
+        logger.warning(
+            "flatten_position received a non-execution order helper; rebuilding OrderExecutionOperations fallback",
+            extra={
+                "dependency_type": type(order_operations).__name__,
+                "mode": mode,
+            },
+        )
+        return OrderExecutionOperations(
+            client=client,
+            accounts=accounts,
+            account_id=getattr(order_operations, "account_id", None),
+            default_mode=getattr(order_operations, "default_mode", None),
+        )
+
+    _raise_invalid_request(
+        "flatten_position",
+        "flatten_position requires an order_operations dependency exposing place_order(...)",
+        mode,
     )
 
 
@@ -145,7 +209,10 @@ class PositionOperations:
         return active_positions
 
     def flatten_position(
-        self, symbol: str | None = None, order_operations=None, mode: str | None = None
+        self,
+        symbol: str | None = None,
+        order_operations: SupportsPlaceOrder | None = None,
+        mode: str | None = None,
     ) -> list[dict[str, Any]]:
         """
         Close all positions. If symbol is provided, only flattens that symbol.
@@ -153,22 +220,20 @@ class PositionOperations:
 
         Args:
             symbol: Optional symbol to flatten (if None, flattens all positions)
-            order_operations: OrderOperations instance for placing orders (required for flattening)
+            order_operations: Dependency exposing place_order(...) for offsetting orders
             mode: "PAPER" or "LIVE". If None, uses instance default_mode (from SDK initialization or last authenticated mode)
 
         Returns:
             List of dictionaries with order_id, symbol, side, quantity for each flattened position
 
-        Dependencies: get_all_positions, get_position, OrderOperations.place_order
+        Dependencies: get_all_positions, get_position, place_order-compatible execution dependency
         """
         if mode is None:
             mode = self.default_mode
-        if order_operations is None:
-            _raise_invalid_request(
-                "flatten_position",
-                "flatten_position requires an order_operations dependency to place offsetting orders",
-                mode,
-            )
+        order_operations = _resolve_place_order_dependency(
+            order_operations,
+            mode=mode,
+        )
 
         if symbol:
             # Flatten single symbol
