@@ -187,6 +187,42 @@ class TestPositionOperationsFlattenPosition:
         # Verify place_order was called for each position
         assert mock_order_exec.place_order.call_count == 2
 
+    def test_flatten_position_all_positions_accepts_empty_errors_field(
+        self, mock_http_client, mocker
+    ):
+        """Test flatten_position accepts positions responses with Errors arrays."""
+        mock_accounts = mocker.MagicMock()
+        mock_accounts.get_account_info.return_value = {"account_id": "SIM123456"}
+        mocker.patch.object(
+            mock_http_client,
+            "make_request",
+            return_value={
+                "Positions": [{"Symbol": "NQM26", "Quantity": "14"}],
+                "Errors": [],
+            },
+        )
+
+        from tradestation.order_executions import OrderExecutionOperations
+
+        mock_order_exec = mocker.MagicMock(spec=OrderExecutionOperations)
+        mock_order_exec.place_order.return_value = ("flat-order-1", "SUCCESS")
+
+        position_ops = PositionOperations(
+            mock_http_client,
+            mock_accounts,
+            default_mode="PAPER",
+        )
+
+        assert position_ops.flatten_position(None, mock_order_exec, mode="PAPER") == [
+            {
+                "order_id": "flat-order-1",
+                "quantity": 14,
+                "side": "SELL",
+                "status": "SUCCESS",
+                "symbol": "NQM26",
+            }
+        ]
+
     def test_flatten_position_requires_order_operations(self, mock_http_client, mocker):
         """Test flatten_position fails loud when order operations are missing."""
         mock_accounts = mocker.MagicMock()
