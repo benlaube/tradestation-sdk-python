@@ -106,6 +106,7 @@ class QuoteStream(TradeStationModel):
     PreviousVolume: NumericText | None = Field(None, description="Previous day's volume")
     DailyOpenInterest: NumericText | None = Field(None, description="Open interest (futures/options)")
     MarketFlags: TradeStationMarketFlags | None = Field(None, description="Market-specific flags")
+    MarketFlagsDisplay: str | None = Field(None, description="Display-form market flags")
     Restrictions: list[str] | None = Field(None, description="Trading restrictions")
     MinPrice: NumericText | None = Field(None, description="Minimum price (futures)")
     MaxPrice: NumericText | None = Field(None, description="Maximum price (futures)")

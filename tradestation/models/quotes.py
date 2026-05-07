@@ -44,6 +44,7 @@ class QuoteSnapshot(TradeStationModel):
         High52Week: 52-week high price
         Low52Week: 52-week low price
         MarketFlags: Market-specific flags
+        MarketFlagsDisplay: Display-form market flags
     """
 
     Symbol: str = Field(..., description="Trading symbol")
@@ -69,6 +70,7 @@ class QuoteSnapshot(TradeStationModel):
     PreviousVolume: NumericText | None = Field(None, description="Previous day's volume")
     DailyOpenInterest: NumericText | None = Field(None, description="Open interest (futures/options)")
     MarketFlags: TradeStationMarketFlags | None = Field(None, description="Market-specific flags")
+    MarketFlagsDisplay: str | None = Field(None, description="Display-form market flags")
     Restrictions: list[str] | None = Field(None, description="Trading restrictions")
     MinPrice: NumericText | None = Field(None, description="Minimum price")
     MaxPrice: NumericText | None = Field(None, description="Maximum price")

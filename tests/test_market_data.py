@@ -293,6 +293,28 @@ class TestMarketDataOperationsGetQuoteSnapshots:
         assert quote["MarketFlags"]["IsDelayed"] is False
         assert quote["VWAP"] == "18501.25"
 
+    def test_get_quote_snapshots_accepts_market_flags_display(self, mock_http_client, mocker):
+        """Test REST quote snapshots accept TradeStation's display-form market flags field."""
+        quote_response = {
+            "Quotes": [
+                {
+                    "Symbol": "NQM26",
+                    "Bid": "28699.75",
+                    "Ask": "28700.25",
+                    "Last": "28700.00",
+                    "MarketFlagsDisplay": "(D)",
+                }
+            ],
+            "Errors": [],
+        }
+        mocker.patch.object(mock_http_client, "make_request", return_value=quote_response)
+
+        market_data = MarketDataOperations(mock_http_client)
+        result = market_data.get_quote_snapshots("NQM26", mode="PAPER")
+
+        quote = result["Quotes"][0]
+        assert quote["MarketFlagsDisplay"] == "(D)"
+
 
 # ============================================================================
 # MarketDataOperations get_symbol_details Tests

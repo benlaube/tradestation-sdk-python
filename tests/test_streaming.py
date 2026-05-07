@@ -126,6 +126,34 @@ class TestStreamingManagerStreamQuotes:
                 break
 
     @pytest.mark.asyncio
+    async def test_stream_quotes_accepts_market_flags_display(
+        self, mock_token_manager, mock_http_client, mocker
+    ):
+        """Test quote streams accept TradeStation's display-form market flags."""
+        mock_data = [
+            {
+                "Symbol": "NQM26",
+                "Bid": "28699.75",
+                "Ask": "28700.25",
+                "Last": "28700.00",
+                "MarketFlagsDisplay": "(D)",
+            }
+        ]
+
+        mocker.patch.object(mock_http_client, "stream_data", return_value=iter(mock_data))
+
+        streaming = StreamingManager(mock_token_manager, "client_id", "client_secret", mock_http_client)
+
+        quotes = []
+        async for quote in streaming.stream_quotes("NQM26", mode="PAPER"):
+            quotes.append(quote)
+            break
+
+        assert len(quotes) == 1
+        assert quotes[0].Symbol == "NQM26"
+        assert quotes[0].MarketFlagsDisplay == "(D)"
+
+    @pytest.mark.asyncio
     async def test_stream_quotes_falls_back_only_for_recoverable_errors(
         self, mock_token_manager, mock_http_client, mocker, caplog
     ):
