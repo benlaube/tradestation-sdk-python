@@ -186,6 +186,7 @@ class OrderStream(TradeStationModel):
     AdvancedOptions: str | None = Field(None, description="Advanced options string")
     Message: str | None = Field(None, description="Status message")
     RejectionReason: str | None = Field(None, description="Rejection reason")
+    RejectReason: str | None = Field(None, description="Rejected-order reason")
     Symbol: str | None = Field(None, description="Trading symbol (if not in Legs)")
     TradeAction: str | None = Field(None, description="Buy or Sell (if not in Legs)")
     Quantity: str | None = Field(None, description="Quantity (if not in Legs)")

@@ -19,6 +19,7 @@ from tradestation.market_data import MarketDataOperations
 from tradestation.models import AccountsListResponse
 from tradestation.models import __all__ as model_exports
 from tradestation.models import accounts_list, accounts_rest
+from tradestation.models.streaming import OrderStream
 from tradestation.order_executions import OrderExecutionOperations
 from tradestation.streaming import StreamingManager
 
@@ -72,6 +73,19 @@ def test_no_duplicate_accounts_list_response_export():
     """The legacy accounts_rest shim must point to the canonical model object."""
     assert accounts_rest.AccountsListResponse is accounts_list.AccountsListResponse
     assert accounts_rest.AccountsListResponse is AccountsListResponse
+
+
+@pytest.mark.unit
+def test_order_stream_accepts_trade_station_reject_reason_alias():
+    """TradeStation order streams may emit RejectReason for rejected orders."""
+    order = OrderStream(
+        AccountID="SIM123456",
+        OrderID="924243071",
+        Status="REJ",
+        RejectReason="insufficient buying power",
+    )
+
+    assert order.RejectReason == "insufficient buying power"
 
 
 @pytest.mark.unit
