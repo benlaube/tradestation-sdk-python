@@ -202,3 +202,15 @@ async def test_streaming_validation_error_is_raised(mock_token_manager, mock_htt
     with pytest.raises(Exception):
         async for _ in streaming.stream_quotes("MNQZ25", mode="PAPER"):
             break
+
+
+@pytest.mark.unit
+def test_position_stream_accepts_deletion_notification():
+    """Position deletion frames carry only PositionID + Deleted."""
+    from tradestation.models.streaming import PositionStream
+
+    deletion = PositionStream(PositionID="187849642", Deleted=True)
+
+    assert deletion.Deleted is True
+    assert deletion.Symbol is None
+    assert deletion.Quantity is None
