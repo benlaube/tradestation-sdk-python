@@ -212,6 +212,8 @@ class TradeStationOrderResponse(TradeStationModel):
     AdvancedOptions: str | None = Field(None, description="Advanced options string")
     Message: str | None = Field(None, description="Status message")
     RejectionReason: str | None = Field(None, description="Rejection reason")
+    RejectReason: str | None = Field(None, description="Rejected-order reason (broker alias of RejectionReason)")
+    Error: str | None = Field(None, description="Broker error code for a failed order action (e.g. FAILED)")
 
     # Additional fields that may be present
     Symbol: str | None = Field(None, description="Trading symbol (if not in Legs)")

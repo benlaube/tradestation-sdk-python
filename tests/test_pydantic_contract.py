@@ -89,6 +89,22 @@ def test_order_stream_accepts_trade_station_reject_reason_alias():
 
 
 @pytest.mark.unit
+def test_rest_order_response_accepts_broker_error_and_reject_reason():
+    """REST order payloads carry Error/RejectReason on rejected orders."""
+    from tradestation.models.orders import TradeStationOrderResponse
+
+    order = TradeStationOrderResponse(
+        OrderID="924243071",
+        Status="REJ",
+        Error="FAILED",
+        RejectReason="contract has expired",
+    )
+
+    assert order.Error == "FAILED"
+    assert order.RejectReason == "contract has expired"
+
+
+@pytest.mark.unit
 def test_models_do_not_regress_to_raw_dict_or_list_unions():
     """Nested typed fields should not be downgraded back to raw dict/list unions."""
     for model_cls in _iter_model_classes():
