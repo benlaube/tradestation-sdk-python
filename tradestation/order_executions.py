@@ -395,6 +395,21 @@ class OrderExecutionOperations:
                 first_order = dump_model(orders[0])
                 order_id = first_order.get("OrderID")
                 message = first_order.get("Message", "Order received")
+                # The broker signals a definitive rejection by attaching an
+                # Error code (e.g. "FAILED") to the order — even when an
+                # OrderID is present. Treat that as a failed placement, not
+                # a success.
+                error_code = first_order.get("Error")
+                if error_code:
+                    reject_detail = (
+                        first_order.get("RejectReason")
+                        or first_order.get("RejectionReason")
+                        or message
+                    )
+                    logger.error(
+                        f"❌ Order rejected by broker: {error_code}: {reject_detail}"
+                    )
+                    return None, f"{error_code}: {reject_detail}"
                 logger.info(f"✅ Order placed successfully - ID: {order_id}")
                 return order_id, message
             logger.error("❌ No order returned in response")

@@ -252,12 +252,15 @@ class PositionStream(TradeStationModel):
         Deleted: True if position was closed (deletion notification)
     """
 
-    AccountID: str = Field(..., description="TradeStation account ID")
+    # Position DELETION notifications carry only {PositionID, Deleted: true}
+    # — no AccountID/Symbol/Quantity — so those fields must be optional or
+    # the first closed position kills the whole positions stream.
+    AccountID: str | None = Field(None, description="TradeStation account ID")
     PositionID: str | None = Field(None, description="Unique position identifier")
-    Symbol: str = Field(..., description="Trading symbol")
+    Symbol: str | None = Field(None, description="Trading symbol")
     AssetType: str | None = Field(None, description="STOCK, STOCKOPTION, FUTURE, INDEXOPTION")
     LongShort: str | None = Field(None, description="Long or Short")
-    Quantity: str = Field(..., description="Number of contracts/shares (negative for short)")
+    Quantity: str | None = Field(None, description="Number of contracts/shares (negative for short)")
     AveragePrice: str | None = Field(None, description="Average entry price")
     Last: str | None = Field(None, description="Last traded price")
     Bid: str | None = Field(None, description="Current bid price")
