@@ -49,7 +49,15 @@ ENDPOINT_MAPPINGS = [
     ("get_order_executions", "orderexecution/orders/{orderID}/executions", "GET", {"order_id": "924243071"}),
     ("confirm_order", "orderexecution/orderconfirm", "POST", {"symbol": "MNQZ25", "side": "BUY", "quantity": 2}),
     ("confirm_group_order", "orderexecution/ordergroupconfirm", "POST", {"group_type": "OCO", "orders": []}),
-    ("place_group_order", "orderexecution/ordergroups", "POST", {"group_type": "OCO", "orders": []}),
+    (
+        "place_group_order",
+        "orderexecution/ordergroups",
+        "POST",
+        {
+            "group_type": "OCO",
+            "orders": [{"Symbol": "MNQZ25", "TradeAction": "BUY", "Quantity": "2", "OrderType": "Market"}],
+        },
+    ),
     ("get_activation_triggers", "orderexecution/activationtriggers", "GET", {}),
     ("get_routes", "orderexecution/routes", "GET", {}),
     # Position Operations
