@@ -359,7 +359,9 @@ class TestOrderExecutionOperationsGroupOrders:
         mock_accounts = mocker.MagicMock()
         mock_accounts.get_account_info.return_value = {"account_id": "SIM123456"}
 
-        mocker.patch.object(mock_http_client, "make_request", return_value=api_responses.MOCK_GROUP_ORDER_PLACEMENT)
+        mocker.patch.object(
+            mock_http_client, "make_request", return_value=api_responses.MOCK_GROUP_ORDER_PLACEMENT_SUCCESS
+        )
 
         order_exec = OrderExecutionOperations(mock_http_client, mock_accounts, default_mode="PAPER")
         orders = [
@@ -370,15 +372,24 @@ class TestOrderExecutionOperationsGroupOrders:
 
         call_args = mock_http_client.make_request.call_args
         assert "orderexecution/ordergroups" in call_args[0][1]
+        assert call_args[0][0] == "POST"
         json_data = call_args[1]["json_data"]
         assert json_data["Type"] == "OCO"
+        assert json_data["Orders"] == orders
+        assert result == [
+            ("924243071", "Order received"),
+            ("924243072", "Order received"),
+            ("924243073", "Order received"),
+        ]
 
     def test_place_group_order_bracket(self, mock_http_client, mocker):
         """Test place_group_order with BRK (Bracket) group type."""
         mock_accounts = mocker.MagicMock()
         mock_accounts.get_account_info.return_value = {"account_id": "SIM123456"}
 
-        mocker.patch.object(mock_http_client, "make_request", return_value=api_responses.MOCK_GROUP_ORDER_PLACEMENT)
+        mocker.patch.object(
+            mock_http_client, "make_request", return_value=api_responses.MOCK_GROUP_ORDER_PLACEMENT_SUCCESS
+        )
 
         order_exec = OrderExecutionOperations(mock_http_client, mock_accounts, default_mode="PAPER")
         orders = [
@@ -391,6 +402,128 @@ class TestOrderExecutionOperationsGroupOrders:
         call_args = mock_http_client.make_request.call_args
         json_data = call_args[1]["json_data"]
         assert json_data["Type"] == "BRK"
+        assert [order_id for order_id, _ in result] == ["924243071", "924243072", "924243073"]
+
+    def test_place_group_order_surfaces_child_rejection(self, mock_http_client, mocker):
+        """A child order rejected by the broker returns (None, error detail)."""
+        mock_accounts = mocker.MagicMock()
+        mock_accounts.get_account_info.return_value = {"account_id": "SIM123456"}
+
+        mocker.patch.object(
+            mock_http_client, "make_request", return_value=api_responses.MOCK_GROUP_ORDER_CHILD_REJECTED
+        )
+
+        order_exec = OrderExecutionOperations(mock_http_client, mock_accounts, default_mode="PAPER")
+        orders = [
+            {"Symbol": "MNQZ25", "TradeAction": "BUY", "Quantity": "2", "OrderType": "Market"},
+            {"Symbol": "MNQZ25", "TradeAction": "SELL", "Quantity": "2", "OrderType": "Limit", "LimitPrice": "25100"},
+            {"Symbol": "MNQZ25", "TradeAction": "SELL", "Quantity": "2", "OrderType": "Stop", "StopPrice": "24900"},
+        ]
+        result = order_exec.place_group_order("BRK", orders, mode="PAPER")
+
+        assert result[0] == ("924243071", "Order received")
+        assert result[1] == ("924243072", "Order received")
+        # Error-tagged child surfaces as a rejection even though the broker
+        # attached an OrderID to it (2026-07-02 place_order hardening).
+        assert result[2] == (None, "FAILED: Invalid stop price")
+
+    def test_place_group_order_surfaces_group_level_errors(self, mock_http_client, mocker):
+        """A whole-group failure with only an Errors array yields error tuples."""
+        mock_accounts = mocker.MagicMock()
+        mock_accounts.get_account_info.return_value = {"account_id": "SIM123456"}
+
+        mocker.patch.object(mock_http_client, "make_request", return_value=api_responses.MOCK_GROUP_ORDER_GROUP_ERROR)
+
+        order_exec = OrderExecutionOperations(mock_http_client, mock_accounts, default_mode="PAPER")
+        orders = [{"Symbol": "MNQZ25", "TradeAction": "BUY", "Quantity": "2", "OrderType": "Market"}]
+        result = order_exec.place_group_order("BRK", orders, mode="PAPER")
+
+        assert result == [(None, "INVALID_GROUP: Order group type is invalid")]
+
+    def test_place_group_order_empty_response_returns_no_order(self, mock_http_client, mocker):
+        """An empty response body maps to the NO_ORDER_RETURNED sentinel."""
+        mock_accounts = mocker.MagicMock()
+        mock_accounts.get_account_info.return_value = {"account_id": "SIM123456"}
+
+        mocker.patch.object(mock_http_client, "make_request", return_value={"Orders": [], "Errors": []})
+
+        order_exec = OrderExecutionOperations(mock_http_client, mock_accounts, default_mode="PAPER")
+        orders = [{"Symbol": "MNQZ25", "TradeAction": "BUY", "Quantity": "2", "OrderType": "Market"}]
+        result = order_exec.place_group_order("OCO", orders, mode="PAPER")
+
+        assert result == [(None, "NO_ORDER_RETURNED")]
+
+    def test_place_group_order_accepts_openapi_array_response(self, mock_http_client, mocker):
+        """The OpenAPI-documented array-of-OrderResponses shape is normalized."""
+        mock_accounts = mocker.MagicMock()
+        mock_accounts.get_account_info.return_value = {"account_id": "SIM123456"}
+
+        mocker.patch.object(
+            mock_http_client,
+            "make_request",
+            return_value=[api_responses.MOCK_GROUP_ORDER_PLACEMENT_SUCCESS],
+        )
+
+        order_exec = OrderExecutionOperations(mock_http_client, mock_accounts, default_mode="PAPER")
+        orders = [{"Symbol": "MNQZ25", "TradeAction": "BUY", "Quantity": "2", "OrderType": "Market"}]
+        result = order_exec.place_group_order("BRK", orders, mode="PAPER")
+
+        assert [order_id for order_id, _ in result] == ["924243071", "924243072", "924243073"]
+
+    def test_place_group_order_rejects_invalid_group_type_locally(self, mock_http_client, mocker):
+        """Invalid group_type returns a local ERROR tuple without any HTTP call."""
+        mock_accounts = mocker.MagicMock()
+        mock_request = mocker.patch.object(mock_http_client, "make_request")
+
+        order_exec = OrderExecutionOperations(mock_http_client, mock_accounts, default_mode="PAPER")
+        orders = [{"Symbol": "MNQZ25", "TradeAction": "BUY", "Quantity": "2", "OrderType": "Market"}]
+        result = order_exec.place_group_order("BOGUS", orders, mode="PAPER")
+
+        assert len(result) == 1
+        order_id, message = result[0]
+        assert order_id is None
+        assert message.startswith("ERROR: group_type must be one of")
+        mock_request.assert_not_called()
+
+    def test_place_group_order_rejects_empty_orders_locally(self, mock_http_client, mocker):
+        """Empty orders list returns a local ERROR tuple without any HTTP call."""
+        mock_accounts = mocker.MagicMock()
+        mock_request = mocker.patch.object(mock_http_client, "make_request")
+
+        order_exec = OrderExecutionOperations(mock_http_client, mock_accounts, default_mode="PAPER")
+        result = order_exec.place_group_order("OCO", [], mode="PAPER")
+
+        assert result == [(None, "ERROR: orders must be a non-empty list of order dictionaries")]
+        mock_request.assert_not_called()
+
+    def test_place_group_order_rejects_invalid_mode_locally(self, mock_http_client, mocker):
+        """Invalid mode returns a local ERROR tuple without any HTTP call."""
+        mock_accounts = mocker.MagicMock()
+        mock_request = mocker.patch.object(mock_http_client, "make_request")
+
+        order_exec = OrderExecutionOperations(mock_http_client, mock_accounts, default_mode="PAPER")
+        orders = [{"Symbol": "MNQZ25", "TradeAction": "BUY", "Quantity": "2", "OrderType": "Market"}]
+        result = order_exec.place_group_order("OCO", orders, mode="SANDBOX")
+
+        assert result == [(None, "ERROR: mode must be 'PAPER' or 'LIVE', got 'SANDBOX'")]
+        mock_request.assert_not_called()
+
+    def test_place_group_order_api_error_tagged(self, mock_http_client, mocker):
+        """Transport failures propagate as TradeStationAPIError with operation context."""
+        mock_accounts = mocker.MagicMock()
+        mocker.patch.object(
+            mock_http_client,
+            "make_request",
+            side_effect=TradeStationAPIError(ErrorDetails(message="ordergroups endpoint unavailable")),
+        )
+
+        order_exec = OrderExecutionOperations(mock_http_client, mock_accounts, default_mode="PAPER")
+        orders = [{"Symbol": "MNQZ25", "TradeAction": "BUY", "Quantity": "2", "OrderType": "Market"}]
+        with pytest.raises(TradeStationAPIError) as exc_info:
+            order_exec.place_group_order("BRK", orders, mode="PAPER")
+
+        assert exc_info.value.details.operation == "place_group_order"
+        assert "Group order placement failed" in exc_info.value.details.message
 
     def test_confirm_group_order(self, mock_http_client, mocker):
         """Test confirm_group_order performs pre-flight check."""
@@ -491,6 +624,8 @@ class TestOrderExecutionOperationsConvenienceFunctions:
         call_args = mock_http_client.make_request.call_args
         json_data = call_args[1]["json_data"]
         assert json_data["Type"] == "OCO"
+        # Convenience wrapper keeps the raw response dict contract.
+        assert result == api_responses.MOCK_GROUP_ORDER_PLACEMENT
 
     def test_place_bracket_order(self, mock_http_client, mocker):
         """Test place_bracket_order with profit target and stop-loss."""
@@ -509,6 +644,8 @@ class TestOrderExecutionOperationsConvenienceFunctions:
         assert json_data["Type"] == "BRK"
         # Verify bracket order structure (entry + profit + stop)
         assert len(json_data["Orders"]) == 3
+        # Convenience wrapper keeps the raw response dict contract.
+        assert result == api_responses.MOCK_GROUP_ORDER_PLACEMENT
 
 
 # ============================================================================

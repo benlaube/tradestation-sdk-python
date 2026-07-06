@@ -277,6 +277,43 @@ MOCK_GROUP_ORDER_PLACEMENT = {
     ]
 }
 
+# Real POST /v3/orderexecution/ordergroups response shape (OrderResponses):
+# a flat Orders array in request order, plus an Errors array.
+MOCK_GROUP_ORDER_PLACEMENT_SUCCESS = {
+    "Orders": [
+        {"OrderID": "924243071", "Message": "Order received"},
+        {"OrderID": "924243072", "Message": "Order received"},
+        {"OrderID": "924243073", "Message": "Order received"},
+    ],
+    "Errors": [],
+}
+
+# Group accepted but one child definitively rejected: the broker attaches an
+# Error code and RejectReason to that child's order payload (same shape the
+# single-order endpoint uses for rejected placements).
+MOCK_GROUP_ORDER_CHILD_REJECTED = {
+    "Orders": [
+        {"OrderID": "924243071", "Message": "Order received"},
+        {"OrderID": "924243072", "Message": "Order received"},
+        {
+            "OrderID": "924243073",
+            "Status": "REJ",
+            "Error": "FAILED",
+            "RejectReason": "Invalid stop price",
+            "Message": "Order rejected",
+        },
+    ],
+    "Errors": [],
+}
+
+# Whole-group failure: no Orders at all, only a top-level Errors array.
+MOCK_GROUP_ORDER_GROUP_ERROR = {
+    "Orders": [],
+    "Errors": [
+        {"Error": "INVALID_GROUP", "Message": "Order group type is invalid"},
+    ],
+}
+
 MOCK_ACTIVATION_TRIGGERS = {
     "Triggers": [
         {"Key": "Last", "Description": "Last Price"},

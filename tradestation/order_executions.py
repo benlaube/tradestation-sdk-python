@@ -1291,26 +1291,29 @@ class OrderExecutionOperations:
             logger.error(f"Group order confirmation failed: {e}", exc_info=True)
             raise
 
-    def place_group_order(
-        self, group_type: str, orders: list[dict[str, Any]], mode: str | None = None
+    def _submit_group_order(
+        self,
+        group_type: str,
+        orders: list[dict[str, Any]],
+        mode: str | None = None,
+        operation: str = "place_group_order",
     ) -> dict[str, Any]:
         """
-        Place a group order (OCO/Bracket).
+        Submit a group order (OCO/Bracket) and return the raw broker response.
 
-        Submits a group of related orders. For OCO orders, if one fills, others are cancelled.
-        For Bracket orders, used to exit positions with stop and limit orders.
+        Internal transport helper shared by place_group_order and the
+        place_oco_order/place_bracket_order convenience wrappers. Performs no
+        per-order outcome interpretation; callers decide how to surface
+        broker Error/RejectReason fields.
 
         Args:
             group_type: Group type ("OCO", "BRK", or "NORMAL")
             orders: List of order dictionaries (same format as place_order)
             mode: "PAPER" or "LIVE". If None, uses sdk_config.trading_mode
+            operation: Operation label attached to raised API errors
 
         Returns:
-            Dictionary with GroupOrderResponse including order IDs and group information:
-            - GroupID: Group order ID
-            - GroupName: Group order name
-            - Type: Group type
-            - Orders: List of order responses with OrderIDs
+            Raw response payload from POST /v3/orderexecution/ordergroups
 
         Dependencies: HTTPClient.make_request
 
@@ -1330,7 +1333,7 @@ class OrderExecutionOperations:
 
             # Extract order IDs from response
             order_ids = []
-            if "Orders" in response:
+            if isinstance(response, dict) and "Orders" in response:
                 for order in response["Orders"]:
                     if "OrderID" in order:
                         order_ids.append(order["OrderID"])
@@ -1340,7 +1343,7 @@ class OrderExecutionOperations:
             return response
 
         except TradeStationAPIError as e:
-            e.details.operation = "place_group_order"
+            e.details.operation = operation
             if not e.details.message.startswith("Group order placement failed"):
                 e.details.message = f"Group order placement failed: {e.details.message}"
             logger.error(f"Group order placement failed: {e.details.to_human_readable()}", exc_info=True)
@@ -1348,6 +1351,169 @@ class OrderExecutionOperations:
         except Exception as e:
             logger.error(f"Group order placement failed: {e}", exc_info=True)
             raise
+
+    @staticmethod
+    def _merge_group_order_response(response: Any) -> dict[str, Any]:
+        """
+        Normalize the order-group response into one OrdersResponse-shaped dict.
+
+        The v3 OpenAPI schema types the ordergroups 200 body as an ARRAY of
+        OrderResponses objects while the live endpoint returns a single
+        object; accept both by concatenating Orders/Errors across elements.
+
+        Args:
+            response: Raw parsed JSON from POST /v3/orderexecution/ordergroups
+
+        Returns:
+            Dict with "Orders" and "Errors" lists ready for OrdersResponse
+            validation
+        """
+        if isinstance(response, list):
+            merged: dict[str, Any] = {"Orders": [], "Errors": []}
+            for item in response:
+                if not isinstance(item, dict):
+                    continue
+                orders = item.get("Orders")
+                errors = item.get("Errors")
+                if isinstance(orders, list):
+                    merged["Orders"].extend(orders)
+                if isinstance(errors, list):
+                    merged["Errors"].extend(errors)
+            return merged
+        if isinstance(response, dict):
+            return response
+        return {"Orders": [], "Errors": []}
+
+    def place_group_order(
+        self, group_type: str, orders: list[dict[str, Any]], mode: str | None = None
+    ) -> list[tuple[str | None, str]]:
+        """
+        Place a group order (OCO/Bracket) and surface per-order outcomes.
+
+        Submits a group of related orders. For OCO orders, if one fills, others
+        are cancelled. For Bracket (BRK) orders, protective exits are linked to
+        the entry. Mirrors place_order's return-with-error contract for EVERY
+        order in the group: a broker rejection on any child (an Error code with
+        RejectReason attached to that order's response payload) is returned as
+        (None, "<Error>: <detail>") for that slot instead of being silently
+        swallowed inside a raw response dict.
+
+        Args:
+            group_type: Group type ("OCO", "BRK", or "NORMAL")
+            orders: Non-empty list of order dictionaries in TradeStation v3
+                request format (AccountID, Symbol, TradeAction, OrderType,
+                Quantity, TimeInForce, ...)
+            mode: "PAPER" or "LIVE". If None, uses sdk_config.trading_mode
+
+        Returns:
+            One (order_id, status_message) tuple per order in the broker
+            response, preserving response order (which matches request order).
+            order_id is None for rejected orders with the message carrying the
+            broker Error code and RejectReason detail. Local validation
+            failures return a single (None, "ERROR: ...") tuple without any
+            network call. An accepted-but-empty response yields
+            [(None, "NO_ORDER_RETURNED")].
+
+        Dependencies: OrderExecutionOperations._submit_group_order
+
+        Note: TradeStation API endpoint: POST /v3/orderexecution/ordergroups
+        """
+        # Validate mode (mirrors place_order)
+        if mode is None:
+            mode = sdk_config.trading_mode
+        if mode is None:
+            mode = self.default_mode
+        if not isinstance(mode, str):
+            logger.error(f"❌ mode must be 'PAPER' or 'LIVE', got {type(mode).__name__}")
+            return [(None, f"ERROR: mode must be 'PAPER' or 'LIVE', got {type(mode).__name__}")]
+        mode_upper = mode.upper().strip()
+        if mode_upper not in ["PAPER", "LIVE"]:
+            logger.error(f"❌ mode must be 'PAPER' or 'LIVE', got '{mode}'")
+            return [(None, f"ERROR: mode must be 'PAPER' or 'LIVE', got '{mode}'")]
+        mode = mode_upper
+
+        # Validate group_type
+        VALID_GROUP_TYPES = ["OCO", "BRK", "NORMAL"]
+        if not group_type or not isinstance(group_type, str):
+            logger.error(
+                f"❌ group_type must be one of {VALID_GROUP_TYPES}, got {type(group_type).__name__ if group_type is not None else 'None'}"
+            )
+            return [
+                (
+                    None,
+                    f"ERROR: group_type must be one of {VALID_GROUP_TYPES}, got {type(group_type).__name__ if group_type is not None else 'None'}",
+                )
+            ]
+        group_type_upper = group_type.upper().strip()
+        if group_type_upper not in VALID_GROUP_TYPES:
+            logger.error(f"❌ group_type must be one of {VALID_GROUP_TYPES}, got '{group_type}'")
+            return [(None, f"ERROR: group_type must be one of {VALID_GROUP_TYPES}, got '{group_type}'")]
+
+        # Validate orders
+        if not isinstance(orders, list) or not orders:
+            logger.error("❌ orders must be a non-empty list of order dictionaries")
+            return [(None, "ERROR: orders must be a non-empty list of order dictionaries")]
+        if not all(isinstance(order, dict) for order in orders):
+            logger.error("❌ every order in orders must be a dictionary")
+            return [(None, "ERROR: every order in orders must be a dictionary")]
+
+        endpoint = "orderexecution/ordergroups"
+        try:
+            logger.info(f"📤 Placing group order: {group_type_upper} with {len(orders)} order(s) ({mode} mode)")
+            response = self._submit_group_order(group_type_upper, orders, mode=mode, operation="place_group_order")
+            orders_response = validate_model(
+                OrdersResponse,
+                self._merge_group_order_response(response),
+                operation="place_group_order",
+                endpoint=endpoint,
+                mode=mode,
+                source="response",
+            )
+
+            results: list[tuple[str | None, str]] = []
+            for order_model in orders_response.Orders:
+                order_payload = dump_model(order_model)
+                order_id = order_payload.get("OrderID")
+                message = order_payload.get("Message", "Order received")
+                # The broker signals a definitive rejection by attaching an
+                # Error code (e.g. "FAILED") to the order — even when an
+                # OrderID is present. Treat that child as a failed placement,
+                # not a success (same hardening as place_order).
+                error_code = order_payload.get("Error")
+                if error_code:
+                    reject_detail = order_payload.get("RejectReason") or order_payload.get("RejectionReason") or message
+                    logger.error(f"❌ Group order child rejected by broker: {error_code}: {reject_detail}")
+                    results.append((None, f"{error_code}: {reject_detail}"))
+                else:
+                    results.append((order_id, message))
+
+            if not results:
+                # Whole-group failures can come back through the top-level
+                # Errors array with no Orders at all.
+                for error in orders_response.Errors:
+                    error_code = str(error.get("Error") or "ERROR")
+                    detail = str(error.get("Message") or error)
+                    logger.error(f"❌ Group order rejected by broker: {error_code}: {detail}")
+                    results.append((None, f"{error_code}: {detail}"))
+
+            if not results:
+                logger.error("❌ No orders returned in group order response")
+                return [(None, "NO_ORDER_RETURNED")]
+
+            accepted = sum(1 for order_id, _ in results if order_id)
+            logger.info(
+                f"✅ Group order processed: {accepted}/{len(results)} order(s) accepted "
+                f"(type={group_type_upper}, mode={mode})"
+            )
+            return results
+        except TradeStationAPIError:
+            # Already logged and operation-tagged by _submit_group_order (or
+            # raised as SDKValidationError by response validation with the
+            # place_group_order operation attached).
+            raise
+        except Exception as e:
+            logger.error(f"❌ Group order placement failed: {e}", exc_info=True)
+            raise_unexpected_error(operation="place_group_order", endpoint=endpoint, mode=mode, exc=e)
 
     def get_activation_triggers(self, mode: str | None = None) -> list[dict[str, Any]]:
         """
@@ -1720,7 +1886,7 @@ class OrderExecutionOperations:
             logger.error("❌ OCO order requires at least 2 orders")
             raise ValueError("OCO order requires at least 2 orders")
 
-        return self.place_group_order("OCO", orders, mode=mode)
+        return self._submit_group_order("OCO", orders, mode=mode, operation="place_oco_order")
 
     def place_bracket_order(
         self,
@@ -2078,7 +2244,7 @@ class OrderExecutionOperations:
         logger.info("=" * 60)
 
         try:
-            return self.place_group_order("BRK", orders, mode=mode)
+            return self._submit_group_order("BRK", orders, mode=mode, operation="place_bracket_order")
         except TradeStationAPIError as e:
             e.details.operation = "place_bracket_order"
             if not e.details.message.startswith("Bracket order placement failed"):

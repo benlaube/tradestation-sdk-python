@@ -917,17 +917,19 @@ class TradeStationSDK:
 
     def place_group_order(
         self, group_type: str, orders: list[dict[str, Any]], mode: str | None = None
-    ) -> dict[str, Any]:
+    ) -> list[tuple[str | None, str]]:
         """
-        Submit an OCO/Bracket group order.
+        Submit an OCO/Bracket group order with per-order outcomes.
 
         Args:
-            group_type: "OCO" or "BRK".
+            group_type: "OCO", "BRK", or "NORMAL".
             orders: List of order legs in TradeStation format.
             mode: Trading mode.
 
         Returns:
-            Dict with group order response.
+            One (order_id, status_message) tuple per order, mirroring
+            place_order: order_id is None for orders the broker rejected,
+            with the message carrying the Error code and RejectReason.
         """
         return self._order_executions.place_group_order(group_type, orders, mode)
 

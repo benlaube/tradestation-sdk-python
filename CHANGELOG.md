@@ -27,6 +27,25 @@ This changelog tracks SDK-specific changes including:
 - Authentication and session management changes
 - Streaming functionality updates
 
+## 2026-07-06 - Group Order Placement Hardening (Per-Order Outcomes)
+
+**Highlights**
+- `place_group_order()` now returns one `(order_id, message)` tuple per order in the group, mirroring `place_order`'s return-with-error contract: a child the broker rejects (an `Error` code with `RejectReason` attached to that order payload) surfaces as `(None, "<Error>: <detail>")` instead of being buried inside a raw response dict. Consumers building broker-native OSO/BRK brackets can now detect a rejected protective child deterministically.
+- Local input validation (mode, group type, non-empty order dicts) returns `ERROR:`-prefixed tuples without a network call, mirroring `place_order`.
+- Group responses are validated through the strict `OrdersResponse` model; both the observed single-object shape and the OpenAPI-documented array shape are accepted.
+- `place_oco_order()` / `place_bracket_order()` keep their raw response-dict contract via the shared `_submit_group_order()` transport helper (no behavior change), with error `operation` tags now attributed to the calling wrapper.
+- Added contract tests for the per-order tuple shape, child rejection surfacing, group-level `Errors` arrays, empty responses, array-shaped responses, local validation failures, and API error tagging.
+
+**Breaking Change**
+- `place_group_order()` return type changed from `dict` to `list[tuple[str | None, str]]`. Callers that need the raw broker payload should use `place_oco_order()` / `place_bracket_order()` or the confirm endpoint; group linkage metadata for placed orders remains available via order queries (`ConditionalOrders`/`GroupName`).
+
+**Files Modified**
+- `tradestation/order_executions.py`
+- `tradestation/__init__.py`
+- `tests/test_order_executions.py`
+- `tests/test_endpoints.py`
+- `tests/fixtures/api_responses.py`
+
 ## 2026-04-14 - Canonical Inventory, Streaming Failure Surfacing, And Doc Normalization
 
 **Highlights**
