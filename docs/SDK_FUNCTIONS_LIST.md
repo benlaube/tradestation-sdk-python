@@ -134,7 +134,7 @@ This is a **legacy quick-reference catalog** of SDK functions, organized by cate
 | [`cancel_all_orders()`](./ORDER_FUNCTIONS_REFERENCE.md#12-cancel_all_orders) | Cancel all open orders for account(s) | list[dict[str, Any]] | Depends on `get_current_orders()` + `cancel_order()` |
 | [`replace_order()`](./ORDER_FUNCTIONS_REFERENCE.md#13-replace_order) | Replace an order by canceling old and placing new | tuple[str \| None, str] | Depends on `cancel_order()` + `place_order()` |
 | [`confirm_group_order()`](./ORDER_FUNCTIONS_REFERENCE.md#7-confirm_group_order) | Confirm a group order (OCO/Bracket) before placement | dict[str, Any] | `POST /v3/orderexecution/ordergroupconfirm` |
-| [`place_group_order()`](./ORDER_FUNCTIONS_REFERENCE.md#8-place_group_order) | Place a group order (OCO/Bracket/NORMAL) | dict[str, Any] | `POST /v3/orderexecution/ordergroups` |
+| [`place_group_order()`](./ORDER_FUNCTIONS_REFERENCE.md#8-place_group_order) | Place a group order (OCO/Bracket/NORMAL) with per-order outcomes | list[tuple[str \| None, str]] | `POST /v3/orderexecution/ordergroups` |
 | [`get_activation_triggers()`](./ORDER_FUNCTIONS_REFERENCE.md#9-get_activation_triggers) | Get available activation trigger keys for conditional orders | list[dict[str, Any]] | `GET /v3/orderexecution/activationtriggers` |
 | [`get_routes()`](./ORDER_FUNCTIONS_REFERENCE.md#10-get_routes) | Get available routing options for order execution | list[dict[str, Any]] | `GET /v3/orderexecution/routes` |
 

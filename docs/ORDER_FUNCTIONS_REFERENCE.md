@@ -338,29 +338,33 @@ confirmation = sdk.confirm_group_order("OCO", group_orders, mode="PAPER")
 
 ### 8. `place_group_order()`
 
-**Description:** Places a group order (OCO/Bracket). Submits a group of related orders. For OCO orders, if one fills, others are cancelled. For Bracket orders, used to exit positions with stop and limit orders.
+**Description:** Places a group order (OCO/Bracket) and surfaces per-order outcomes. Submits a group of related orders. For OCO orders, if one fills, others are cancelled. For Bracket orders, used to exit positions with stop and limit orders. Mirrors `place_order()`'s return-with-error contract for every order in the group.
 
 **Location:** `OrderExecutionOperations.place_group_order()` / `TradeStationSDK.place_group_order()`
 
 **Parameters:**
 - `group_type` (str): Group type ("OCO", "BRK", or "NORMAL")
-- `orders` (list[dict[str, Any]]): List of order dictionaries (same format as `place_order()`)
+- `orders` (list[dict[str, Any]]): Non-empty list of order dictionaries (same format as `place_order()`)
 - `mode` (str | None): "PAPER" or "LIVE" (optional)
 
-**Returns:** `dict[str, Any]` - GroupOrderResponse including:
-- `GroupID`: Group order ID
-- `GroupName`: Group order name
-- `Type`: Group type
-- `Orders`: List of order responses with OrderIDs
+**Returns:** `list[tuple[str | None, str]]` - One `(order_id, status_message)` tuple per order in the broker response, preserving response order:
+- Accepted order: `(order_id, "<broker Message text>")`
+- Broker-rejected order (an `Error` code with `RejectReason` attached to that order): `(None, "<Error>: <detail>")`
+- Local validation failure: a single `(None, "ERROR: ...")` tuple, no network call
+- Accepted-but-empty response: `[(None, "NO_ORDER_RETURNED")]`
+
+> **Breaking change (2026-07-06):** previously returned the raw group response `dict` (`GroupID`/`GroupName`/`Type`/`Orders`). Use `place_oco_order()` / `place_bracket_order()` for the raw broker payload; group linkage metadata remains available via order queries (`ConditionalOrders`/`GroupName`).
 
 **API Endpoint:** `POST /v3/orderexecution/ordergroups`
 
 **Example:**
 ```python
-result = sdk.place_group_order("BRK", orders, mode="PAPER")
-print(f"Group ID: {result.get('GroupID')}")
-for order in result.get('Orders', []):
-    print(f"  Order {order['OrderID']}: {order['Status']}")
+outcomes = sdk.place_group_order("BRK", orders, mode="PAPER")
+for order_id, message in outcomes:
+    if order_id is None:
+        print(f"  Rejected: {message}")
+    else:
+        print(f"  Order {order_id}: {message}")
 ```
 
 ---

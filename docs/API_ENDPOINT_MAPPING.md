@@ -75,7 +75,7 @@ All methods in this class use the `/orderexecution/` API endpoints for order pla
 
 | SDK Function | API Endpoint | Method | Request Model | Response Model | Example |
 |--------------|--------------|--------|---------------|----------------|---------|
-| `place_group_order()` | `/v3/orderexecution/ordergroups` | POST | `TradeStationOrderGroupRequest` (dict) | `TradeStationOrderGroupResponse` | `sdk.place_group_order("BRK", orders)` |
+| `place_group_order()` | `/v3/orderexecution/ordergroups` | POST | `TradeStationOrderGroupRequest` (dict) | `TradeStationOrderGroupResponse` (validated internally; returned to callers as per-order `list[tuple[str \| None, str]]`) | `sdk.place_group_order("BRK", orders)` |
 
 ### Configuration Methods
 

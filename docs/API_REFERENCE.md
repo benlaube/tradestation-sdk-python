@@ -510,21 +510,23 @@ confirmation = sdk.confirm_group_order("BRK", orders, mode="PAPER")
 
 ---
 
-#### `place_group_order(group_type: str, orders: list[dict[str, Any]], mode: str | None = None) -> dict[str, Any]`
+#### `place_group_order(group_type: str, orders: list[dict[str, Any]], mode: str | None = None) -> list[tuple[str | None, str]]`
 
-Place a group order (OCO/Bracket) - low-level method.
+Place a group order (OCO/Bracket) - low-level method with per-order outcomes.
 
 **Parameters:**
 - `group_type: str` - "OCO", "BRK", or "NORMAL"
-- `orders: list[dict[str, Any]]` - List of order dictionaries (see `TradeStationOrderRequest`)
+- `orders: list[dict[str, Any]]` - Non-empty list of order dictionaries (see `TradeStationOrderRequest`)
 - `mode: str | None` - "PAPER" or "LIVE". Defaults to `secrets.trading_mode`
 
 **Returns:**
-- `dict[str, Any]` - Group order response with keys:
-  - `GroupID: str` - Group order ID
-  - `GroupName: str` - Group order name
-  - `Type: str` - Group type
-  - `Orders: list[dict]` - List of order responses with OrderIDs
+- `list[tuple[str | None, str]]` - One `(order_id, status_message)` tuple per order in the broker response, preserving response order (which matches request order). Mirrors `place_order`'s return-with-error contract:
+  - Accepted order: `("123456789", "<broker Message text>")` (defaults to `"Order received"` when the broker omits `Message`)
+  - Broker-rejected order: `(None, "<Error>: <RejectReason detail>")`
+  - Local validation failure (bad mode/group_type/empty orders): a single `(None, "ERROR: ...")` tuple, no network call
+  - Accepted-but-empty response: `[(None, "NO_ORDER_RETURNED")]`
+
+> **Breaking change (2026-07-06):** this method previously returned the raw group response `dict` (`GroupID`/`GroupName`/`Type`/`Orders`). Callers that need the raw broker payload should use `place_oco_order()` / `place_bracket_order()` or `confirm_group_order()`; group linkage metadata for placed orders remains available via order queries (`ConditionalOrders`/`GroupName`).
 
 **Example:**
 ```python
@@ -540,7 +542,12 @@ bracket_orders = [
     },
     # ... profit target and stop loss orders
 ]
-result = sdk.place_group_order("BRK", bracket_orders, mode="PAPER")
+outcomes = sdk.place_group_order("BRK", bracket_orders, mode="PAPER")
+for order_id, message in outcomes:
+    if order_id is None:
+        print(f"Rejected: {message}")
+    else:
+        print(f"Placed {order_id}: {message}")
 ```
 
 ---

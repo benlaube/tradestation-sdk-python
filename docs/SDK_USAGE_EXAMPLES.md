@@ -443,15 +443,20 @@ bracket_orders = [
     }
 ]
 
-result = sdk.place_group_order(
+# Returns one (order_id, status_message) tuple per order in the group;
+# order_id is None for orders the broker rejected (message carries the
+# Error code and RejectReason detail).
+outcomes = sdk.place_group_order(
     group_type="BRK",
     orders=bracket_orders,
     mode="PAPER"
 )
 
-print(f"Bracket order placed: GroupID={result.get('GroupID')}")
-for order in result.get('Orders', []):
-    print(f"  Order {order['OrderID']}: {order['Status']}")
+for order_id, message in outcomes:
+    if order_id is None:
+        print(f"  Rejected: {message}")
+    else:
+        print(f"  Order {order_id}: {message}")
 ```
 
 ### Place OCO Order
@@ -483,7 +488,8 @@ oco_orders = [
     }
 ]
 
-result = sdk.place_group_order(
+# One (order_id, status_message) tuple per order in the group
+outcomes = sdk.place_group_order(
     group_type="OCO",
     orders=oco_orders,
     mode="PAPER"

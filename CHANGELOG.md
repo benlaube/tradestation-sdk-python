@@ -27,6 +27,23 @@ This changelog tracks SDK-specific changes including:
 - Authentication and session management changes
 - Streaming functionality updates
 
+## 2026-07-07 - Documentation Audit: Group Order Contract Alignment (BEN-2838)
+
+**Highlights**
+- Aligned all documentation surfaces with the 2026-07-06 `place_group_order()` breaking change (return type `dict` → `list[tuple[str | None, str]]`): `docs/API_REFERENCE.md`, `docs/ORDER_FUNCTIONS_REFERENCE.md`, and `docs/SDK_FUNCTIONS_LIST.md` now document the per-order tuple contract, the broker-rejection shape (`(None, "<Error>: <RejectReason detail>")`), local-validation `ERROR:` tuples, and the `NO_ORDER_RETURNED` empty-response sentinel.
+- Fixed stale examples in `README.md` and `docs/SDK_USAGE_EXAMPLES.md` that dereferenced the removed raw-dict response (`result.get('GroupID')` / `result.get('Orders')`) — those examples would fail at runtime against the current SDK.
+- Annotated `docs/API_ENDPOINT_MAPPING.md` to clarify that `TradeStationOrderGroupResponse` is validated internally while callers receive per-order tuples.
+- Backfilled changelog entries for the previously undocumented 2026-04-20 → 2026-07-02 fix wave (see entries below).
+
+**Files Modified**
+- `README.md`
+- `docs/API_REFERENCE.md`
+- `docs/ORDER_FUNCTIONS_REFERENCE.md`
+- `docs/SDK_FUNCTIONS_LIST.md`
+- `docs/SDK_USAGE_EXAMPLES.md`
+- `docs/API_ENDPOINT_MAPPING.md`
+- `CHANGELOG.md`
+
 ## 2026-07-06 - Group Order Placement Hardening (Per-Order Outcomes)
 
 **Highlights**
@@ -45,6 +62,65 @@ This changelog tracks SDK-specific changes including:
 - `tests/test_order_executions.py`
 - `tests/test_endpoints.py`
 - `tests/fixtures/api_responses.py`
+
+## 2026-07-02 - Streaming: Accept Position Deletion Notifications
+
+**Highlights**
+- Position deletion frames carry only `PositionID` and `Deleted=true`; the previously required `AccountID`/`Symbol`/`Quantity` fields made the first closed position kill the entire positions stream (observed live 2026-07-02, enabling runaway entry accumulation in the parent trading bot). Those fields are now optional on the position stream model, and deletion frames are covered by a contract test.
+
+**Files Modified**
+- `tradestation/models/streaming.py`
+- `tests/test_pydantic_contract.py`
+
+## 2026-07-01 - Orders: Surface Broker Error/RejectReason on REST Order Responses
+
+**Highlights**
+- Rejected order placements return an `OrderID` plus `Error=FAILED` and a `RejectReason`; the strict `TradeStationOrderResponse` model raised `SDKValidationError` instead of surfacing the rejection. Both fields are now accepted, and `place_order()` treats an `Error`-tagged order as a definitive rejection — returning `(None, "<Error>: <RejectReason>")` rather than a success tuple. (Unblocks clean broker-rejection handling downstream, BEN-2763.)
+
+**Files Modified**
+- `tradestation/models/orders.py`
+- `tradestation/order_executions.py`
+- `tests/test_pydantic_contract.py`
+
+## 2026-05-23 - Streaming: Accept Order RejectReason Alias
+
+**Highlights**
+- Added the TradeStation `RejectReason` field to order stream models so rejected-order stream payloads validate instead of failing the strict extra-field policy. Covered by SDK contract tests.
+
+**Files Modified**
+- `tradestation/models/streaming.py`
+- `tests/test_pydantic_contract.py`
+
+## 2026-05-07 - Quotes: Accept MarketFlagsDisplay
+
+**Highlights**
+- Added `MarketFlagsDisplay` to quote snapshot and quote stream models so REST snapshots and streaming payloads that include the display-form market flags no longer fail strict response validation (which was breaking the PAPER quote fallback).
+
+**Files Modified**
+- `tradestation/models/quotes.py`
+- `tradestation/models/streaming.py`
+- `tests/test_market_data.py`
+- `tests/test_streaming.py`
+
+## 2026-04-20 to 2026-04-23 - Schema-Drift Acceptance, Streaming Resilience, and Packaging Fixes
+
+**Highlights**
+- **Futures order schema drift** (2026-04-20): accept order ACKs that omit `AccountID`, accept `ConversionRate` on order history and current order rows, and capture PAPER futures balance stream fields returned by v3.
+- **GoAway as recoverable control** (2026-04-21): stream control and error payloads are classified before model validation; `GoAway` now raises a typed recoverable error (exported for app-level status mapping) so the stream retry policy reconnects instead of dying.
+- **Non-blocking stream queues** (2026-04-21): thread-fed stream queues are read through `asyncio.to_thread` for quote, bar, order, position, balance, and order-by-ID streams, so queue waits no longer block peer coroutines; slow polls log their latency.
+- **Packaging** (2026-04-21): declared the `requests` runtime dependency across `pyproject.toml`, `setup.py`, and requirements metadata, unblocking clean CI installs.
+- **Futures balance typing** (2026-04-22): detailed balance responses use explicit models preserving futures-specific balance detail and currency fields; the currency detail model is exported through the public model modules.
+- **Quote stream recovery** (2026-04-22): broker `FAILED` stream payloads are treated as recoverable with fallback to REST polling; terminal handling preserved for other stream errors.
+- **Rich quote snapshots** (2026-04-22): added the richer TradeStation quote fields observed in REST snapshots and typed snapshot market flags via the shared streaming market-flags model.
+- **Positions `Errors` field** (2026-04-22): the positions response wrapper accepts TradeStation `Errors` arrays while keeping strict validation for position rows; flatten-all coverage exercises the Errors path.
+- **Flatten execution helper wiring** (2026-04-23): SDK flatten requests route through the execution helper (not the query-only orders helper), with a rebuilt `OrderExecutionOperations` fallback when flattening receives a non-execution dependency.
+- **Test hygiene** (2026-04-21/22): credentialed CLI smoke scripts are skipped under pytest, and terminal stream-error coverage stays bounded after the recovery change.
+
+**Files Modified**
+- `tradestation/models/{orders,positions,quotes,streaming,accounts}.py` (and model exports)
+- `tradestation/streaming.py`, `tradestation/positions.py`, `tradestation/__init__.py`
+- `pyproject.toml`, `setup.py`, `requirements.txt`, `.gitignore`
+- `tests/` (contract, streaming, market data, positions, CLI discovery)
 
 ## 2026-04-14 - Canonical Inventory, Streaming Failure Surfacing, And Doc Normalization
 
