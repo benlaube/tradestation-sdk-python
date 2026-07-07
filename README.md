@@ -869,12 +869,16 @@ bracket_orders = [
     }
 ]
 
-result = sdk.place_group_order(
+# Returns one (order_id, status_message) tuple per order in the group;
+# order_id is None for orders the broker rejected (message carries the
+# Error code and RejectReason detail).
+outcomes = sdk.place_group_order(
     group_type="BRK",
     orders=bracket_orders,
     mode="PAPER"
 )
-print(f"Bracket order placed: {result}")
+for order_id, message in outcomes:
+    print(f"Order {order_id}: {message}")
 ```
 
 ---
@@ -1122,8 +1126,11 @@ result = sdk.place_oco_order(oco_orders, mode="PAPER")
 
 **Group Orders (Low-Level):**
 ```python
-# Place group order (low-level - for advanced use cases)
-result = sdk.place_group_order(
+# Place group order (low-level - for advanced use cases).
+# Returns list[tuple[str | None, str]]: one (order_id, status_message)
+# tuple per order, mirroring place_order. order_id is None for orders
+# the broker rejected (message carries Error code + RejectReason).
+outcomes = sdk.place_group_order(
     group_type="BRK",  # or "OCO", "NORMAL"
     orders=[...],  # List of order dictionaries
     mode="PAPER"
@@ -1571,12 +1578,16 @@ bracket_orders = [
     }
 ]
 
-result = sdk.place_group_order(
+# Returns one (order_id, status_message) tuple per order in the group;
+# order_id is None for orders the broker rejected (message carries the
+# Error code and RejectReason detail).
+outcomes = sdk.place_group_order(
     group_type="BRK",
     orders=bracket_orders,
     mode="PAPER"
 )
-print(f"Bracket order placed: {result}")
+for order_id, message in outcomes:
+    print(f"Order {order_id}: {message}")
 ```
 
 ---
