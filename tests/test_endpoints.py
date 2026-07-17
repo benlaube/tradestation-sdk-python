@@ -6,6 +6,7 @@ Uses parametrized tests to verify each function calls the correct endpoint.
 """
 
 import json
+import re
 
 import pytest
 
@@ -24,7 +25,10 @@ ENDPOINT_MAPPINGS = [
     # Market Data Operations
     ("get_bars", "marketdata/barcharts/{symbol}", "GET", {"symbol": "MNQZ25", "interval": "1", "unit": "Minute"}),
     ("search_symbols", "marketdata/symbols/search", "GET", {"pattern": "MNQ"}),
-    ("get_futures_index_symbols", "marketdata/symbollists/futures/index/symbolnames", "GET", {}),
+    # get_futures_index_symbols intentionally uses the symbol search endpoint
+    # (see MarketDataOperations.get_futures_index_symbols) rather than
+    # marketdata/symbollists/futures/index/symbolnames.
+    ("get_futures_index_symbols", "marketdata/symbols/search", "GET", {}),
     ("get_quote_snapshots", "marketdata/quotes/{symbols}", "GET", {"symbols": "MNQZ25"}),
     ("get_symbol_details", "marketdata/symbols/{symbols}", "GET", {"symbols": "MNQZ25"}),
     ("get_crypto_symbol_names", "marketdata/symbollists/cryptopairs/symbolnames", "GET", {}),
@@ -137,6 +141,11 @@ class TestEndpointVerification:
             else:
                 # Generic call
                 func(mode="PAPER", **params)
+        except AssertionError:
+            # Never downgrade assertion failures to skips. The interactive-OAuth
+            # guard in conftest raises AssertionError when a test escapes to the
+            # real browser/listener auth flow - that must fail the test loudly.
+            raise
         except Exception as e:
             # Some functions may have different signatures, skip if call fails
             pytest.skip(f"Function {function_name} has different signature: {e}")
@@ -147,15 +156,17 @@ class TestEndpointVerification:
             actual_endpoint = call_args[0][1]
             actual_method = call_args[0][0]
 
-            # Verify endpoint contains expected path
-            assert expected_endpoint.split("/")[-1] in actual_endpoint or expected_endpoint in actual_endpoint, (
-                f"{function_name}: Expected endpoint '{expected_endpoint}' not found in '{actual_endpoint}'"
-            )
+            # Treat {placeholders} in the expected endpoint as wildcards for the
+            # substituted path values (symbols, account IDs, order IDs, ...).
+            endpoint_pattern = re.sub(r"\\\{[^}]*\\\}", r"[^/]+", re.escape(expected_endpoint))
+            assert re.fullmatch(
+                endpoint_pattern, actual_endpoint
+            ), f"{function_name}: Expected endpoint '{expected_endpoint}' does not match '{actual_endpoint}'"
 
             # Verify method
-            assert actual_method == expected_method, (
-                f"{function_name}: Expected method '{expected_method}', got '{actual_method}'"
-            )
+            assert (
+                actual_method == expected_method
+            ), f"{function_name}: Expected method '{expected_method}', got '{actual_method}'"
 
 
 # ============================================================================

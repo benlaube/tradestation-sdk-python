@@ -27,6 +27,24 @@ This changelog tracks SDK-specific changes including:
 - Authentication and session management changes
 - Streaming functionality updates
 
+## 2026-07-17 - No Interactive OAuth in Tests or Headless Processes (BEN-3171)
+
+**Highlights**
+- Fixed the test-suite escape that opened real Chrome tabs at `security.tradestation.com/login-error?client_id=test_client_id` on machines without token files: `tests/test_endpoints.py::test_endpoint_mapping` patched `make_request` on the mock client that `sdk_instance` had swapped in, while the operation modules still held the real `HTTPClient` from `TradeStationSDK.__init__` — every endpoint call flowed into `TokenManager.ensure_authenticated()` → `authenticate()` → local listener on the redirect port + `webbrowser.open(...)`, and the test's blanket `except Exception: pytest.skip(...)` silenced the resulting 3-minute OAuth timeout as a "different signature" skip.
+- `sdk_instance` / `sdk_instance_full_logging` now rewire the mocked token manager and HTTP client across the whole SDK object graph (all operation modules plus `StreamingManager`), so unpatched SDK calls in tests can never reach the real auth path.
+- Added an autouse session-scoped guard in `tests/conftest.py` that patches `webbrowser.open` / `open_new` / `open_new_tab` and `tradestation.session.HTTPServer` to record the attempt and raise `AssertionError` — any future interactive-OAuth escape fails the offending test loudly instead of opening browser windows. `test_endpoints.py` no longer downgrades `AssertionError` to a skip.
+- Endpoint-mapping assertions now actually verify (previously they always skipped before reaching the assertion): `{placeholder}` templates match substituted path values, and the stale `get_futures_index_symbols` expectation was corrected to the endpoint the implementation intentionally uses (`marketdata/symbols/search`).
+- Runtime hardening: `TokenManager.authenticate()` refuses to open a browser or start the OAuth callback listener when the process is non-interactive — stdout is not a TTY (CI, build agents, captured test output, supervised services) or `TRADESTATION_NO_BROWSER` is set to `1`/`true`/`yes`/`on`. It logs the authorization URL at ERROR level and raises the new `AuthenticationRequiredError` (subclass of `AuthenticationError`, exported from the package root) so headless callers fail fast with a clear remediation path. Interactive terminal flows are unchanged.
+
+**Files Modified**
+- `tradestation/session.py`
+- `tradestation/exceptions.py`
+- `tradestation/__init__.py`
+- `tests/conftest.py`
+- `tests/test_endpoints.py`
+- `tests/test_session.py`
+- `CHANGELOG.md`
+
 ## 2026-07-07 - Documentation Audit: Group Order Contract Alignment (BEN-2838)
 
 **Highlights**
