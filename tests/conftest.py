@@ -5,6 +5,7 @@ Provides shared fixtures for mocking HTTP requests, tokens, and SDK instances.
 """
 
 import json
+import webbrowser
 from typing import Any
 from unittest.mock import MagicMock
 
@@ -14,6 +15,60 @@ from tradestation.client import HTTPClient
 from tradestation.session import TokenManager
 
 from .fixtures import api_responses, mock_requests
+
+# ============================================================================
+# Interactive OAuth Guard (autouse)
+# ============================================================================
+
+_INTERACTIVE_OAUTH_MESSAGE = (
+    "Test attempted interactive OAuth via {entry_point}. The test suite must "
+    "never open a real browser or start the OAuth callback listener. Mock your "
+    "session/tokens instead: patch TokenManager.ensure_authenticated / "
+    "TokenManager.authenticate, use the mock_token_manager fixture, or seed "
+    "fake token files (see tests/test_session.py for patterns)."
+)
+
+
+@pytest.fixture(scope="session", autouse=True)
+def block_interactive_oauth():
+    """
+    Fail loudly if any test reaches the real interactive OAuth path.
+
+    A test that constructs a real TokenManager without tokens and then hits
+    ensure_authenticated() would otherwise open a real browser tab at
+    security.tradestation.com and start a local HTTP listener. This guard
+    replaces webbrowser.open/open_new/open_new_tab and the OAuth callback
+    HTTPServer with recorders that raise AssertionError, so the offending
+    test fails instead of silently spawning browser windows.
+
+    Tests that legitimately exercise TokenManager.authenticate() keep working:
+    they already layer their own function-scoped mocks for webbrowser.open and
+    tradestation.session.HTTPServer on top of this session-scoped guard.
+
+    Yields:
+        List of recorded escape attempts (empty for a healthy suite).
+    """
+    monkeypatch = pytest.MonkeyPatch()
+    attempts: list[str] = []
+
+    def _blocked(entry_point: str):
+        def _record_and_fail(*args: Any, **kwargs: Any):
+            attempts.append(f"{entry_point}: args={args!r} kwargs={kwargs!r}")
+            raise AssertionError(_INTERACTIVE_OAUTH_MESSAGE.format(entry_point=entry_point))
+
+        return _record_and_fail
+
+    for attr in ("open", "open_new", "open_new_tab"):
+        monkeypatch.setattr(webbrowser, attr, _blocked(f"webbrowser.{attr}"))
+    monkeypatch.setattr(
+        "tradestation.session.HTTPServer",
+        _blocked("the OAuth callback HTTPServer (tradestation.session.HTTPServer)"),
+    )
+
+    yield attempts
+
+    monkeypatch.undo()
+
 
 # ============================================================================
 # Token Manager Fixtures
@@ -117,6 +172,32 @@ def mock_http_client_full_logging(mock_token_manager, mocker):
 # ============================================================================
 
 
+def _rewire_sdk_mocks(sdk: TradeStationSDK, mock_token_manager, mock_http_client) -> None:
+    """
+    Point every SDK component at the mocked token manager and HTTP client.
+
+    TradeStationSDK.__init__ builds a real TokenManager and HTTPClient and
+    hands them to every operation module. Replacing only sdk._token_manager
+    and sdk._client would leave the operation modules (accounts, market data,
+    positions, orders, executions, streaming) holding the real client, whose
+    lazy ensure_authenticated() starts a real interactive OAuth flow (browser
+    tab + local callback listener) the moment a test calls an unpatched SDK
+    method with no tokens on disk.
+    """
+    sdk._token_manager = mock_token_manager
+    sdk._client = mock_http_client
+    for operations in (
+        sdk._accounts,
+        sdk._market_data,
+        sdk._positions,
+        sdk._order_executions,
+        sdk._orders,
+    ):
+        operations.client = mock_http_client
+    sdk._streaming.token_manager = mock_token_manager
+    sdk._streaming._api_client = mock_http_client
+
+
 @pytest.fixture
 def sdk_instance(mocker, mock_token_manager, mock_http_client):
     """
@@ -137,9 +218,8 @@ def sdk_instance(mocker, mock_token_manager, mock_http_client):
         enable_full_logging=False,
     )
 
-    # Mock token manager
-    sdk._token_manager = mock_token_manager
-    sdk._client = mock_http_client
+    # Mock token manager and HTTP client across the whole SDK object graph
+    _rewire_sdk_mocks(sdk, mock_token_manager, mock_http_client)
 
     return sdk
 
@@ -158,8 +238,7 @@ def sdk_instance_full_logging(mocker, mock_token_manager, mock_http_client_full_
         ),
         enable_full_logging=True,
     )
-    sdk._token_manager = mock_token_manager
-    sdk._client = mock_http_client_full_logging
+    _rewire_sdk_mocks(sdk, mock_token_manager, mock_http_client_full_logging)
 
     return sdk
 

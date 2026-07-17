@@ -6,11 +6,12 @@ Note: OAuth flow is mocked to avoid real browser interaction.
 """
 
 import json
+import types
 from unittest.mock import MagicMock
 
 import pytest
-from tradestation.exceptions import AuthenticationError, InvalidTokenError
-from tradestation.session import Session, TokenManager
+from tradestation.exceptions import AuthenticationError, AuthenticationRequiredError, InvalidTokenError
+from tradestation.session import NO_BROWSER_ENV_VAR, Session, TokenManager, _browser_auth_disabled
 
 from .fixtures import api_responses
 
@@ -151,7 +152,8 @@ class TestTokenManagerAuthentication:
     def test_authenticate_for_paper_mode(self, mocker):
         """Test authentication for PAPER mode."""
         mocker.patch("tradestation.session.sdk_config.trading_mode", "PAPER")
-        mocker.patch("webbrowser.open")
+        mocker.patch("tradestation.session._browser_auth_disabled", return_value=False)
+        mock_browser_open = mocker.patch("webbrowser.open")
         mocker.patch("threading.Thread")
         mocker.patch("tradestation.session.HTTPServer")
 
@@ -181,9 +183,16 @@ class TestTokenManagerAuthentication:
         assert tokens["refresh_token"] == "mock_refresh_token_67890"
         assert tm._last_mode == "PAPER"
 
+        # Interactive branch: the browser is opened exactly once with the auth URL
+        mock_browser_open.assert_called_once()
+        opened_url = mock_browser_open.call_args[0][0]
+        assert opened_url.startswith("https://signin.tradestation.com/authorize?")
+        assert "client_id=client_id" in opened_url
+
     def test_authenticate_for_live_mode(self, mocker):
         """Test authentication for LIVE mode."""
         mocker.patch("tradestation.session.sdk_config.trading_mode", "LIVE")
+        mocker.patch("tradestation.session._browser_auth_disabled", return_value=False)
         mocker.patch("webbrowser.open")
         mocker.patch("threading.Thread")
         mocker.patch("tradestation.session.HTTPServer")
@@ -213,6 +222,7 @@ class TestTokenManagerAuthentication:
     def test_authenticate_token_exchange_failure(self, mocker):
         """Test authentication raises error when token exchange fails."""
         mocker.patch("tradestation.session.sdk_config.trading_mode", "PAPER")
+        mocker.patch("tradestation.session._browser_auth_disabled", return_value=False)
         mocker.patch("webbrowser.open")
         mocker.patch("threading.Thread")
         mocker.patch("tradestation.session.HTTPServer")
@@ -267,6 +277,64 @@ class TestTokenManagerAuthentication:
 
         # Verify authenticate was called
         mock_authenticate.assert_called_once_with("PAPER")
+
+
+# ============================================================================
+# Non-Interactive Authentication Guard Tests
+# ============================================================================
+
+
+@pytest.mark.unit
+class TestNonInteractiveAuthenticationGuard:
+    """Tests for the headless/no-TTY guard around interactive OAuth."""
+
+    def test_browser_auth_disabled_when_no_tty(self, monkeypatch):
+        """A process without a TTY on stdout must not open a browser."""
+        monkeypatch.delenv(NO_BROWSER_ENV_VAR, raising=False)
+        monkeypatch.setattr("sys.stdout", types.SimpleNamespace(isatty=lambda: False))
+
+        assert _browser_auth_disabled() is True
+
+    def test_browser_auth_enabled_with_tty(self, monkeypatch):
+        """An interactive terminal (TTY) keeps the browser flow available."""
+        monkeypatch.delenv(NO_BROWSER_ENV_VAR, raising=False)
+        monkeypatch.setattr("sys.stdout", types.SimpleNamespace(isatty=lambda: True))
+
+        assert _browser_auth_disabled() is False
+
+    def test_browser_auth_disabled_by_env_override_even_with_tty(self, monkeypatch):
+        """TRADESTATION_NO_BROWSER=1 force-disables the browser flow on a TTY."""
+        monkeypatch.setenv(NO_BROWSER_ENV_VAR, "1")
+        monkeypatch.setattr("sys.stdout", types.SimpleNamespace(isatty=lambda: True))
+
+        assert _browser_auth_disabled() is True
+
+    def test_browser_auth_disabled_when_stdout_isatty_unavailable(self, monkeypatch):
+        """A broken/replaced stdout is treated as non-interactive."""
+        monkeypatch.delenv(NO_BROWSER_ENV_VAR, raising=False)
+        monkeypatch.setattr("sys.stdout", object())  # no isatty attribute
+
+        assert _browser_auth_disabled() is True
+
+    def test_authenticate_non_interactive_raises_without_browser_or_listener(self, mocker, monkeypatch):
+        """Non-interactive authenticate() fails fast: no browser, no listener."""
+        mocker.patch("tradestation.session.sdk_config.trading_mode", "PAPER")
+        monkeypatch.setenv(NO_BROWSER_ENV_VAR, "1")
+
+        mock_browser_open = mocker.patch("webbrowser.open")
+        mock_http_server = mocker.patch("tradestation.session.HTTPServer")
+
+        tm = TokenManager("client_id", "client_secret", "http://localhost:8888")
+
+        with pytest.raises(AuthenticationRequiredError):
+            tm.authenticate("PAPER")
+
+        mock_browser_open.assert_not_called()
+        mock_http_server.assert_not_called()
+
+    def test_authenticate_required_error_is_authentication_error(self):
+        """AuthenticationRequiredError stays catchable as AuthenticationError."""
+        assert issubclass(AuthenticationRequiredError, AuthenticationError)
 
 
 # ============================================================================

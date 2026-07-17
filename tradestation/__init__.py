@@ -16,6 +16,7 @@ from .client import HTTPClient, get_base_url
 from .config import TradeStationSDKConfig, sdk_config
 from .exceptions import (
     AuthenticationError,
+    AuthenticationRequiredError,
     InvalidRequestError,
     InvalidTokenError,
     NetworkError,
@@ -1233,6 +1234,7 @@ __all__ = [
     # Exceptions
     "TradeStationAPIError",
     "AuthenticationError",
+    "AuthenticationRequiredError",
     "RateLimitError",
     "InvalidRequestError",
     "NetworkError",

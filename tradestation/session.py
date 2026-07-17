@@ -14,7 +14,7 @@ Side effects:
 - Starts a temporary local HTTP server on the redirect URI port during auth
 - Writes token JSON files under `config/` (git-ignored)
 
-Dependencies: requests, json, time, webbrowser, pathlib, http.server, urllib.parse, threading
+Dependencies: requests, json, sys, time, webbrowser, pathlib, http.server, urllib.parse, threading
 """
 
 import builtins
@@ -22,6 +22,7 @@ import contextlib
 import json
 import os
 import secrets as py_secrets
+import sys
 import threading
 import time
 import webbrowser
@@ -35,7 +36,13 @@ import jwt
 from .logger import setup_logger
 
 from .config import sdk_config
-from .exceptions import AuthenticationError, ErrorDetails, InvalidTokenError, TokenExpiredError
+from .exceptions import (
+    AuthenticationError,
+    AuthenticationRequiredError,
+    ErrorDetails,
+    InvalidTokenError,
+    TokenExpiredError,
+)
 
 logger = setup_logger(__name__, sdk_config.log_level)
 
@@ -63,6 +70,38 @@ TOKEN_DIR = Path(__file__).parent.parent.parent.parent / "config"
 TOKEN_DIR.mkdir(exist_ok=True)  # Ensure config directory exists
 TOKEN_FILE_PAPER = TOKEN_DIR / "tokens_paper.json"
 TOKEN_FILE_LIVE = TOKEN_DIR / "tokens_live.json"
+
+# Environment override that force-disables interactive browser authentication
+NO_BROWSER_ENV_VAR = "TRADESTATION_NO_BROWSER"
+_NO_BROWSER_TRUTHY = {"1", "true", "yes", "on"}
+
+
+def _browser_auth_disabled() -> bool:
+    """
+    Return True when interactive browser authentication must not run.
+
+    Interactive OAuth opens a real browser window and starts a local HTTP
+    listener - that only makes sense for a human at a terminal. This guard
+    disables it when:
+    - TRADESTATION_NO_BROWSER is set to a truthy value ("1", "true", "yes",
+      "on"), regardless of TTY state (explicit opt-out for supervised
+      processes), or
+    - stdout is not attached to a TTY (CI runners, build agents, test
+      runners with captured output, background services).
+
+    Returns:
+        True if the interactive browser flow must be skipped.
+    """
+    env_value = os.environ.get(NO_BROWSER_ENV_VAR, "").strip().lower()
+    if env_value in _NO_BROWSER_TRUTHY:
+        return True
+
+    try:
+        return not sys.stdout.isatty()
+    except (AttributeError, ValueError):
+        # stdout replaced or closed (e.g. captured/redirected) - treat as
+        # non-interactive.
+        return True
 
 
 class OAuthCallbackHandler(BaseHTTPRequestHandler):
@@ -272,6 +311,9 @@ class TokenManager:
             - Writes token file for the chosen mode.
 
         Raises:
+            AuthenticationRequiredError: if the process is non-interactive
+                (no TTY, or TRADESTATION_NO_BROWSER set) - no browser is
+                opened and no listener is started in that case.
             AuthenticationError: if authentication fails.
         """
         if mode is None:
@@ -301,6 +343,23 @@ class TokenManager:
         auth_request_url = f"{self.auth_url}?{urlencode(auth_params)}"
 
         logger.debug(f"Auth URL: {auth_request_url}")
+
+        # Interactive OAuth needs a human with a browser. In headless contexts
+        # (CI, build agents, test runs, supervised restarts) opening a browser
+        # tab and binding a local listener is never useful - fail fast with the
+        # auth URL instead so an operator can authenticate interactively.
+        if _browser_auth_disabled():
+            logger.error(
+                f"❌ Interactive OAuth required for {mode} mode but this process is "
+                f"non-interactive (no TTY, or {NO_BROWSER_ENV_VAR} is set). "
+                "Not opening a browser and not starting the callback listener."
+            )
+            logger.error(f"   Complete authentication manually from an interactive session: {auth_request_url}")
+            raise AuthenticationRequiredError(
+                f"TradeStation {mode} authentication requires an interactive browser login, "
+                "but this process is non-interactive. Run the auth flow from a terminal "
+                "(e.g. `python -m tradestation.cli.test_auth`) or provide valid token files."
+            )
 
         # Step 2: Start local server to capture callback
         redirect_port = 8888  # Default

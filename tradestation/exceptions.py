@@ -197,6 +197,16 @@ class AuthenticationError(TradeStationAPIError):
     pass
 
 
+class AuthenticationRequiredError(AuthenticationError):
+    """
+    Raised when interactive (browser) authentication is required but the
+    current process cannot run it (headless/CI/non-TTY environments or
+    TRADESTATION_NO_BROWSER set).
+    """
+
+    pass
+
+
 class RateLimitError(TradeStationAPIError):
     """Raised when rate limit is exceeded."""
 
