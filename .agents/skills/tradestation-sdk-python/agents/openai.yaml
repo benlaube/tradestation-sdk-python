@@ -1,0 +1,6 @@
+interface:
+  display_name: "Tradestation Sdk Python"
+  short_description: "Repo-specific patterns and workflows for tradestation-sdk-python"
+  default_prompt: "Use the tradestation-sdk-python repo skill to follow existing architecture, testing, and workflow conventions."
+policy:
+  allow_implicit_invocation: true

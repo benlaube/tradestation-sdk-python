@@ -1,0 +1,366 @@
+# Instincts generated from https://github.com/benlaube/tradestation-sdk-python
+# Generated: 2026-07-02T06:02:00.113Z
+# Version: 2.0
+# NOTE: This file supplements (does not replace) any existing curated instincts.
+# High-confidence manually curated instincts should be preserved alongside these.
+
+---
+id: tradestation-sdk-python-commit-conventional
+trigger: "when writing a commit message"
+confidence: 0.85
+domain: git
+source: repo-analysis
+source_repo: https://github.com/benlaube/tradestation-sdk-python
+---
+
+# Tradestation Sdk Python Commit Conventional
+
+## Action
+
+Use conventional commit format with prefixes: fix
+
+## Evidence
+
+- 2 commits analyzed
+- Detected conventional commit pattern
+- Examples: fix(orders): accept broker Error/RejectReason on REST order responses, fix(streaming): accept position deletion notifications
+
+---
+id: tradestation-sdk-python-commit-length
+trigger: "when writing a commit message"
+confidence: 0.6
+domain: git
+source: repo-analysis
+source_repo: https://github.com/benlaube/tradestation-sdk-python
+---
+
+# Tradestation Sdk Python Commit Length
+
+## Action
+
+Write moderate-length commit messages (~62 characters)
+
+## Evidence
+
+- Average commit message length: 62 chars
+- Based on 2 commits
+
+---
+id: tradestation-sdk-python-naming-files
+trigger: "when creating a new file"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/benlaube/tradestation-sdk-python
+---
+
+# Tradestation Sdk Python Naming Files
+
+## Action
+
+Use snake_case naming convention
+
+## Evidence
+
+- Analyzed file naming patterns in repository
+- Dominant pattern: snake_case
+
+---
+id: tradestation-sdk-python-import-relative
+trigger: "when importing modules"
+confidence: 0.75
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/benlaube/tradestation-sdk-python
+---
+
+# Tradestation Sdk Python Import Relative
+
+## Action
+
+Use relative imports for project files
+
+## Evidence
+
+- Import analysis shows relative import pattern
+- Example: import { x } from '../lib/x'
+
+---
+id: tradestation-sdk-python-export-style
+trigger: "when exporting from a module"
+confidence: 0.7
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/benlaube/tradestation-sdk-python
+---
+
+# Tradestation Sdk Python Export Style
+
+## Action
+
+Prefer named exports
+
+## Evidence
+
+- Export pattern analysis
+- Dominant style: named
+
+---
+id: tradestation-sdk-python-test-separate
+trigger: "when writing tests"
+confidence: 0.8
+domain: testing
+source: repo-analysis
+source_repo: https://github.com/benlaube/tradestation-sdk-python
+---
+
+# Tradestation Sdk Python Test Separate
+
+## Action
+
+Place tests in the tests/ or __tests__/ directory, mirroring src structure
+
+## Evidence
+
+- Separate test directory pattern detected
+- Tests live in dedicated test folders
+
+---
+id: tradestation-sdk-python-workflow-update-model-and-contract-test
+trigger: "when doing update model and contract test"
+confidence: 0.6
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/benlaube/tradestation-sdk-python
+---
+
+# Tradestation Sdk Python Workflow Update Model And Contract Test
+
+## Action
+
+Follow the update-model-and-contract-test workflow:
+1. Edit the relevant Pydantic model to accept new/optional fields.
+2. Update or add logic in the implementation to handle the new model behavior.
+3. Update or add contract tests to verify the new/changed model behavior.
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~2x per month
+- Files: tradestation/models/orders.py, tradestation/models/streaming.py, tradestation/order_executions.py
+
+---
+id: tradestation-sdk-python-instinct-file-naming
+trigger: "When creating a new Python file"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: benlaube/tradestation-sdk-python
+---
+
+# Tradestation Sdk Python Instinct File Naming
+
+## Action
+
+Name the file using snake_case
+
+## Evidence
+
+- Pattern in namingConventions.files
+- Files in tradestation/ and tests/ use snake_case
+
+---
+id: tradestation-sdk-python-instinct-function-naming
+trigger: "When defining a new function"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: benlaube/tradestation-sdk-python
+---
+
+# Tradestation Sdk Python Instinct Function Naming
+
+## Action
+
+Name the function using camelCase
+
+## Evidence
+
+- Pattern in namingConventions.functions
+
+---
+id: tradestation-sdk-python-instinct-class-naming
+trigger: "When defining a new class"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: benlaube/tradestation-sdk-python
+---
+
+# Tradestation Sdk Python Instinct Class Naming
+
+## Action
+
+Name the class using PascalCase
+
+## Evidence
+
+- Pattern in namingConventions.classes
+
+---
+id: tradestation-sdk-python-instinct-constant-naming
+trigger: "When defining a constant"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: benlaube/tradestation-sdk-python
+---
+
+# Tradestation Sdk Python Instinct Constant Naming
+
+## Action
+
+Name the constant using SCREAMING_SNAKE_CASE
+
+## Evidence
+
+- Pattern in namingConventions.constants
+
+---
+id: tradestation-sdk-python-instinct-import-style
+trigger: "When importing from another module in the package"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: benlaube/tradestation-sdk-python
+---
+
+# Tradestation Sdk Python Instinct Import Style
+
+## Action
+
+Use relative imports
+
+## Evidence
+
+- Pattern in importStyle: relative
+
+---
+id: tradestation-sdk-python-instinct-export-style
+trigger: "When exporting functions or classes"
+confidence: 0.7
+domain: code-style
+source: repo-analysis
+source_repo: benlaube/tradestation-sdk-python
+---
+
+# Tradestation Sdk Python Instinct Export Style
+
+## Action
+
+Use named exports
+
+## Evidence
+
+- Pattern in exportStyle: named
+
+---
+id: tradestation-sdk-python-instinct-test-location
+trigger: "When adding new tests"
+confidence: 0.9
+domain: testing
+source: repo-analysis
+source_repo: benlaube/tradestation-sdk-python
+---
+
+# Tradestation Sdk Python Instinct Test Location
+
+## Action
+
+Place test files in the separate 'tests' folder
+
+## Evidence
+
+- tests/ folder exists
+- testLocation: separate
+
+---
+id: tradestation-sdk-python-instinct-test-contract
+trigger: "When updating or adding Pydantic model fields"
+confidence: 0.9
+domain: testing
+source: repo-analysis
+source_repo: benlaube/tradestation-sdk-python
+---
+
+# Tradestation Sdk Python Instinct Test Contract
+
+## Action
+
+Update or add contract tests in tests/test_pydantic_contract.py to cover new/changed model behavior
+
+## Evidence
+
+- Workflow: update-model-and-contract-test
+- Files involved: tests/test_pydantic_contract.py
+
+---
+id: tradestation-sdk-python-instinct-git-conventional-commits
+trigger: "When writing a commit message"
+confidence: 0.9
+domain: git
+source: repo-analysis
+source_repo: benlaube/tradestation-sdk-python
+---
+
+# Tradestation Sdk Python Instinct Git Conventional Commits
+
+## Action
+
+Use the conventional commit format with a prefix (e.g., fix(scope): message)
+
+## Evidence
+
+- commits.type: conventional
+- commits.prefixes: fix
+- Examples: fix(orders): ...
+
+---
+id: tradestation-sdk-python-instinct-git-commit-length
+trigger: "When writing a commit message"
+confidence: 0.7
+domain: git
+source: repo-analysis
+source_repo: benlaube/tradestation-sdk-python
+---
+
+# Tradestation Sdk Python Instinct Git Commit Length
+
+## Action
+
+Keep the commit message concise (around 62 characters on average)
+
+## Evidence
+
+- commits.averageLength: 62
+
+---
+id: tradestation-sdk-python-instinct-update-model-contract-test
+trigger: "When someone needs to support new response shapes or optional fields in API/streaming models"
+confidence: 0.9
+domain: workflow
+source: repo-analysis
+source_repo: benlaube/tradestation-sdk-python
+---
+
+# Tradestation Sdk Python Instinct Update Model Contract Test
+
+## Action
+
+Edit the relevant Pydantic model, update implementation logic, and update/add contract tests to cover the new behavior
+
+## Evidence
+
+- Workflow: update-model-and-contract-test
+- Files involved: tradestation/models/orders.py, tradestation/models/streaming.py, tradestation/order_executions.py, tests/test_pydantic_contract.py
+
